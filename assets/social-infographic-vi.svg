@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowOrange" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feColorMatrix type="matrix" values="1 0.5 0 0 0  0 0.3 0 0 0  0 0 0 0 0  0 0 0 1 0" in="blur" result="c"/>
+      <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0.2 0 0  0 0 0 1 0" in="blur" result="c"/>
+      <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" opacity="0.8" />
+      <stop offset="100%" stop-color="#818cf8" opacity="0.6" />
+    </linearGradient>
+    <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <marker id="aO" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#fb923c" />
+    </marker>
+    <marker id="aG" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#22c55e" />
+    </marker>
+    <marker id="aB" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#60a5fa" />
+    </marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#bg)" />
+
+  <!-- ===== TITLE ===== -->
+  <text x="500" y="50" fill="#f8fafc" font-family="-apple-system, system-ui, sans-serif" font-size="26" font-weight="900" text-anchor="middle" letter-spacing="0.5">
+    KHÔNG CẦN AI THÔNG MINH HƠN
+  </text>
+  <text x="500" y="80" fill="#60a5fa" font-family="-apple-system, system-ui, sans-serif" font-size="22" font-weight="800" text-anchor="middle">
+    CHỈ CẦN AI LÀM ĐÚNG HƠN
+  </text>
+  <text x="500" y="105" fill="#94a3b8" font-family="-apple-system, system-ui, sans-serif" font-size="14" font-weight="500" text-anchor="middle">
+    defend-in-depth — Cải thiện Hành vi, Giảm thiểu Sai lầm cho AI Agent
+  </text>
+
+  <!-- ===== LEFT: AI AGENTS ===== -->
+  <rect x="40" y="140" width="220" height="250" rx="12" fill="#0f172a" stroke="#475569" stroke-width="2" />
+  <text x="150" y="172" fill="#f8fafc" font-family="-apple-system, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">AI Agent</text>
+  <text x="150" y="195" fill="#94a3b8" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">Code nhanh, nhưng hay "lơ đãng"</text>
+
+  <g transform="translate(55, 225)">
+    <rect x="0" y="0" width="190" height="35" rx="6" fill="#431407" stroke="#fb923c" stroke-width="1.5" filter="url(#glowOrange)"/>
+    <text x="95" y="22" fill="#fdba74" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Bỏ lại file rỗng (TODO)</text>
+
+    <rect x="0" y="50" width="190" height="35" rx="6" fill="#431407" stroke="#fb923c" stroke-width="1.5" filter="url(#glowOrange)"/>
+    <text x="95" y="72" fill="#fdba74" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Sửa lố tay file Config/SSoT</text>
+
+    <rect x="0" y="100" width="190" height="35" rx="6" fill="#431407" stroke="#fb923c" stroke-width="1.5" filter="url(#glowOrange)"/>
+    <text x="95" y="122" fill="#fdba74" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Bỏ qua bước Plan/Design</text>
+  </g>
+
+  <!-- ===== MIDDLE: DEFEND-IN-DEPTH ===== -->
+  <path d="M 390 130 L 610 130 L 610 330 C 610 400 500 440 500 440 C 500 440 390 400 390 330 Z" fill="url(#shieldGrad)" filter="url(#glow)" stroke="#eff6ff" stroke-width="3" />
+  <path d="M 410 150 L 590 150 L 590 320 C 590 375 500 410 500 410 C 500 410 410 375 410 320 Z" fill="none" stroke="#bfdbfe" stroke-width="2" stroke-dasharray="8 8" />
+
+  <text x="500" y="180" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="20" font-weight="900" text-anchor="middle" letter-spacing="1">defend-in-depth</text>
+  <text x="500" y="200" fill="#e0e7ff" font-family="-apple-system, sans-serif" font-size="12" font-weight="500" text-anchor="middle">Kiểm tra Hành vi tại Git Hooks</text>
+
+  <rect x="415" y="225" width="170" height="28" rx="4" fill="#0f172a" fill-opacity="0.9" stroke="#60a5fa" />
+  <text x="500" y="244" fill="#93c5fd" font-family="-apple-system, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">✋ File rỗng? Chặn lại!</text>
+
+  <rect x="415" y="265" width="170" height="28" rx="4" fill="#0f172a" fill-opacity="0.9" stroke="#60a5fa" />
+  <text x="500" y="284" fill="#93c5fd" font-family="-apple-system, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">✋ Đụng SSoT? Chặn lại!</text>
+
+  <rect x="415" y="305" width="170" height="28" rx="4" fill="#0f172a" fill-opacity="0.9" stroke="#60a5fa" />
+  <text x="500" y="324" fill="#93c5fd" font-family="-apple-system, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">✅ Code sạch, cho qua!</text>
+
+  <!-- ===== RIGHT: RESULTS ===== -->
+  <rect x="740" y="140" width="220" height="250" rx="12" fill="#0f172a" stroke="#475569" stroke-width="2" />
+  <text x="850" y="172" fill="#f8fafc" font-family="-apple-system, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">Project An Toàn</text>
+  <text x="850" y="195" fill="#94a3b8" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">AI làm đúng hơn, team nhẹ hơn</text>
+
+  <g transform="translate(755, 225)">
+    <rect x="0" y="0" width="190" height="35" rx="6" fill="#052e16" stroke="#22c55e" stroke-width="1.5" filter="url(#glowGreen)"/>
+    <text x="95" y="22" fill="#86efac" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="middle">PR hoàn chỉnh, không TODO</text>
+
+    <rect x="0" y="50" width="190" height="35" rx="6" fill="#052e16" stroke="#22c55e" stroke-width="1.5" filter="url(#glowGreen)"/>
+    <text x="95" y="72" fill="#86efac" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Config lõi còn nguyên vẹn</text>
+
+    <rect x="0" y="100" width="190" height="35" rx="6" fill="#052e16" stroke="#22c55e" stroke-width="1.5" filter="url(#glowGreen)"/>
+    <text x="95" y="122" fill="#86efac" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Có Plan rồi mới code</text>
+  </g>
+
+  <!-- ===== ARROWS ===== -->
+  <line x1="260" y1="245" x2="380" y2="245" stroke="#fb923c" stroke-width="3" stroke-dasharray="5 5" marker-end="url(#aO)" />
+  <text x="320" y="235" fill="#fdba74" font-family="-apple-system, sans-serif" font-size="11" text-anchor="middle">Hành vi sai</text>
+  <line x1="260" y1="295" x2="380" y2="295" stroke="#fb923c" stroke-width="3" stroke-dasharray="5 5" marker-end="url(#aO)" />
+  <line x1="260" y1="345" x2="380" y2="345" stroke="#60a5fa" stroke-width="2" marker-end="url(#aB)" />
+  <text x="320" y="363" fill="#93c5fd" font-family="-apple-system, sans-serif" font-size="11" text-anchor="middle">Hành vi đúng</text>
+
+  <line x1="620" y1="250" x2="730" y2="250" stroke="#22c55e" stroke-width="4" marker-end="url(#aG)" />
+  <text x="675" y="240" fill="#86efac" font-family="-apple-system, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Code chỉn chu</text>
+  <line x1="620" y1="310" x2="730" y2="310" stroke="#22c55e" stroke-width="2" stroke-dasharray="8 4" marker-end="url(#aG)" />
+  <text x="675" y="300" fill="#86efac" font-family="-apple-system, sans-serif" font-size="11" text-anchor="middle">Đã qua kiểm duyệt</text>
+
+  <!-- ===== BOTTOM: COMPETITIVE ADVANTAGES ===== -->
+  <line x1="50" y1="470" x2="950" y2="470" stroke="#475569" stroke-width="1" stroke-dasharray="6 4" />
+
+  <text x="500" y="500" fill="#f8fafc" font-family="-apple-system, sans-serif" font-size="17" font-weight="800" text-anchor="middle" letter-spacing="1">
+    LỢI THẾ SO VỚI CÔNG CỤ TRUYỀN THỐNG (husky, commitlint)
+  </text>
+
+  <!-- Advantage 1 -->
+  <rect x="50" y="520" width="210" height="75" rx="8" fill="url(#boxGrad)" stroke="#60a5fa" stroke-width="1.5" />
+  <text x="155" y="548" fill="#93c5fd" font-family="-apple-system, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Kiểm tra Nội dung</text>
+  <text x="155" y="568" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">Bắt file rỗng, TODO, bảo vệ SSoT</text>
+  <text x="155" y="585" fill="#64748b" font-family="-apple-system, sans-serif" font-size="11" text-anchor="middle">(husky/commitlint: ❌)</text>
+
+  <!-- Advantage 2 -->
+  <rect x="280" y="520" width="210" height="75" rx="8" fill="url(#boxGrad)" stroke="#22c55e" stroke-width="1.5" />
+  <text x="385" y="548" fill="#4ade80" font-family="-apple-system, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Phase Gate</text>
+  <text x="385" y="568" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">Buộc có Plan trước khi Code</text>
+  <text x="385" y="585" fill="#64748b" font-family="-apple-system, sans-serif" font-size="11" text-anchor="middle">(husky/commitlint: ❌)</text>
+
+  <!-- Advantage 3 -->
+  <rect x="510" y="520" width="210" height="75" rx="8" fill="url(#boxGrad)" stroke="#a78bfa" stroke-width="1.5" />
+  <text x="615" y="548" fill="#c4b5fd" font-family="-apple-system, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Plugin Guard System</text>
+  <text x="615" y="568" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">Tự viết Guard riêng dễ dàng</text>
+  <text x="615" y="585" fill="#64748b" font-family="-apple-system, sans-serif" font-size="11" text-anchor="middle">(husky/commitlint: ❌)</text>
+
+  <!-- Advantage 4 -->
+  <rect x="740" y="520" width="210" height="75" rx="8" fill="url(#boxGrad)" stroke="#facc15" stroke-width="1.5" />
+  <text x="845" y="548" fill="#fde047" font-family="-apple-system, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Sinh ra cho AI Agent</text>
+  <text x="845" y="568" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">Quản trị hành vi AI, không</text>
+  <text x="845" y="585" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">chỉ cho Developer con người</text>
+
+  <!-- Footer: just the link -->
+  <text x="500" y="635" fill="#475569" font-family="-apple-system, sans-serif" font-size="13" text-anchor="middle">
+    github.com/tamld/defend-in-depth  ·  Open Source · MIT License
+  </text>
+
+</svg>
