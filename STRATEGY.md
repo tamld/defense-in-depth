@@ -1,0 +1,122 @@
+# 📋 STRATEGY.md — Strategic Metadata for defend-in-depth
+
+> **For any agent reading this:** This document tells you WHERE this project is going,
+> WHAT has been decided, and HOW to contribute without conflicting with the plan.
+
+---
+
+## Mission
+
+**defend-in-depth** is a governance middleware layer that bridges AI coding agents
+into human/enterprise operational workflows.
+
+- **AI** handles: artifact generation, execution plans, mechanical checks
+- **Humans** handle: business logic, ground truth, architecture decisions
+- **defend-in-depth** handles: the gap between them (validation, enforcement, growth)
+
+---
+
+## Strategic Pillars
+
+### 1. CLI-First, Zero-Infrastructure
+
+| Decision | Rationale |
+|:---|:---|
+| Git hooks only | No servers, databases, or cloud services required |
+| `yaml` as sole dependency | Minimal attack surface, maximum portability |
+| Cross-platform CI (3 OS × 3 Node) | Must work everywhere agents work |
+
+**Implication for agents:** Do NOT introduce external dependencies. If a feature
+requires infrastructure, it must be opt-in and clearly documented.
+
+### 2. Guard Pipeline Architecture
+
+| Decision | Rationale |
+|:---|:---|
+| Pluggable `Guard` interface | Users can add custom validators |
+| Pure functions only | No side effects → deterministic, testable |
+| Engine runs guards sequentially | Predictable order, clear error attribution |
+| PASS/WARN/BLOCK severity | Simple tri-state for clear decisions |
+
+**Implication for agents:** Every new check = new guard file. No checking logic
+inside the engine or CLI.
+
+### 3. Trust-but-Verify (Evidence System)
+
+| Decision | Rationale |
+|:---|:---|
+| `EvidenceLevel` enum (`CODE`/`RUNTIME`/`INFER`/`HYPO`) | Forces agents to tag how they verified |
+| `Finding.evidence` field | Guards can attach proof level |
+| Future: `Lesson.wrongApproach` + `correctApproach` | Án Lệ (case law) records concrete context |
+
+**Implication for agents:** When reporting findings, ALWAYS specify evidence level.
+Untagged findings are treated as `HYPO`.
+
+### 4. HITL as Supreme Rule
+
+| Decision | Rationale |
+|:---|:---|
+| Guards never auto-merge PRs | Human judgment is irreplaceable for semantics |
+| CodeRabbit as first-pass reviewer | Reduces human review burden, not replaces it |
+| Phase gates require plan files | Prevents "code first, think later" |
+
+**Implication for agents:** You are NOT autonomous. You propose. Humans approve.
+
+### 5. Growth Engine (Future)
+
+| Decision | Rationale |
+|:---|:---|
+| `Lesson` type with recall-friendly fields | Growth requires searchable memory |
+| `searchTerms` + `tags` + `relatedLessons` | Enables semantic recall across projects |
+| `GrowthMetric` tracking | Measures learning velocity over time |
+| `wrongApproach` is MANDATORY in lessons | Generic lessons are useless |
+
+**Implication for agents:** When recording lessons, be SPECIFIC. "Always test code"
+is rejected. "Guard X missed BOM-prefixed files because regex lacked BOM strip" is accepted.
+
+### 6. Prebuilt Agent Configs (Meta Prompting Materialized)
+
+| File | Platform | Purpose |
+|:---|:---|:---|
+| `GEMINI.md` | Gemini CLI | Bootstrap chain + cognitive framework |
+| `CLAUDE.md` | Claude Code / Antigravity | Bootstrap chain + memory priming |
+| `.cursorrules` | Cursor AI | Comment-based ruleset |
+
+**Implication:** Any AI agent entering this project has ZERO onboarding friction.
+They immediately receive: laws, coding standards, quick reference, and cognitive framework.
+This is meta-prompting — not telling agents what to do, but teaching them how to teach themselves.
+
+### 7. Meta Layers (Vision — Published as Types)
+
+| Layer | Type | What it measures |
+|:---|:---|:---|
+| 0: Guards | `Guard`, `Finding` | Is this commit clean? (SHIPPED) |
+| 1: Memory | `Lesson`, `GrowthMetric` | What did we learn? (DESIGNED) |
+| 2: Meta Memory | `LessonOutcome`, `RecallMetric` | Are lessons recalled and helpful? |
+| 3: Meta Growth | `MetaGrowthSnapshot` | Is the growth system improving? |
+| F: Federation | `FederationPayload` | Bidirectional AAOS ↔ OSS data flow |
+
+All types are published in `src/core/types.ts` — compiled, documented, importable.
+See `docs/vision/meta-architecture.md` for the full vision.
+
+---
+
+## Roadmap (Tactical)
+
+| Phase | Version | Focus | Key Types |
+|:---|:---:|:---|:---|
+| **Foundation** | v0.1 | Core guards + CLI + OSS + prebuilt configs | `Guard`, `Severity`, `Finding` |
+| **Ecosystem** | v0.2 | `.agents/` scaffold + 18 rules + 5 skills | `GuardContext`, config schema |
+| **Identity** | v0.3 | Ticket-aware guards (TKID Lite) | `TicketRef` |
+| **Memory** | v0.4 | Lesson recording + growth metrics | `Lesson`, `GrowthMetric` |
+| **Intelligence** | v0.5 | DSPy adapter + semantic evaluation | `EvaluationScore` |
+| **Meta Memory** | v0.6 | Recall quality measurement | `LessonOutcome`, `RecallMetric` |
+| **Meta Growth** | v0.7 | Growth acceleration tracking | `MetaGrowthSnapshot` |
+| **Federation** | v0.8 | Bidirectional AAOS ↔ OSS data flow | `FederationPayload` |
+| **Stable** | v1.0 | Public API freeze + npm publish | All types frozen |
+
+**Status Update**: We aggressively bundled **v0.1** and **v0.2** into the initial release. The project now ships out-of-the-box with full agent scaffold capabilities (18 rules, 5 skills, bootstrap wizard). Next target is v0.3 (TKID). Each phase builds on the previous. Agents MUST NOT implement v0.4 features during v0.3 work unless explicitly tasked.
+
+---
+
+

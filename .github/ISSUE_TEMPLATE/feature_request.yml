@@ -1,0 +1,54 @@
+name: ✨ Feature Request
+description: Propose a new feature or guard
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe what you'd like.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - New Guard
+        - CLI Enhancement
+        - Configuration
+        - Documentation
+        - Integration
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What AI agent behavior does this address? What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this to work?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other approaches you've thought about
+
+  - type: dropdown
+    id: willing-to-pr
+    attributes:
+      label: Would you submit a PR for this?
+      options:
+        - "Yes"
+        - "No, but I can help test"
+        - "No"

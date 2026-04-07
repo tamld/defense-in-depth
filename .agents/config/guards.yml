@@ -1,0 +1,56 @@
+# Guard Configuration Registry
+# Machine-readable configuration for all built-in guards.
+# Agents and tools can parse this to understand available guards.
+
+version: "1.0"
+
+guards:
+  hollowArtifact:
+    id: hollow-artifact
+    status: stable
+    defaultEnabled: true
+    defaultSeverity: BLOCK
+    source: src/guards/hollow-artifact.ts
+    description: Detects files containing only placeholder content (TODO, TBD, etc.)
+    category: content-quality
+    platforms: [windows, macos, linux]
+
+  ssotPollution:
+    id: ssot-pollution
+    status: stable
+    defaultEnabled: true
+    defaultSeverity: BLOCK
+    source: src/guards/ssot-pollution.ts
+    description: Blocks governance/config files from leaking into feature PRs
+    category: state-isolation
+    platforms: [windows, macos, linux]
+
+  commitFormat:
+    id: commit-format
+    status: stable
+    defaultEnabled: true
+    defaultSeverity: WARN
+    source: src/guards/commit-format.ts
+    description: Enforces conventional commit message format
+    category: git-hygiene
+    platforms: [windows, macos, linux]
+
+  branchNaming:
+    id: branch-naming
+    status: stable
+    defaultEnabled: false
+    defaultSeverity: WARN
+    source: src/guards/branch-naming.ts
+    description: Validates branch naming conventions
+    category: git-hygiene
+    platforms: [windows, macos, linux]
+
+  phaseGate:
+    id: phase-gate
+    status: stable
+    defaultEnabled: false
+    defaultSeverity: BLOCK
+    source: src/guards/phase-gate.ts
+    description: Requires plan files before code commits
+    category: workflow-enforcement
+    platforms: [windows, macos, linux]

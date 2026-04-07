@@ -1,0 +1,43 @@
+# CodeRabbit Configuration for defend-in-depth
+# Copy this file to your project root as .coderabbit.yaml
+# See: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en
+
+reviews:
+  # Auto-review PRs
+  auto_review:
+    enabled: true
+    drafts: false
+
+  # Focus areas for AI review
+  path_instructions:
+    - path: "src/guards/**"
+      instructions: |
+        Review guard implementations for:
+        1. Purity — no side effects beyond reading files
+        2. Error handling — guards must not throw uncaught errors
+        3. Finding quality — every BLOCK must include a fix suggestion
+        4. Performance — should complete in <100ms
+
+    - path: "src/core/**"
+      instructions: |
+        Core modules are the foundation. Review for:
+        1. No any types
+        2. Proper error boundaries
+        3. Config deep merge correctness
+        4. Guard interface compliance
+
+    - path: "src/cli/**"
+      instructions: |
+        CLI commands must be cross-platform compatible:
+        1. Use path.join() not hardcoded separators
+        2. Handle missing .git directory gracefully
+        3. Exit codes: 0 = success, 1 = block, 2 = error
+
+  # Auto-merge criteria
+  auto_merge:
+    enabled: false  # Requires manual label 'ready-to-merge'
+
+chat:
+  auto_reply: true

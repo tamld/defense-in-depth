@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background gradient: deep indigo to near-black -->
+    <radialGradient id="bgRadial" cx="50%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0a0a1a"/>
+    </radialGradient>
+
+    <!-- Shield outer glow: electric cyan → violet -->
+    <linearGradient id="shieldGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+
+    <!-- Shield inner surface: frosted glass -->
+    <linearGradient id="shieldInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#312e81" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Accent highlight for code brackets -->
+    <linearGradient id="codeAccent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+
+    <!-- Outer neon glow filter -->
+    <filter id="outerGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.22
+                0 0 0 0 0.38
+                0 0 0 0 0.97
+                0 0 0 0.6 0" result="colorBlur"/>
+      <feMerge>
+        <feMergeNode in="colorBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle inner shadow for depth -->
+    <filter id="innerShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <feOffset dx="0" dy="3" result="offsetBlur"/>
+      <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowDiff"/>
+      <feFlood flood-color="#000000" flood-opacity="0.4" result="shadowColor"/>
+      <feComposite in="shadowColor" in2="shadowDiff" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="shadow"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glassmorphism blur for ring -->
+    <filter id="glassBlur">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+
+  <!-- === BACKGROUND === -->
+  <rect width="512" height="512" rx="112" fill="url(#bgRadial)"/>
+
+  <!-- Subtle grid pattern for texture -->
+  <g opacity="0.04">
+    <line x1="0" y1="128" x2="512" y2="128" stroke="#818cf8" stroke-width="1"/>
+    <line x1="0" y1="256" x2="512" y2="256" stroke="#818cf8" stroke-width="1"/>
+    <line x1="0" y1="384" x2="512" y2="384" stroke="#818cf8" stroke-width="1"/>
+    <line x1="128" y1="0" x2="128" y2="512" stroke="#818cf8" stroke-width="1"/>
+    <line x1="256" y1="0" x2="256" y2="512" stroke="#818cf8" stroke-width="1"/>
+    <line x1="384" y1="0" x2="384" y2="512" stroke="#818cf8" stroke-width="1"/>
+  </g>
+
+  <!-- === LAYER 1: Outermost defense ring (dashed orbit) === -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#4f46e5" stroke-width="1.5"
+          stroke-dasharray="8 12" opacity="0.25"/>
+
+  <!-- === LAYER 2: Middle defense ring (glassmorphic) === -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#shieldGlow)" stroke-width="2"
+          opacity="0.15" filter="url(#glassBlur)"/>
+
+  <!-- === LAYER 3: Inner defense ring (solid subtle) === -->
+  <circle cx="256" cy="256" r="155" fill="none" stroke="#6366f1" stroke-width="1" opacity="0.2"/>
+
+  <!-- Small orbital dots on rings for visual interest -->
+  <circle cx="256" cy="46" r="4" fill="#38bdf8" opacity="0.6"/>
+  <circle cx="466" cy="256" r="3" fill="#818cf8" opacity="0.5"/>
+  <circle cx="100" cy="180" r="3" fill="#6366f1" opacity="0.4"/>
+  <circle cx="400" cy="400" r="3.5" fill="#38bdf8" opacity="0.35"/>
+
+  <!-- === MAIN SHIELD (3 nested layers = "defense in depth") === -->
+
+  <!-- Shield Layer 3 (outermost): Neon glow border -->
+  <path d="M256,88 L380,138 L380,290 C380,382 256,432 256,432 C256,432 132,382 132,290 L132,138 Z"
+        fill="none" stroke="url(#shieldGlow)" stroke-width="3" filter="url(#outerGlow)" opacity="0.7"/>
+
+  <!-- Shield Layer 2 (middle): Semi-transparent fill -->
+  <path d="M256,100 L370,146 L370,286 C370,372 256,418 256,418 C256,418 142,372 142,286 L142,146 Z"
+        fill="url(#shieldGlow)" opacity="0.15"/>
+
+  <!-- Shield Layer 1 (inner, main surface): Dark frosted glass -->
+  <path d="M256,112 L358,154 L358,282 C358,362 256,404 256,404 C256,404 154,362 154,282 L154,154 Z"
+        fill="url(#shieldInner)" filter="url(#innerShadow)"/>
+
+  <!-- Shield highlight edge (top light reflection) -->
+  <path d="M256,112 L358,154 L358,180 L256,138 L154,180 L154,154 Z"
+        fill="#ffffff" opacity="0.04"/>
+
+  <!-- === CODE SYMBOL (< / > centered in the shield) === -->
+  <g filter="url(#outerGlow)">
+    <!-- Left bracket < -->
+    <path d="M210,225 L185,268 L210,311"
+          fill="none" stroke="url(#codeAccent)" stroke-width="18"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Right bracket > -->
+    <path d="M302,225 L327,268 L302,311"
+          fill="none" stroke="url(#codeAccent)" stroke-width="18"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Slash / -->
+    <line x1="272" y1="320" x2="240" y2="216"
+          stroke="url(#codeAccent)" stroke-width="18" stroke-linecap="round"/>
+  </g>
+
+  <!-- === CORNER ACCENTS (layered defense visual metaphor) === -->
+  <!-- Top-left corner bracket -->
+  <path d="M60,100 L60,60 L100,60" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.3" stroke-linecap="round"/>
+  <!-- Top-right corner bracket -->
+  <path d="M412,60 L452,60 L452,100" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.3" stroke-linecap="round"/>
+  <!-- Bottom-left corner bracket -->
+  <path d="M60,412 L60,452 L100,452" fill="none" stroke="#6366f1" stroke-width="2.5" opacity="0.25" stroke-linecap="round"/>
+  <!-- Bottom-right corner bracket -->
+  <path d="M412,452 L452,452 L452,412" fill="none" stroke="#6366f1" stroke-width="2.5" opacity="0.25" stroke-linecap="round"/>
+</svg>

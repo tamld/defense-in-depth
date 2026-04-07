@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520" width="880" height="520">
+  <defs>
+    <!-- Background -->
+    <radialGradient id="bgR" cx="30%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0a0a1a"/>
+    </radialGradient>
+
+    <!-- Card fills -->
+    <linearGradient id="cardCore" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#312e81" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="cardOpt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#14532d" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0a2618" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Accent gradients -->
+    <linearGradient id="accentCyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="accentGreen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.22  0 0 0 0 0.38  0 0 0 0 0.97  0 0 0 0.5 0" result="cBlur"/>
+      <feMerge>
+        <feMergeNode in="cBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle card shadow -->
+    <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+
+    <!-- Glass highlight filter -->
+    <filter id="glassEdge">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+  </defs>
+
+  <!-- ========== BACKGROUND ========== -->
+  <rect width="880" height="520" rx="20" fill="url(#bgR)"/>
+
+  <!-- Subtle grid texture -->
+  <g opacity="0.03">
+    <line x1="0" y1="130" x2="880" y2="130" stroke="#818cf8" stroke-width="0.5"/>
+    <line x1="0" y1="260" x2="880" y2="260" stroke="#818cf8" stroke-width="0.5"/>
+    <line x1="0" y1="390" x2="880" y2="390" stroke="#818cf8" stroke-width="0.5"/>
+    <line x1="220" y1="0" x2="220" y2="520" stroke="#818cf8" stroke-width="0.5"/>
+    <line x1="440" y1="0" x2="440" y2="520" stroke="#818cf8" stroke-width="0.5"/>
+    <line x1="660" y1="0" x2="660" y2="520" stroke="#818cf8" stroke-width="0.5"/>
+  </g>
+
+  <!-- ========== TITLE BAR ========== -->
+  <text x="440" y="42" fill="#e0e7ff" font-family="'SF Pro Display', 'Segoe UI', system-ui, sans-serif"
+        font-size="15" font-weight="600" text-anchor="middle" letter-spacing="3" opacity="0.6">
+    THE .AGENTS/ ECOSYSTEM
+  </text>
+  <line x1="310" y1="52" x2="570" y2="52" stroke="url(#accentCyan)" stroke-width="1" opacity="0.3"/>
+
+  <!-- ========== CENTRAL HUB ========== -->
+  <!-- Outer glow ring -->
+  <circle cx="140" cy="280" r="68" fill="none" stroke="url(#accentCyan)" stroke-width="1.5" opacity="0.15" filter="url(#glassEdge)"/>
+  <circle cx="140" cy="280" r="58" fill="none" stroke="url(#accentCyan)" stroke-width="1" opacity="0.1" stroke-dasharray="6 8"/>
+
+  <!-- Hub circle -->
+  <circle cx="140" cy="280" r="48" fill="url(#cardCore)" stroke="url(#accentCyan)" stroke-width="2" filter="url(#glow)"/>
+
+  <!-- Hub icon: shield -->
+  <path d="M140,254 L158,262 L158,282 C158,296 140,304 140,304 C140,304 122,296 122,282 L122,262 Z"
+        fill="none" stroke="url(#accentCyan)" stroke-width="2" stroke-linejoin="round"/>
+  <text x="140" y="318" fill="#c7d2fe" font-family="'SF Pro Text', 'Segoe UI', system-ui, sans-serif"
+        font-size="14" font-weight="700" text-anchor="middle">.agents/</text>
+
+  <!-- ========== CONNECTION LINES (bezier curves) ========== -->
+  <!-- To rules -->
+  <path d="M188,258 C260,258 290,105 340,105" fill="none" stroke="#6366f1" stroke-width="1.5" opacity="0.4" stroke-dasharray="4 4"/>
+  <circle cx="340" cy="105" r="3" fill="#818cf8" opacity="0.6"/>
+
+  <!-- To workflows -->
+  <path d="M188,270 C270,270 290,215 340,215" fill="none" stroke="#22c55e" stroke-width="1.5" opacity="0.4" stroke-dasharray="4 4"/>
+  <circle cx="340" cy="215" r="3" fill="#4ade80" opacity="0.6"/>
+
+  <!-- To skills -->
+  <path d="M188,280 C270,280 290,325 340,325" fill="none" stroke="#22c55e" stroke-width="1.5" opacity="0.4" stroke-dasharray="4 4"/>
+  <circle cx="340" cy="325" r="3" fill="#4ade80" opacity="0.6"/>
+
+  <!-- To config -->
+  <path d="M188,295 C260,295 290,435 340,435" fill="none" stroke="#6366f1" stroke-width="1.5" opacity="0.4" stroke-dasharray="4 4"/>
+  <circle cx="340" cy="435" r="3" fill="#818cf8" opacity="0.6"/>
+
+  <!-- ========== CARD 1: rules/ (Core) ========== -->
+  <g filter="url(#cardShadow)">
+    <rect x="350" y="70" width="500" height="72" rx="12" fill="url(#cardCore)" stroke="#4f46e5" stroke-width="1"/>
+    <!-- Top highlight -->
+    <rect x="350" y="70" width="500" height="12" rx="12" fill="#ffffff" opacity="0.03"/>
+    <!-- Badge -->
+    <rect x="370" y="84" width="52" height="20" rx="10" fill="#4f46e5" opacity="0.6"/>
+    <text x="396" y="98" fill="#c7d2fe" font-family="'SF Mono', 'Cascadia Code', monospace"
+          font-size="10" font-weight="600" text-anchor="middle">CORE</text>
+    <!-- Title -->
+    <text x="434" y="99" fill="#e0e7ff" font-family="'SF Pro Display', 'Segoe UI', system-ui, sans-serif"
+          font-size="16" font-weight="700">rules/</text>
+    <!-- Description -->
+    <text x="370" y="126" fill="#94a3b8" font-family="'SF Pro Text', 'Segoe UI', system-ui, sans-serif"
+          font-size="12">Immutable governance standards. Enforced deterministically by the sheriff.</text>
+  </g>
+
+  <!-- ========== CARD 2: workflows/ (Optional) ========== -->
+  <g filter="url(#cardShadow)">
+    <rect x="350" y="180" width="500" height="72" rx="12" fill="url(#cardOpt)" stroke="#16a34a" stroke-width="1"/>
+    <rect x="350" y="180" width="500" height="12" rx="12" fill="#ffffff" opacity="0.03"/>
+    <!-- Badge -->
+    <rect x="370" y="194" width="72" height="20" rx="10" fill="#16a34a" opacity="0.5"/>
+    <text x="406" y="208" fill="#bbf7d0" font-family="'SF Mono', 'Cascadia Code', monospace"
+          font-size="10" font-weight="600" text-anchor="middle">OPTIONAL</text>
+    <!-- Title -->
+    <text x="454" y="209" fill="#dcfce7" font-family="'SF Pro Display', 'Segoe UI', system-ui, sans-serif"
+          font-size="16" font-weight="700">workflows/</text>
+    <!-- Description -->
+    <text x="370" y="236" fill="#94a3b8" font-family="'SF Pro Text', 'Segoe UI', system-ui, sans-serif"
+          font-size="12">Step-by-step SOPs and operational procedures for agent task execution.</text>
+  </g>
+
+  <!-- ========== CARD 3: skills/ (Optional) ========== -->
+  <g filter="url(#cardShadow)">
+    <rect x="350" y="290" width="500" height="72" rx="12" fill="url(#cardOpt)" stroke="#16a34a" stroke-width="1"/>
+    <rect x="350" y="290" width="500" height="12" rx="12" fill="#ffffff" opacity="0.03"/>
+    <!-- Badge -->
+    <rect x="370" y="304" width="72" height="20" rx="10" fill="#16a34a" opacity="0.5"/>
+    <text x="406" y="318" fill="#bbf7d0" font-family="'SF Mono', 'Cascadia Code', monospace"
+          font-size="10" font-weight="600" text-anchor="middle">OPTIONAL</text>
+    <!-- Title -->
+    <text x="454" y="319" fill="#dcfce7" font-family="'SF Pro Display', 'Segoe UI', system-ui, sans-serif"
+          font-size="16" font-weight="700">skills/</text>
+    <!-- Description -->
+    <text x="370" y="346" fill="#94a3b8" font-family="'SF Pro Text', 'Segoe UI', system-ui, sans-serif"
+          font-size="12">Pluggable agent capabilities, specialist knowledge, and custom extensions.</text>
+  </g>
+
+  <!-- ========== CARD 4: config/ (Core) ========== -->
+  <g filter="url(#cardShadow)">
+    <rect x="350" y="400" width="500" height="72" rx="12" fill="url(#cardCore)" stroke="#4f46e5" stroke-width="1"/>
+    <rect x="350" y="400" width="500" height="12" rx="12" fill="#ffffff" opacity="0.03"/>
+    <!-- Badge -->
+    <rect x="370" y="414" width="52" height="20" rx="10" fill="#4f46e5" opacity="0.6"/>
+    <text x="396" y="428" fill="#c7d2fe" font-family="'SF Mono', 'Cascadia Code', monospace"
+          font-size="10" font-weight="600" text-anchor="middle">CORE</text>
+    <!-- Title -->
+    <text x="434" y="429" fill="#e0e7ff" font-family="'SF Pro Display', 'Segoe UI', system-ui, sans-serif"
+          font-size="16" font-weight="700">config/</text>
+    <!-- Description -->
+    <text x="370" y="456" fill="#94a3b8" font-family="'SF Pro Text', 'Segoe UI', system-ui, sans-serif"
+          font-size="12">Machine-readable YAML guard registry and enforcement configuration.</text>
+  </g>
+
+  <!-- ========== LEGEND (bottom-left) ========== -->
+  <g transform="translate(46, 470)">
+    <circle cx="0" cy="0" r="5" fill="#4f46e5" opacity="0.8"/>
+    <text x="12" y="4" fill="#94a3b8" font-family="'SF Pro Text', system-ui, sans-serif" font-size="10">Core (required)</text>
+    <circle cx="110" cy="0" r="5" fill="#16a34a" opacity="0.8"/>
+    <text x="122" y="4" fill="#94a3b8" font-family="'SF Pro Text', system-ui, sans-serif" font-size="10">Optional (extensible)</text>
+  </g>
+
+  <!-- ========== CORNER ACCENTS ========== -->
+  <path d="M30,60 L30,30 L60,30" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+  <path d="M820,30 L850,30 L850,60" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+  <path d="M30,460 L30,490 L60,490" fill="none" stroke="#6366f1" stroke-width="1.5" opacity="0.15" stroke-linecap="round"/>
+  <path d="M820,490 L850,490 L850,460" fill="none" stroke="#6366f1" stroke-width="1.5" opacity="0.15" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,40 @@
+# defend-in-depth Governance Rules
+# Prebuilt cognitive framework for Cursor AI
+
+# Identity
+# You are operating inside a defend-in-depth governed project.
+# This is a governance middleware that bridges AI agents into human workflows.
+
+# Bootstrap: Read these files IN ORDER before coding:
+# 1. AGENTS.md (root) → Project identity, 3 Absolute Laws
+# 2. .agents/AGENTS.md → Ecosystem map, onboarding flowchart
+# 3. .agents/rules/rule-consistency.md → Immutable coding standards
+
+# The 3 Absolute Laws:
+# 1. Zero-Theater: No hollow artifacts. TODO/TBD = instant BLOCK.
+# 2. Evidence > Plausibility: Tag claims [CODE], [RUNTIME], [INFER], [HYPO].
+# 3. HITL: You propose. Humans approve. Never auto-merge.
+
+# Coding Standards (non-negotiable):
+# - TypeScript strict mode, no `any` types
+# - No external dependencies (only `yaml` in production)
+# - Guards must be pure functions (no side effects)
+# - One guard = one file = one test
+# - Conventional commits: feat(scope): description
+# - Evidence tagging on all findings
+
+# Quick Reference:
+# - Guard contract: .agents/contracts/guard-interface.md
+# - Coding rules: .agents/rules/rule-consistency.md
+# - Workflow: .agents/workflows/procedure-task-execution.md
+# - Philosophy: .agents/philosophy/COGNITIVE_TREE.md
+# - Strategy: STRATEGY.md
+# - Vision: docs/vision/meta-architecture.md
+
+# Cognitive Framework:
+# Evidence > Plausibility → Tag everything you verify
+# Mechanism > Prompting → Guards are code, not instructions
+# Growth > Stasis → Record lessons with wrongApproach
+# HITL > Autonomy → You serve human judgment
+
+# Sign your work: Executor: Cursor-AI
