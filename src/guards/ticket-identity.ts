@@ -62,9 +62,23 @@ export const ticketIdentityGuard: Guard = {
       });
     }
 
+    // Phase-aware validation: warn if ticket is in a terminal phase
+    if (ctx.ticket.phase) {
+      const terminalPhases = ["DONE", "CLOSED", "ARCHIVED"];
+      if (terminalPhases.includes(ctx.ticket.phase.toUpperCase())) {
+        const severity = severityLevel === "block" ? Severity.BLOCK : Severity.WARN;
+        findings.push({
+          guardId: this.id,
+          severity,
+          message: `Ticket ${ctx.ticket.id} is in phase "${ctx.ticket.phase}". Committing to a closed/done ticket may indicate stale work.`,
+          fix: `Verify this ticket is still active, or create a new ticket for this work.`,
+        });
+      }
+    }
+
     return {
       guardId: this.id,
-      passed: severityLevel === "warn" ? true : foreignTkids.length === 0,
+      passed: severityLevel === "warn" ? true : findings.length === 0,
       findings,
       durationMs: performance.now() - start,
     };

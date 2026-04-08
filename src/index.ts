@@ -29,5 +29,11 @@ export {
   commitFormatGuard,
   branchNamingGuard,
   phaseGateGuard,
+  ticketIdentityGuard,
   allBuiltinGuards,
 } from "./guards/index.js";
+
+// Federation (v0.3)
+export { createProvider, FileTicketProvider } from "./federation/index.js";
+export type { TicketStateProvider } from "./federation/types.js";
+export type { TicketRef } from "./core/types.js";

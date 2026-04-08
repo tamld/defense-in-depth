@@ -7,6 +7,10 @@ dist/
 *.d.ts
 *.js.map
 
+# But track test files
+!tests/
+!tests/**/*.js
+
 # IDE
 .vscode/
 .idea/

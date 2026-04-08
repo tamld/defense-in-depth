@@ -20,6 +20,8 @@ import type {
 } from "./types.js";
 import { Severity } from "./types.js";
 import { loadConfig } from "./config-loader.js";
+import { createProvider } from "../federation/index.js";
+import type { TicketStateProvider } from "../federation/types.js";
 
 export class DefendEngine {
   private guards: Guard[] = [];
@@ -88,7 +90,11 @@ export class DefendEngine {
   ): Promise<EngineVerdict> {
     const start = performance.now();
 
-    const ticket = this.extractTicketRef(options?.branch, options?.commitMessage, this.projectRoot);
+    // Phase 1: Extract basic TicketRef from branch/commit/directory (pure, no I/O)
+    const basicRef = this.extractTicketRef(options?.branch, options?.commitMessage, this.projectRoot);
+
+    // Phase 2: Enrich with provider (MAY do I/O — file, DB, API)
+    const { ticket, provider } = await this.enrichTicketRef(basicRef);
 
     const ctx: GuardContext = {
       stagedFiles,
@@ -128,6 +134,9 @@ export class DefendEngine {
       }
     }
 
+    // Cleanup provider resources (DB connections, etc.)
+    await provider?.dispose?.();
+
     const durationMs = performance.now() - start;
     const failedGuards = results.filter((r) => !r.passed).length;
     const warnedGuards = results.filter(
@@ -145,6 +154,40 @@ export class DefendEngine {
       results,
       durationMs,
     };
+  }
+
+  /**
+   * Enrich a basic TicketRef with provider data (phase, metadata).
+   *
+   * This runs BEFORE the guard pipeline. If the provider fails or is
+   * unavailable, the basic ref is returned unchanged — guards degrade
+   * gracefully to non-phase-aware mode.
+   */
+  private async enrichTicketRef(
+    basicRef: TicketRef | undefined,
+  ): Promise<{ ticket: TicketRef | undefined; provider: TicketStateProvider | undefined }> {
+    if (!basicRef) return { ticket: undefined, provider: undefined };
+
+    const guardConfig = this.config.guards.ticketIdentity;
+    if (!guardConfig?.enabled) return { ticket: basicRef, provider: undefined };
+
+    const provider = createProvider(
+      guardConfig.provider,
+      guardConfig.providerConfig,
+      this.projectRoot,
+    );
+
+    try {
+      const enriched = await provider.resolve(basicRef.id);
+      // Merge: provider data enriches basic ref, basic ref provides fallback
+      const ticket: TicketRef = enriched
+        ? { ...basicRef, ...enriched }
+        : basicRef;
+      return { ticket, provider };
+    } catch {
+      // Provider errors never crash the guard pipeline
+      return { ticket: basicRef, provider };
+    }
   }
 
   /** Look up a guard's config section by its id */

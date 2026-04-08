@@ -58,6 +58,7 @@ const DEFAULT_CONFIG: DefendConfig = {
       enabled: false,
       tkidPattern: "TK-[0-9A-Z-]+",
       severity: "warn",
+      provider: "file",
     },
   },
 };

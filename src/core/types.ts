@@ -118,6 +118,10 @@ export interface TicketIdentityConfig {
   tkidPattern?: string;
   /** Severity: 'warn' (advisory, v0.3 default) or 'block' (enforcement) */
   severity?: 'warn' | 'block';
+  /** Provider type: "file" (default) | custom module path (future) */
+  provider?: string;
+  /** Provider-specific configuration (passed directly to the provider constructor) */
+  providerConfig?: Record<string, unknown>;
 }
 
 /** Root configuration loaded from defense.config.yml */
