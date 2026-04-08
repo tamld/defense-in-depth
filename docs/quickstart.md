@@ -87,6 +87,6 @@ guards:
 
 ## Next Steps
 
-- [Writing Custom Guards](./guide-writing-guards.md) — Create your own validators
-- [Configuration Reference](./configuration.md) — All config options
+- [Writing Custom Guards](./dev-guide/writing-guards.md) — Create your own validators
+- [Configuration Reference](./user-guide/configuration.md) — All config options
 - [Vision: Meta Architecture](./vision/meta-architecture.md) — Where this project is heading

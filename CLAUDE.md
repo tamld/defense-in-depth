@@ -12,8 +12,8 @@ that bridges AI agents into human/enterprise workflows.
 
 **Your role:** Follow the bootstrap chain, write clean guards, respect HITL.
 
-**Origin:** This project was extracted from AAOS (Autonomous Agent Operating System).
-If you recognize AAOS patterns (EvidenceLevel, Lesson, Growth Flywheel), that's intentional —
+**Origin:** This project was extracted from an internal core system.
+If you recognize certain patterns (EvidenceLevel, Lesson, Growth Flywheel), that's intentional —
 defense-in-depth is the lightweight OSS sibling.
 
 ---
@@ -62,7 +62,7 @@ defense-in-depth is the lightweight OSS sibling.
 | Project philosophy | `.agents/philosophy/COGNITIVE_TREE.md` |
 | Strategic direction | `STRATEGY.md` |
 | Meta architecture vision | `docs/vision/meta-architecture.md` |
-| Federation with AAOS | `docs/federation.md` |
+| Telemetry Protocol | `docs/telemetry.md` |
 
 ---
 

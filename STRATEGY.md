@@ -94,7 +94,7 @@ This is meta-prompting — not telling agents what to do, but teaching them how 
 | 1: Memory | `Lesson`, `GrowthMetric` | What did we learn? (DESIGNED) |
 | 2: Meta Memory | `LessonOutcome`, `RecallMetric` | Are lessons recalled and helpful? |
 | 3: Meta Growth | `MetaGrowthSnapshot` | Is the growth system improving? |
-| F: Federation | `FederationPayload` | Bidirectional AAOS ↔ OSS data flow |
+| F: Federation | `TelemetryPayload` | Bidirectional Internal ↔ OSS data flow |
 
 All types are published in `src/core/types.ts` — compiled, documented, importable.
 See `docs/vision/meta-architecture.md` for the full vision.
@@ -112,10 +112,17 @@ See `docs/vision/meta-architecture.md` for the full vision.
 | **Intelligence** | v0.5 | DSPy adapter + semantic evaluation | `EvaluationScore` |
 | **Meta Memory** | v0.6 | Recall quality measurement | `LessonOutcome`, `RecallMetric` |
 | **Meta Growth** | v0.7 | Growth acceleration tracking | `MetaGrowthSnapshot` |
-| **Federation** | v0.8 | Bidirectional AAOS ↔ OSS data flow | `FederationPayload` |
+| **Telemetry Sync** | v0.8 | Bidirectional Internal ↔ OSS data flow | `TelemetryPayload` |
 | **Stable** | v1.0 | Public API freeze + npm publish | All types frozen |
 
-**Status Update**: We aggressively bundled **v0.1** and **v0.2** into the initial release. The project now ships out-of-the-box with full agent scaffold capabilities (18 rules, 5 skills, bootstrap wizard). Next target is v0.3 (TKID). Each phase builds on the previous. Agents MUST NOT implement v0.4 features during v0.3 work unless explicitly tasked.
+**Status Update (v0.3)**: Foundation (v0.1) and Ecosystem (v0.2) shipped. Identity (v0.3) **in progress**:
+
+- `TicketRef` added to `GuardContext` — engine extracts TKID from branch name, commit message, or directory name.
+- `TicketIdentityGuard` enforces non-contradiction: if branch declares TKID `TK-xxx`, commit must not reference a *different* ticket. Severity: `WARN` (advisory, not blocking).
+- **Key architectural insight**: Git worktree IS the Dependency Injection mechanism. `DefendEngine(projectRoot)` receives CWD as the scope boundary. All git operations (`branch`, `staged files`, `config`) resolve relative to this root. When an AAOS worktree (`.worktrees/TK-xxx/`) is the CWD, identity and isolation come free from Git. When a standalone project is the CWD, the same code works without modification. **Zero lock-in by design.**
+- **Lesson**: `.worktrees` path was initially hardcoded in `extractTicketRef` — removed. Branch name is the canonical TKID source; directory name is a generic fallback.
+
+Each phase builds on the previous. Agents MUST NOT implement v0.4 features during v0.3 work unless explicitly tasked.
 
 ---
 

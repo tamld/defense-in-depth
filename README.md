@@ -225,6 +225,7 @@ defense-in-depth init --scaffold
 | **Hollow Artifact** | ✅ ON | BLOCK | Files with only `TODO`, `TBD`, empty templates |
 | **SSoT Pollution** | ✅ ON | BLOCK | Config/state files modified in feature branches |
 | **Commit Format** | ✅ ON | WARN | Non-conventional commit messages |
+| **Ticket Identity** | ❌ OFF | WARN | Commit references a conflicting ticket |
 | **Branch Naming** | ❌ OFF | WARN | Branch names not matching pattern |
 | **Phase Gate** | ❌ OFF | BLOCK | Code committed without a plan file |
 

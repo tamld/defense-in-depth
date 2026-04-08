@@ -177,6 +177,7 @@ npx defense-in-depth verify
 | `hollow-artifact` | pre-commit | ✅ Bật | Chặn file rỗng, chỉ chứa nội dung giữ chỗ |
 | `ssot-pollution` | pre-commit | ✅ Bật | Bảo vệ file cấu hình/quản trị |
 | `phase-gate` | pre-commit | ⚠️ Tắt | Buộc có plan trước khi code |
+| `ticket-identity` | pre-commit | ⚠️ Tắt | Ngăn commit chứa sửa đổi của nhiều ticket cùng lúc |
 | `branch-naming` | pre-push | ✅ Bật | Kiểm tra tên branch `feat/TK-*` |
 | `commit-msg` | pre-push | ✅ Bật | Tuân thủ conventional commits |
 

@@ -98,4 +98,4 @@ npx defense-in-depth verify --files "path/to/large-file.ts"
 
 ## Full Contract Reference
 
-See [`.agents/contracts/guard-interface.md`](../.agents/contracts/guard-interface.md) for the complete interface specification with all types and invariants.
+See [`../../.agents/contracts/guard-interface.md`](../../.agents/contracts/guard-interface.md) for the complete interface specification with all types and invariants.

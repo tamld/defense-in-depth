@@ -110,7 +110,7 @@ From accumulated `LessonOutcome` data, we derive `RecallMetric`:
 
 ```
 ┌─────────────┐                    ┌──────────────────┐
-│  AAOS       │ ──── Extract ────→ │ defense-in-depth  │
+│Internal Core│ ──── Extract ────→ │ defense-in-depth  │
 │  (HQ)       │    patterns,       │ (OSS Embassy)    │
 │             │    philosophy      │                  │
 │             │                    │ Collects:        │
@@ -128,7 +128,7 @@ The `FederationPayload` type defines the data contract:
 - **GuardStats** showing which guards work (and which don't)
 - **MetaGrowthSnapshot** tracking overall system health
 
-**Why this matters:** AAOS is built in a controlled environment. defense-in-depth runs in the wild — different OSes, different project types, different agent platforms. The field data is invaluable.
+**Why this matters:** The internal core is built in a controlled environment. defense-in-depth runs in the wild — different OSes, different project types, different agent platforms. The field data is invaluable.
 
 ---
 
