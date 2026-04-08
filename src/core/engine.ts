@@ -178,14 +178,28 @@ export class DefendEngine {
     );
 
     try {
-      const enriched = await provider.resolve(basicRef.id);
+      const timeoutMs =
+        typeof guardConfig.providerConfig?.timeout === "number"
+          ? guardConfig.providerConfig.timeout
+          : 5000;
+
+      const enriched = await Promise.race([
+        provider.resolve(basicRef.id),
+        new Promise<undefined>((_, reject) =>
+          setTimeout(() => reject(new Error(`Resolution timed out after ${timeoutMs}ms`)), timeoutMs),
+        ),
+      ]);
+
       // Merge: provider data enriches basic ref, basic ref provides fallback
       const ticket: TicketRef = enriched
         ? { ...basicRef, ...enriched }
         : basicRef;
       return { ticket, provider };
-    } catch {
+    } catch (err) {
       // Provider errors never crash the guard pipeline
+      console.warn(
+        `⚠ Ticket provider '${provider.name}' failed for ${basicRef.id}: ${err instanceof Error ? err.message : String(err)}`,
+      );
       return { ticket: basicRef, provider };
     }
   }

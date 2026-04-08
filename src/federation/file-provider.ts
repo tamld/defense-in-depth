@@ -23,7 +23,8 @@
  * already ships (`yaml` for YAML parsing, `node:fs` for file I/O).
  */
 
-import * as fs from "node:fs";
+import { constants } from "node:fs";
+import { access, readFile } from "node:fs/promises";
 import * as path from "node:path";
 import * as yaml from "yaml";
 import type { TicketStateProvider } from "./types.js";
@@ -50,13 +51,9 @@ export class FileTicketProvider implements TicketStateProvider {
   async resolve(ticketId: string): Promise<TicketRef | undefined> {
     const filePath = path.join(this.projectRoot, this.ticketFile);
 
-    // File missing → silent skip (common for standalone projects)
-    if (!fs.existsSync(filePath)) {
-      return undefined;
-    }
-
     try {
-      const content = fs.readFileSync(filePath, "utf-8");
+      await access(filePath, constants.R_OK);
+      const content = await readFile(filePath, "utf-8");
       const frontmatter = this.parseFrontmatter(content);
 
       if (!frontmatter) {
@@ -65,7 +62,7 @@ export class FileTicketProvider implements TicketStateProvider {
 
       // Build enriched TicketRef from frontmatter
       const ref: TicketRef = {
-        id: (frontmatter.id as string) ?? ticketId,
+        id: typeof frontmatter.id === "string" ? frontmatter.id : (frontmatter.id != null ? String(frontmatter.id) : ticketId),
       };
 
       if (frontmatter.phase && typeof frontmatter.phase === "string") {
@@ -81,7 +78,11 @@ export class FileTicketProvider implements TicketStateProvider {
 
       return ref;
     } catch (err) {
-      // Parse errors → warn but don't crash
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        return undefined; // File missing → silent skip
+      }
+      
+      // Parse or other errors → warn but don't crash
       console.warn(
         `⚠ FileTicketProvider: Failed to read ${this.ticketFile}: ${err instanceof Error ? err.message : String(err)}`,
       );

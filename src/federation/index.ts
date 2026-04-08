@@ -10,7 +10,7 @@
  */
 
 import { FileTicketProvider } from "./file-provider.js";
-import type { TicketStateProvider } from "./types.js";
+import type { TicketStateProvider, ProviderConfig } from "./types.js";
 
 /**
  * Create a TicketStateProvider from config values.
@@ -22,10 +22,10 @@ import type { TicketStateProvider } from "./types.js";
  */
 export function createProvider(
   provider: string | undefined,
-  providerConfig?: Record<string, unknown>,
+  providerConfig?: ProviderConfig,
   projectRoot?: string,
 ): TicketStateProvider {
-  const config = { ...providerConfig, projectRoot } as Record<string, unknown>;
+  const config = { ...providerConfig, projectRoot };
 
   switch (provider) {
     case undefined:
@@ -43,5 +43,5 @@ export function createProvider(
 }
 
 // Barrel exports
-export type { TicketStateProvider } from "./types.js";
+export type { TicketStateProvider, ProviderConfig } from "./types.js";
 export { FileTicketProvider } from "./file-provider.js";

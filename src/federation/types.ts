@@ -6,7 +6,7 @@
  *   - MAY make network/file I/O
  *   - MAY be non-deterministic (external state changes)
  *   - MUST handle their own errors (return undefined, never throw to caller)
- *   - MUST respect configurable timeout (default: 5000ms)
+ *   - SHOULD complete within reasonable time (timeout enforcement happens in engine)
  *   - SHOULD cache results when appropriate
  *
  * This separation preserves the Guard Interface Contract:
@@ -17,6 +17,15 @@
  */
 
 import type { TicketRef } from "../core/types.js";
+
+/**
+ * Base configuration for any TicketStateProvider.
+ */
+export interface ProviderConfig {
+  /** Maximum time in milliseconds to wait for provider resolution (default: 5000) */
+  timeout?: number;
+  [key: string]: unknown;
+}
 
 /**
  * A TicketStateProvider resolves ticket metadata from an external source.
