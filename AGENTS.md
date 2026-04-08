@@ -12,7 +12,7 @@
 **Purpose**: Git-based governance hooks for AI coding agents
 **Parent**: Extracted from an internal autonomous core system
 **Runtime**: TypeScript strict / Node.js ≥18 / CLI-first
-**Status**: Active Development (v0.1.0)
+**Status**: Active Development (v0.3 — TKID Lite in progress)
 
 ### What This Project IS
 - A lightweight governance middleware that runs as Git hooks
@@ -50,10 +50,13 @@ These are non-negotiable. No PR, no contributor, no agent may violate:
 | Mission | Load This |
 |---------|-----------|
 | Understanding the codebase | `src/core/types.ts` → `src/core/engine.ts` |
-| Adding a new guard | `src/guards/hollow-artifact.ts` (reference impl) + `CONTRIBUTING.md` |
+| Adding a new guard | `docs/dev-guide/writing-guards.md` + `.agents/contracts/guard-interface.md` |
 | Fixing a bug | `src/core/engine.ts` → relevant guard file |
-| Documentation | `README.md` + `CHANGELOG.md` |
+| Configuration schema | `docs/user-guide/configuration.md` |
+| CLI commands | `docs/user-guide/cli-reference.md` |
+| Architecture deep-dive | `docs/dev-guide/architecture.md` |
 | Rules & standards | `.agents/rules/` directory |
+| Strategic direction | `STRATEGY.md` |
 | CI/CD | `.github/workflows/ci.yml` |
 
 ### Agent Responsibilities
@@ -70,7 +73,7 @@ These are non-negotiable. No PR, no contributor, no agent may violate:
 defense-in-depth/
 ├── src/
 │   ├── core/               # Mandatory Pillars (engine, types, config)
-│   │   ├── types.ts        # Guard interface + future interfaces
+│   │   ├── types.ts        # Guard interface + future interfaces (v0.1–v0.8)
 │   │   ├── engine.ts       # Pipeline runner (sequential gate execution)
 │   │   └── config-loader.ts # YAML config with deep merge defaults
 │   ├── guards/             # Template Guards (pluggable validators)
@@ -79,6 +82,7 @@ defense-in-depth/
 │   │   ├── commit-format.ts
 │   │   ├── branch-naming.ts
 │   │   ├── phase-gate.ts
+│   │   ├── ticket-identity.ts  # v0.3 — TKID Lite
 │   │   └── index.ts        # Barrel export
 │   ├── hooks/              # Git hook generators
 │   │   ├── pre-commit.ts
@@ -88,10 +92,15 @@ defense-in-depth/
 │       ├── init.ts         # Install hooks + config
 │       ├── verify.ts       # Run guards
 │       └── doctor.ts       # Health check
+├── docs/                   # 📖 Lazy-Load Documentation Hub
+│   ├── user-guide/         # For users (config, CLI)
+│   ├── dev-guide/          # For developers (architecture, guard authoring)
+│   ├── quickstart.md       # 60-second onboarding
+│   └── vision/             # Meta architecture
 ├── templates/              # Shipped templates
-├── .agents/rules/          # Immutable consistency rules
+├── .agents/                # Governance ecosystem
 ├── .github/                # CI + issue/PR templates
-├── defense.config.yml       # User config (created by init)
+├── defense.config.yml      # User config (created by init)
 └── tests/                  # Test suite
 ```
 

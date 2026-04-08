@@ -40,7 +40,7 @@ Before writing any code, read:
 2. Add to `src/guards/index.ts` barrel export
 3. Add config type in `src/core/types.ts`
 4. Create `tests/guards/my-guard.test.ts`
-5. Update the guards table in `README.md`
+5. Update the guards table in [`docs/user-guide/configuration.md`](docs/user-guide/configuration.md)
 6. PR with title: `feat(guards): add my-guard`
 
 ### Guard Requirements
