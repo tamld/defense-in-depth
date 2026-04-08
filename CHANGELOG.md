@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v0.3 (In Progress)
+## [0.3.0] — Ticket Federation & Providers - 2026-04-08
 
 ### Added
+- `TicketStateProvider` interface and generic API boundaries for custom external state resolution.
+- Built-in `file` Provider for zero-infrastructure governance (parses native `TICKET.md` frontmatter).
 - `ticket-identity` guard (v0.3 TKID Lite) — detects cross-ticket contamination in commits (WARN severity)
 - Explicit contract surface for `ticketIdentity` guard in `DefendConfig` and `defense.config.yml` (opt-in by default)
 - `TicketRef` interface and `TicketIdentityConfig` in `src/core/types.ts` for Federation
+- Agent and User documents regarding Custom TicketStateProviders.
 - Federation v0.3: `extractTicketRef()` now derives ticket scope purely from branch name (generic, no AAOS lock-in)
 
 ### Changed

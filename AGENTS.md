@@ -55,6 +55,7 @@ These are non-negotiable. No PR, no contributor, no agent may violate:
 | Configuration schema | `docs/user-guide/configuration.md` |
 | CLI commands | `docs/user-guide/cli-reference.md` |
 | Architecture deep-dive | `docs/dev-guide/architecture.md` |
+| Agent API Boundaries | `docs/agents/guard-interface.md`, `docs/agents/provider-interface.md` |
 | Rules & standards | `.agents/rules/` directory |
 | Strategic direction | `STRATEGY.md` |
 | CI/CD | `.github/workflows/ci.yml` |

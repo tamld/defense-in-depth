@@ -64,4 +64,7 @@ guards:
     enabled: false
     tkidPattern: "TK-[0-9A-Z-]+"
     severity: "warn"
+    provider: "file"           # Pluggable state resolution
+    providerConfig:
+      ticketFile: "TICKET.md"
 ```

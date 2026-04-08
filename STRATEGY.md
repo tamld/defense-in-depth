@@ -18,16 +18,17 @@ into human/enterprise operational workflows.
 
 ## Strategic Pillars
 
-### 1. CLI-First, Zero-Infrastructure
+### 1. CLI-First, Zero-Infrastructure (Depends-On Philosophy)
 
 | Decision | Rationale |
 |:---|:---|
-| Git hooks only | No servers, databases, or cloud services required |
-| `yaml` as sole dependency | Minimal attack surface, maximum portability |
+| Git hooks only | No servers, databases, or cloud services required by default |
+| `yaml` and `json` interfaces | Minimal attack surface, maximum portability |
 | Cross-platform CI (3 OS × 3 Node) | Must work everywhere agents work |
+| Pluggable Providers | Bridging to external systems (Jira, Linear) works via adapters, never bloated core |
 
 **Implication for agents:** Do NOT introduce external dependencies. If a feature
-requires infrastructure, it must be opt-in and clearly documented.
+requires infrastructure, it must be opt-in via a `TicketStateProvider` or similar extension, keeping the core lightweight.
 
 ### 2. Guard Pipeline Architecture
 

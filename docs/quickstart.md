@@ -69,6 +69,7 @@ rm test-hollow.md
 | Commit Format | ✅ ON | Non-conventional commit messages |
 | Branch Naming | ❌ OFF | Enable in config to enforce patterns |
 | Phase Gate | ❌ OFF | Enable to require plan files before code |
+| Ticket Identity | ❌ OFF | Enable to verify commit TKIDs (auto-sources from `TICKET.md`) |
 
 ## Enable More Guards
 

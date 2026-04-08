@@ -296,7 +296,22 @@ export const fileSizeGuard: Guard = {
 };
 ```
 
-> See [`.agents/contracts/guard-interface.md`](.agents/contracts/guard-interface.md) for the full contract.
+> See [`docs/agents/guard-interface.md`](docs/agents/guard-interface.md) for the full contract.
+
+---
+
+## 7. Ticket Federation Providers
+
+To integrate context cleanly from third-party ecosystems (like Jira, Linear, or your own local `TICKET.md`), `defense-in-depth` relies on **TicketStateProviders**. Providers inject metadata asynchronously *before* guards run purely.
+
+```typescript
+export interface TicketStateProvider {
+  name: string;
+  resolve(ticketId: string): Promise<TicketRef | undefined>;
+}
+```
+
+> See [`docs/dev-guide/writing-providers.md`](docs/dev-guide/writing-providers.md) for more info on plugging your own system into the governance model.
 
 ---
 
