@@ -7,7 +7,15 @@ enforcement: advisory
 
 # RULE: CodeRabbit Integration & Review Protocol
 
-> Defines how AI Agents (and humans) interact with CodeRabbit's automated feedback.
+> Defines how AI Agents (and humans) interact with CodeRabbit's automated feedback for THIS SPECIFIC REPOSITORY.
+
+## 0. Anchors & Insight (Operation vs. Implementation Boundary)
+
+> [!IMPORTANT]
+> **Anti-Hallucination Anchor:**
+> CodeRabbit is an **internal operational tool** chosen by the owners to review Pull Requests for *this specific project* (defense-in-depth).
+> **CodeRabbit is NOT a feature, component, API, or roadmap item of the Defense-in-Depth framework itself.** 
+> When documenting, discussing, or designing features for Defense-in-Depth, agents MUST NOT treat CodeRabbit as an integrated capability of the product. The product is strictly vendor-agnostic.
 
 ## 1. Metadata Storage (The `pr_feedback.json`)
 

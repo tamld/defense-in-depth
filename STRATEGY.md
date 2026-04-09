@@ -60,11 +60,11 @@ Untagged findings are treated as `HYPO`.
 | Decision | Rationale |
 |:---|:---|
 | Guards never auto-merge PRs | Human judgment is irreplaceable for semantics |
-| CodeRabbit as first-pass reviewer | Reduces human review burden, not replaces it |
+| Automated Gateways as first-pass reviewer | Reduces human review burden, not replaces it |
 | Phase gates require plan files | Prevents "code first, think later" |
 
 **Implication for agents:** You are NOT autonomous. You propose. Humans approve.
-*For automated first-pass reviews, refer to [rule-coderabbit-integration.md](.agents/rules/rule-coderabbit-integration.md) for handling `pr_feedback.json` metadata and review cycles.*
+*For automated first-pass reviews, refer to internal operational rules like [rule-coderabbit-integration.md](.agents/rules/rule-coderabbit-integration.md) to handle feedback metadata.*
 
 ### 5. Growth Engine (Future)
 
@@ -125,7 +125,7 @@ See `docs/vision/meta-architecture.md` for the full vision.
 - `TicketIdentityGuard` enforces non-contradiction: if branch declares TKID `TK-xxx`, commit must not reference a *different* ticket. Severity: `WARN` (advisory, not blocking).
 - **Key architectural insight**: Git worktree IS the Dependency Injection mechanism. `DefendEngine(projectRoot)` receives CWD as the scope boundary. All git operations (`branch`, `staged files`, `config`) resolve relative to this root. When an AAOS worktree (`.worktrees/TK-xxx/`) is the CWD, identity and isolation come free from Git. When a standalone project is the CWD, the same code works without modification. **Zero lock-in by design.**
 - **Lesson**: `.worktrees` path was initially hardcoded in `extractTicketRef` — removed. Branch name is the canonical TKID source; directory name is a generic fallback.
-- **Review Ecosystem Enhancement**: CodeRabbit profile strictly aligned with AAOS guidelines, integrating assertive architectural analysis and Git-ignored `.agents/records/reviews/` flow.
+- **Review Ecosystem Enhancement**: End-user Gateway profiles should align with AAOS guidelines, integrating assertive architectural analysis and preserving the Git-ignored `.agents/records/reviews/` flow.
 
 Each phase builds on the previous. Agents MUST NOT implement v0.4 features during v0.3 work unless explicitly tasked.
 

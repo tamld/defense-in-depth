@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "node:test";
+import { strict as assert } from "node:assert";
 import { hitlReviewGuard } from "../../src/guards/hitl-review.js";
 import type { GuardContext, DefendConfig } from "../../src/core/types.js";
 import { Severity } from "../../src/core/types.js";
@@ -32,31 +33,31 @@ describe("hitlReviewGuard", () => {
   it("passes when branch is not provided", async () => {
     const ctx = createContext(undefined);
     const result = await hitlReviewGuard.check(ctx);
-    expect(result.passed).toBe(true);
-    expect(result.findings).toHaveLength(0);
+    assert.equal(result.passed, true);
+    assert.equal(result.findings.length, 0);
   });
 
   it("passes when on an unprotected branch", async () => {
     const ctx = createContext("feat/TK-12345");
     const result = await hitlReviewGuard.check(ctx);
-    expect(result.passed).toBe(true);
-    expect(result.findings).toHaveLength(0);
+    assert.equal(result.passed, true);
+    assert.equal(result.findings.length, 0);
   });
 
   it("blocks when on default protected branch 'main'", async () => {
     const ctx = createContext("main");
     const result = await hitlReviewGuard.check(ctx);
-    expect(result.passed).toBe(false);
-    expect(result.findings).toHaveLength(1);
-    expect(result.findings[0]?.severity).toBe(Severity.BLOCK);
-    expect(result.findings[0]?.message).toContain("Direct commits to protected branch 'main' are strictly prohibited");
+    assert.equal(result.passed, false);
+    assert.equal(result.findings.length, 1);
+    assert.equal(result.findings[0]?.severity, Severity.BLOCK);
+    assert.ok(result.findings[0]?.message.includes("Direct commits to protected branch 'main' are strictly prohibited"));
   });
 
   it("blocks when on default protected branch 'master'", async () => {
     const ctx = createContext("master");
     const result = await hitlReviewGuard.check(ctx);
-    expect(result.passed).toBe(false);
-    expect(result.findings).toHaveLength(1);
+    assert.equal(result.passed, false);
+    assert.equal(result.findings.length, 1);
   });
 
   it("blocks when on custom protected branch configured in yaml", async () => {
@@ -65,9 +66,9 @@ describe("hitlReviewGuard", () => {
       protectedBranches: ["production", "staging"],
     });
     const result = await hitlReviewGuard.check(ctx);
-    expect(result.passed).toBe(false);
-    expect(result.findings).toHaveLength(1);
-    expect(result.findings[0]?.message).toContain("production");
+    assert.equal(result.passed, false);
+    assert.equal(result.findings.length, 1);
+    assert.ok(result.findings[0]?.message.includes("production"));
   });
 
   it("passes on main if main is not in custom protectedBranches", async () => {
@@ -76,7 +77,7 @@ describe("hitlReviewGuard", () => {
       protectedBranches: ["production", "staging"],
     });
     const result = await hitlReviewGuard.check(ctx);
-    expect(result.passed).toBe(true);
-    expect(result.findings).toHaveLength(0);
+    assert.equal(result.passed, true);
+    assert.equal(result.findings.length, 0);
   });
 });

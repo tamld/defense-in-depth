@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.0] — Memory Layer & Growth Tracking - 2026-04-09
 
 ### Added
-- Review ecosystem strictness: Deep architectural analysis via CodeRabbit (assertive profile) alongside AI Agent validation pipelines.
+- Review ecosystem strictness: Deep architectural analysis via Automated Review Gateways (assertive profile) alongside AI Agent validation pipelines.
 - Local memory system for lesson recording without external infrastructure (`lessons.jsonl`).
 - Growth tracking metrics (`growth_metrics.jsonl`).
 - New `lesson` CLI subcommand for recording and searching cases (án lệ).

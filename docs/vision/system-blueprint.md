@@ -34,7 +34,7 @@ flowchart TD
     subgraph RuntimeConfig ["📜 Governance Ecosystem"]
         IDENTITY["Identity Resolver<br/>(v0.3)"]:::config
         RULES[".agents/rules/<br/>(Immutable Laws)"]:::config
-        ECOSYSTEM["Review Ecosystem<br/>(CodeRabbit / HITL)"]:::config
+        ECOSYSTEM["Review Ecosystem<br/>(Agnostic Gateway / HITL)"]:::config
     end
 
     subgraph MemoryIntelligence ["🧠 Intelligence Subsystem (Branch 3: Growth > Stasis)"]
