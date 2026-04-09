@@ -52,4 +52,12 @@ CodeRabbit is configured with `profile: assertive`. It will aggressively point o
 - Do NOT ignore "Nitpick comments". Evaluate and fix them if they align with project standards.
 - If CodeRabbit requests a change that directly contradicts a `RULE-*.md`, the agent must respond by explaining the rule to CodeRabbit (or instructing a human to reply), rather than breaking AAOS rules to satisfy CodeRabbit.
 
+## 6. Reporting & The HITL Philosophy (Human-in-the-Loop)
+
+*(Aligned with the core `README.md` philosophy: "The system never replaces human judgment.")*
+
+- **DO:** After analyzing CodeRabbit's review, you MUST report back to the user. Provide explicit evidence (e.g., `[CODE]`, `[RUNTIME]`) explaining whether the requested changes are reasonable and align with project constraints.
+- **DO NOT:** Silently accept, reject, or push code based on an AI review without providing the rationale to the user. 
+- **DO NOT:** Assume AI suggestions overrule human oversight. Always respect that human intuition, perspective, and viewpoint are the ultimate authority in this project.
+
 > Executor: Gemini-CLI
