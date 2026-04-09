@@ -21,10 +21,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "pretest": "tsc --project tsconfig.test.json",
+    "pretest": "npm run build",
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "node --test dist-test/tests/",
+    "test": "node --test",
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },

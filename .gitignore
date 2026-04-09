@@ -3,7 +3,6 @@ node_modules/
 
 # Build output
 dist/
-dist-test/
 *.js
 *.d.ts
 *.js.map

@@ -1,10 +1,9 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { hitlReviewGuard } from "../../src/guards/hitl-review.js";
-import type { GuardContext, DefendConfig } from "../../src/core/types.js";
-import { Severity } from "../../src/core/types.js";
+import { hitlReviewGuard } from "../../dist/guards/hitl-review.js";
+import { Severity } from "../../dist/core/types.js";
 
-const baseConfig: DefendConfig = {
+const baseConfig = {
   version: "0.4.0",
   guards: {
     hitlReview: {
@@ -14,7 +13,7 @@ const baseConfig: DefendConfig = {
   },
 };
 
-function createContext(branch?: string, configOverrides?: any): GuardContext {
+function createContext(branch, configOverrides) {
   return {
     stagedFiles: ["src/index.ts"],
     projectRoot: "/mock/root",
