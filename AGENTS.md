@@ -13,7 +13,7 @@
 **Purpose**: Git-based governance hooks for AI coding agents
 **Parent**: Extracted from an internal autonomous core system
 **Runtime**: TypeScript strict / Node.js ≥18 / CLI-first
-**Status**: Active Development (v0.3 — TKID Lite in progress)
+**Status**: Active Development (v0.4 — Memory Layer & Root Pollution Guard)
 
 ### What This Project IS
 - A lightweight governance middleware that runs as Git hooks

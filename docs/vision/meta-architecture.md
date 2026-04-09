@@ -142,8 +142,8 @@ Implementation timeline:
 |:---|:---:|:---:|:---:|
 | Guard, Finding, Severity | ✅ | ✅ | v0.1 |
 | EvidenceLevel | ✅ | ✅ | v0.1 |
-| TicketRef | ✅ | ❌ | v0.3 |
-| Lesson, GrowthMetric | ✅ | ❌ | v0.4 |
+| TicketRef | ✅ | ✅ | v0.3 |
+| Lesson, GrowthMetric | ✅ | ✅ | v0.4 |
 | EvaluationScore | ✅ | ❌ | v0.5 |
 | LessonOutcome, RecallMetric | ✅ | ❌ | v0.6 |
 | MetaGrowthSnapshot | ✅ | ❌ | v0.7 |

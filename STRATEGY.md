@@ -7,6 +7,8 @@
 
 ## Mission
 
+*For the complete philosophical foundation — the three cognitive branches, the DO/DON'T mandates, and the growth flywheel — see [COGNITIVE_TREE.md](.agents/philosophy/COGNITIVE_TREE.md).*
+
 **defense-in-depth** is a governance middleware layer that bridges AI coding agents
 into human/enterprise operational workflows.
 
@@ -117,7 +119,7 @@ See `docs/vision/meta-architecture.md` for the full vision.
 | **Telemetry Sync** | v0.8 | Bidirectional Internal ↔ OSS data flow | `TelemetryPayload` |
 | **Stable** | v1.0 | Public API freeze + npm publish | All types frozen |
 
-**Status Update (v0.3)**: Foundation (v0.1) and Ecosystem (v0.2) shipped. Identity (v0.3) **in progress**:
+**Status Update (v0.4)**: Foundation (v0.1), Ecosystem (v0.2), Identity (v0.3) shipped. Memory Layer & Root Pollution Guard (v0.4) **in progress**:
 
 - `TicketRef` added to `GuardContext` — engine extracts TKID from branch name, commit message, or directory name.
 - `TicketIdentityGuard` enforces non-contradiction: if branch declares TKID `TK-xxx`, commit must not reference a *different* ticket. Severity: `WARN` (advisory, not blocking).

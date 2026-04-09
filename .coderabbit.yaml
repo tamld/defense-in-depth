@@ -13,7 +13,9 @@ reviews:
   estimate_code_review_effort: true
   review_details: true
   poem: false
-  review_status: true
+  # HITL Enforcement: CodeRabbit can Request Changes (block) but CANNOT Approve.
+  # Only the human maintainer has merge authority. See rule-hitl-enforcement.md
+  review_status: false
   path_instructions:
     - path: "src/**/*.ts"
       instructions: "Focus on architectural patterns, dependency management, and system design impact."

@@ -21,9 +21,7 @@ Without HITL enforcement, all other rules are suggestions, not laws.
 flowchart TD
     ACTION["Agent wants to\nperform an action"] --> Q1{"Is action\nauto-safe?"}
     Q1 -->|"Yes"| AUTO["✅ Proceed\n(read files, run tests,\ngenerate plans)"]
-    Q1 -->|"No"| Q2{"Does ALL criteria\nfor auto-merge pass?"}
-    Q2 -->|"Yes"| CONDITIONAL["Auto-merge allowed\n(see criteria below)"]
-    Q2 -->|"No"| HUMAN["🛑 STOP\nHuman approval required"]
+    Q1 -->|"No"| HUMAN["🛑 STOP\nHuman approval required (Final Boss)"]
 ```
 
 ## What Agents CAN Do Autonomously
@@ -41,25 +39,23 @@ flowchart TD
 
 | Action | Why Blocked | Gate |
 |:---|:---|:---|
-| **Merge PR to main** | Changes shared truth | Human review or auto-merge criteria |
+| **Merge PR to main** | Changes shared truth | **Human review only** (No Auto-Merge allowed) |
 | **Delete files from main** | Destructive, irreversible | Human approval always |
 | **Change Guard interface** | Breaking change | Human maintainer review |
 | **Change DefendConfig schema** | Breaking change | Human maintainer review |
 | **Modify .agents/rules/** | Governance mutation | Human maintainer review |
 | **Add production dependencies** | Attack surface change | Human maintainer review |
 
-## Auto-Merge Criteria (All Must Pass)
+## CodeRabbit Review Boundary (Trust but Verify)
 
 ```
-✅ CI green (all 9 matrix jobs: 3 OS × 3 Node)
-✅ CodeRabbit approves (LGTM)
-✅ No breaking changes detected
-✅ Conventional commit title format
-✅ CHANGELOG updated (if user-facing change)
-✅ No .agents/rules/ modifications
+✅ CodeRabbit has NO merge authority.
+✅ CodeRabbit is used ONLY as an automated Linter / Initial Gate.
+✅ When CodeRabbit Requests Changes -> Agent MUST fix.
+✅ When CodeRabbit says LGTM -> Wait for Human Approval.
 ```
 
-If ANY criterion fails → route to human maintainer.
+If CodeRabbit approves, the PR simply proceeds to the final boss (the Human). **It does NOT auto-merge.**
 
 ## Guards Never Auto-Fix
 
@@ -73,7 +69,7 @@ If ANY criterion fails → route to human maintainer.
 
 | ❌ Violation | ✅ Correct |
 |:---|:---|
-| Agent merges PR without human review | Wait for human approval or auto-merge criteria |
+| Agent merges PR without human review | Wait for Human approval (CodeRabbit LGTM is not enough) |
 | Agent deletes "unused" file autonomously | Propose deletion in PR, human decides |
 | Agent modifies rules to "improve" them | Propose changes, human reviews |
 | Guard rewrites code it flagged | Guard blocks, suggests fix, human/agent decides |

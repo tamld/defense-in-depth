@@ -43,6 +43,8 @@
 
 ## Philosophy: Human-in-the-Loop (HITL)
 
+*For the complete philosophical foundation — the three cognitive branches, the DO/DON'T mandates, and the growth flywheel — see [COGNITIVE_TREE.md](.agents/philosophy/COGNITIVE_TREE.md).*
+
 > *"Trust but Verify: Autonomous execution demands empirical proof."*
 
 ### The Core Belief
@@ -224,6 +226,7 @@ defense-in-depth init --scaffold
 |:---|:---:|:---:|:---|
 | **Hollow Artifact** | ✅ ON | BLOCK | Files with only `TODO`, `TBD`, empty templates |
 | **SSoT Pollution** | ✅ ON | BLOCK | Config/state files modified in feature branches |
+| **Root Pollution** | ✅ ON | BLOCK | Unapproved files or folders created in the project root |
 | **Commit Format** | ✅ ON | WARN | Non-conventional commit messages |
 | **Ticket Identity** | ❌ OFF | WARN | Commit references a conflicting ticket |
 | **Branch Naming** | ❌ OFF | WARN | Branch names not matching pattern |

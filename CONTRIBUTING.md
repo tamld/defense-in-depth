@@ -23,7 +23,10 @@ npm test
 
 ## Rules (Non-Negotiable)
 
-Before writing any code, read:
+Before writing any code, read this first:
+- [`.agents/philosophy/COGNITIVE_TREE.md`](.agents/philosophy/COGNITIVE_TREE.md) — Understand our core beliefs and philosophy
+
+Then, review these foundational rules:
 - [`.agents/rules/rule-consistency.md`](.agents/rules/rule-consistency.md) — Folder structure, naming, dependencies
 - [`.agents/rules/rule-guard-lifecycle.md`](.agents/rules/rule-guard-lifecycle.md) — How to add new guards
 - [`.agents/rules/rule-contribution-workflow.md`](.agents/rules/rule-contribution-workflow.md) — PR flow
