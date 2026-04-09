@@ -1,3 +1,7 @@
+---
+executor: Gemini-CLI
+---
+
 # .agents/ — Governance Ecosystem
 
 > **This is the inner AGENTS.md for the `.agents/` directory.**

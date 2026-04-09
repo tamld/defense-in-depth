@@ -72,7 +72,7 @@ export const rootPollutionGuard: Guard = {
             severity: Severity.BLOCK,
             message: `[Ecosystem Pollution] File "${basename}" is NOT allowed at the project root. The root is strictly restricted to configs and READMEs defined in defense.config.yml.`,
             filePath,
-            fix: `git reset HEAD "${filePath}" && mv "${filePath}" <target-directory>/\n\nGuiding Map for AI Agents:\n  - 🧠 Scratch/Drafts/Memory -> .gemini/brain/, .claude/, .cursor/, or /tmp/\n  - 📜 Documentation -> docs/\n  - ⚙️ Governance/Rules -> .agents/rules/\n  - 💻 Source Code -> src/`,
+            fix: `git reset HEAD ${JSON.stringify(filePath)} && mv ${JSON.stringify(filePath)} <target-directory>/\n\nGuiding Map for AI Agents:\n  - 🧠 Scratch/Drafts/Memory -> .gemini/brain/, .claude/, .cursor/, or /tmp/\n  - 📜 Documentation -> docs/\n  - ⚙️ Governance/Rules -> .agents/rules/\n  - 💻 Source Code -> src/`,
           });
         }
       }

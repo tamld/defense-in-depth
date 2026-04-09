@@ -16,7 +16,7 @@ If you need to create a file, use this decision matrix:
 | What you are trying to do | Where it belongs | Will it be tracked by Git? |
 |---------------------------|------------------|---------------------------|
 | **1. Brainstorming / Drafts / Memory** | `.gemini/brain/`, `.claude/`, `.cursor/`, or `/tmp/` | ❌ Gitignored. Perfect for private, messy scratchpads. |
-| **2. One-off Test Scripts** | `.scratch/` or `.gemini/scratch/` | ❌ Gitignored. Safe to run without worrying about pollution. |
+| **2. One-off Test Scripts** | `<target-directory>/` or `.gemini/scratch/` | ❌ Gitignored. Safe to run without worrying about pollution. |
 | **3. Project Documentation** | `docs/dev-guide/` or `docs/user-guide/` | ✅ Tracked. Write clear markdown for human developers. |
 | **4. Architectural Blueprints** | `docs/vision/` | ✅ Tracked. Used for system design planning. |
 | **5. AI Rules & Governance** | `.agents/rules/` | ✅ Tracked. Immutable laws that all AI agents must follow. |
@@ -35,5 +35,5 @@ If you try to commit a file like `root_test_script.js` and the Guard blocks you:
 2. Run exactly what the `Fix` suggestion says:
    `git reset HEAD "root_test_script.js"`
 3. Move the file:
-   `mv "root_test_script.js" .scratch/root_test_script.js`
+   `mv "root_test_script.js" <target-directory>/root_test_script.js`
 4. Stage the other files and re-commit!

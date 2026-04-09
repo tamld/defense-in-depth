@@ -74,6 +74,16 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     process.exit(1);
   }
 
+  if (typeof payload.confidence !== 'number' || payload.confidence < 0 || payload.confidence > 1) {
+    console.error(`❌ Invalid confidence score: must be a number between 0 and 1.`);
+    process.exit(1);
+  }
+
+  if (!Object.values(EvidenceLevel).includes(payload.evidence as any)) {
+    console.error(`❌ Invalid evidence level: must be one of ${Object.values(EvidenceLevel).join(", ")}`);
+    process.exit(1);
+  }
+
   // Record it
   const created = await recordLesson(payload as Omit<Lesson, "id" | "createdAt">, projectRoot);
   console.log(`✅ Lesson recorded successfully [ID: ${created.id}]`);

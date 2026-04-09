@@ -43,18 +43,20 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
   }
 
   const value = parseFloat(valueStr);
-  if (isNaN(value)) {
+  if (isNaN(value) || !isFinite(value)) {
     console.error(`❌ Invalid numeric value for --value: "${valueStr}"`);
     process.exit(1);
   }
 
-  const payload: any = { name, value, unit };
+  const payload: Partial<GrowthMetric> = { name, value, unit };
   if (source) payload.source = source;
-  if (trend === "improving" || trend === "stable" || trend === "degrading") {
-    payload.trend = trend;
-  } else if (trend) {
-    console.warn(`⚠️ Warning: Unknown trend "${trend}". Acceptable values: improving, stable, degrading.`);
-    payload.trend = trend; 
+  if (trend) {
+    if (trend === "improving" || trend === "stable" || trend === "degrading") {
+      payload.trend = trend as "improving" | "stable" | "degrading";
+    } else {
+      console.error(`❌ Unknown trend "${trend}". Acceptable values: improving, stable, degrading.`);
+      process.exit(1);
+    }
   }
 
   const created = await recordGrowthMetric(payload as Omit<GrowthMetric, "measuredAt">, projectRoot);

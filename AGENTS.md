@@ -2,6 +2,7 @@
 
 > **SYSTEM DIRECTIVE**: This file is auto-loaded by all AI agents operating in this project.
 > It is the ROOT of all governance. Read this FIRST.
+> Executor: Gemini-CLI
 
 ---
 

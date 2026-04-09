@@ -63,6 +63,7 @@ Untagged findings are treated as `HYPO`.
 
 **Implication for agents:** You are NOT autonomous. You propose. Humans approve.
 *For automated first-pass reviews, refer to [rule-coderabbit-integration.md](.agents/rules/rule-coderabbit-integration.md) for handling `pr_feedback.json` metadata and review cycles.*
+
 ### 5. Growth Engine (Future)
 
 | Decision | Rationale |

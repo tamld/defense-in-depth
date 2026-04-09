@@ -11,7 +11,8 @@ enforcement: advisory
 
 ## 1. Metadata Storage (The `pr_feedback.json`)
 
-CodeRabbit provides feedback in JSON format which AI Agents can parse to automatically resolve requested changes.
+CodeRabbit provides feedback in JSON format which AI Agents can parse to resolve automatically requested changes.
+
 
 - **Location**: All CodeRabbit review dumps MUST be stored in `.agents/records/reviews/`.
 - **Constraint**: Never leave `pr_feedback.json` in the project root.
@@ -50,3 +51,5 @@ When an agent processes the review file, they must read specific paths:
 CodeRabbit is configured with `profile: assertive`. It will aggressively point out architectural flaws.
 - Do NOT ignore "Nitpick comments". Evaluate and fix them if they align with project standards.
 - If CodeRabbit requests a change that directly contradicts a `RULE-*.md`, the agent must respond by explaining the rule to CodeRabbit (or instructing a human to reply), rather than breaking AAOS rules to satisfy CodeRabbit.
+
+> Executor: Gemini-CLI

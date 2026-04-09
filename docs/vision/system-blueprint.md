@@ -1,5 +1,7 @@
 # System Design Blueprint: defense-in-depth
 
+> Executor: Gemini-CLI
+
 This document serves as the **Master Architectural Blueprint**, linking all subsystems from the strategic roadmap (v0.1 to v0.8) into a unified, tight-knit diagram. It bridges the gap between scattered concepts and the actual data flow executing under the hood.
 
 ---
@@ -37,14 +39,14 @@ flowchart TD
 
     subgraph MemoryIntelligence ["🧠 Intelligence Subsystem (Branch 3: Growth > Stasis)"]
         MEMORY["Memory Layer (Án Lệ)<br/>(lessons.jsonl)"]:::mem
-        DSPY["DSPy Semantic Engine<br/>(Branch 1: Evidence > Plausible)"]:::mem
-        METRICS["Meta Growth & Recall<br/>(v0.6 - v0.7)"]:::mem
+        DSPY["DSPy Semantic Engine<br/>(Branch 1: Evidence > Plausible) [ROADMAP]"]:::mem
+        METRICS["Meta Growth & Recall<br/>(v0.6 - v0.7) [ROADMAP]"]:::mem
         
         MEMORY <--> DSPY
         MEMORY --> METRICS
     end
 
-    subgraph Telemetry ["🌐 OSS Synchronization (v0.8)"]
+    subgraph Telemetry ["🌐 OSS Synchronization (v0.8) [ROADMAP]"]
         SYNC["Telemetry Sync<br/>(Bi-directional Bridge)"]:::sync
     end
 

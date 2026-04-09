@@ -1,3 +1,4 @@
+// Executor: Gemini-CLI
 import { strict as assert } from "node:assert";
 import { rootPollutionGuard } from "../dist/guards/root-pollution.js";
 import { Severity } from "../dist/core/types.js";

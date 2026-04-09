@@ -1,5 +1,7 @@
 # Contributing to defense-in-depth
 
+> Executor: Gemini-CLI
+
 Thank you for your interest in contributing! This project follows strict standards to maintain quality.
 
 ## Quick Start

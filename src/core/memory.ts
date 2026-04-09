@@ -45,8 +45,19 @@ export async function recordLesson(
   const lesson: Lesson = {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
-    ...fragment,
+    title: fragment.title,
+    scenario: fragment.scenario,
+    wrongApproach: fragment.wrongApproach,
+    correctApproach: fragment.correctApproach,
+    insight: fragment.insight,
+    category: fragment.category,
+    evidence: fragment.evidence,
+    confidence: fragment.confidence,
   };
+  
+  if (fragment.searchTerms) lesson.searchTerms = [...fragment.searchTerms];
+  if (fragment.tags) lesson.tags = [...fragment.tags];
+  if (fragment.relatedLessons) lesson.relatedLessons = [...fragment.relatedLessons];
 
   const targetPath = path.join(projectRoot, LESSONS_FILE);
   await appendJsonl(targetPath, lesson);
@@ -81,8 +92,8 @@ export async function searchLessons(
       return false;
     });
 
-  } catch (err: any) {
-    if (err.code === "ENOENT") {
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "code" in err && err.code === "ENOENT") {
       return []; // No lessons file yet
     }
     throw err;
@@ -100,8 +111,13 @@ export async function recordGrowthMetric(
 ): Promise<GrowthMetric> {
   const fullMetric: GrowthMetric = {
     measuredAt: new Date().toISOString(),
-    ...metric,
+    name: metric.name,
+    value: metric.value,
+    unit: metric.unit,
   };
+  
+  if (metric.source) fullMetric.source = metric.source;
+  if (metric.trend) fullMetric.trend = metric.trend;
 
   const targetPath = path.join(projectRoot, GROWTH_METRICS_FILE);
   await appendJsonl(targetPath, fullMetric);

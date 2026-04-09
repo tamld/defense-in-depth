@@ -1,3 +1,5 @@
+// Executor: Gemini-CLI
+// [PROVEN] Ensure memory is isolated
 import test from "node:test";
 import assert from "node:assert";
 import * as fs from "fs/promises";
@@ -7,8 +9,9 @@ import { recordLesson, searchLessons, recordGrowthMetric } from "../dist/core/me
 import { EvidenceLevel } from "../dist/core/types.js";
 
 test("Memory Layer: Lesson and Growth Metrics tracking", async (t) => {
-  // Create a temporary directory for tests to avoid writing to actual project root
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "defense-memory-test-"));
+  let tempDir;
+  try {
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "defense-memory-test-"));
 
   await t.test("should record a new lesson to lessons.jsonl", async () => {
     const payload = {
@@ -77,6 +80,10 @@ test("Memory Layer: Lesson and Growth Metrics tracking", async (t) => {
     assert.strictEqual(parsed.value, 0.05);
   });
 
-  // Cleanup
-  await fs.rm(tempDir, { recursive: true, force: true });
+  } finally {
+    // [PROVEN] Cleanup isolated directory cleanly
+    if (tempDir) {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
+  }
 });
