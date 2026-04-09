@@ -55,7 +55,6 @@ const DEFAULT_CONFIG: DefendConfig = {
         "package-lock.json",
         "tsconfig.json",
         ".gitignore",
-        ".coderabbit.yaml",
         ".cursorrules",
       ],
       allowedRootPatterns: [],
