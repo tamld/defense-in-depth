@@ -35,7 +35,7 @@ flowchart TD
 ├── AGENTS.md                  ← YOU ARE HERE
 ├── philosophy/                # System mindset
 │   └── COGNITIVE_TREE.md      (3 branches + HITL trunk)
-├── rules/                     # Immutable project standards (18 total)
+├── rules/                     # Immutable project standards (19 total)
 │   ├── rule-consistency.md           (project standards)
 │   ├── rule-guard-lifecycle.md       (guard maturity)
 │   ├── rule-contribution-workflow.md (how to contribute)

@@ -89,6 +89,14 @@ export interface SsotPollutionConfig {
   protectedPaths?: string[];
 }
 
+export interface RootPollutionConfig {
+  enabled: boolean;
+  /** Exact filenames allowed in the root directory */
+  allowedRootFiles?: string[];
+  /** Glob patterns for allowed root files (e.g. "*.md") */
+  allowedRootPatterns?: string[];
+}
+
 export interface CommitFormatConfig {
   enabled: boolean;
   /** Regex pattern for valid commit messages */
@@ -130,6 +138,7 @@ export interface DefendConfig {
   guards: {
     hollowArtifact?: HollowArtifactConfig;
     ssotPollution?: SsotPollutionConfig;
+    rootPollution?: RootPollutionConfig;
     commitFormat?: CommitFormatConfig;
     branchNaming?: BranchNamingConfig;
     phaseGate?: PhaseGateConfig;

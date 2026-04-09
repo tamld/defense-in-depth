@@ -44,3 +44,6 @@ defense.config.yml
 .scratch/
 
 .npmrc
+
+# Agent records
+.agents/records/reviews/

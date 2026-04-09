@@ -166,6 +166,11 @@ npx defense-in-depth doctor
 
 # 3. Quét thủ công (bất kỳ lúc nào)
 npx defense-in-depth verify
+
+# 4. Quản lý Memory Layer (v0.4)
+npx defense-in-depth lesson record --data '{"title": "Bài học 1", ...}'
+npx defense-in-depth lesson search "keyword"
+npx defense-in-depth growth record --name "metric" --value 1 --unit "count"
 ```
 
 ---
@@ -233,9 +238,9 @@ export interface TicketStateProvider {
 | Phiên bản | Trọng tâm | Trạng thái |
 |:---|:---|:---:|
 | **v0.1** | Guard pipeline + CLI + CI/CD + cấu hình sẵn cho Agent | ✅ Hoàn thành |
-| **v0.2** | `.agents/` scaffold + 18 rules + 5 skills | ✅ Hoàn thành |
-| **v0.3** | TKID (Ticket-aware Guards) — cần Database làm SSoT | 🔄 Đang phát triển |
-| **v0.4** | Memory Layer — ghi nhận bài học (`lessons.jsonl`) | 📋 Lên kế hoạch |
+| **v0.2** | `.agents/` scaffold + 19 rules + 5 skills | ✅ Hoàn thành |
+| **v0.3** | TKID (Ticket-aware Guards) — cần Database làm SSoT | ✅ Hoàn thành |
+| **v0.4** | Memory Layer — ghi nhận bài học (`lessons.jsonl`) | ✅ Hoàn thành |
 | **v0.5** | DSPy — đánh giá chất lượng ngữ nghĩa | 📋 Lên kế hoạch |
 | **v0.6–v0.8** | Meta Growth + Federation — kết nối hệ thống AAOS | 📋 Đã thiết kế |
 | **v1.0** | API ổn định + publish lên npm | 📋 Lên kế hoạch |

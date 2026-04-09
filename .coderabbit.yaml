@@ -1,12 +1,22 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: en
+tone_instructions: "Provide architectural insights on system design, scalability, and long-term maintainability."
 reviews:
-  profile: chill
+  profile: assertive
   request_changes_workflow: true
   high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  sequence_diagrams: true
+  related_issues: true
+  related_prs: true
+  assess_linked_issues: true
+  estimate_code_review_effort: true
+  review_details: true
   poem: false
   review_status: true
   path_instructions:
+    - path: "src/**/*.ts"
+      instructions: "Focus on architectural patterns, dependency management, and system design impact."
     - path: "src/guards/**"
       instructions: "Guards MUST be 100% pure functions. They must NOT perform any I/O (no fs, no fetch). All data must come from HookContext. Focus on false positive/negative rates."
     - path: "src/federation/**"

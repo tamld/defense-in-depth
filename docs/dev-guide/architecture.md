@@ -2,6 +2,8 @@
 
 ## 🏗️ Architecture
 
+> **Looking for the big picture?** See the [Unified System Blueprint](../vision/system-blueprint.md) for how Guards connect with Memory, Identity, and AI models.
+
 ```mermaid
 flowchart TD
     classDef agent fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81,font-weight:bold;

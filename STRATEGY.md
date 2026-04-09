@@ -62,7 +62,7 @@ Untagged findings are treated as `HYPO`.
 | Phase gates require plan files | Prevents "code first, think later" |
 
 **Implication for agents:** You are NOT autonomous. You propose. Humans approve.
-
+*For automated first-pass reviews, refer to [rule-coderabbit-integration.md](.agents/rules/rule-coderabbit-integration.md) for handling `pr_feedback.json` metadata and review cycles.*
 ### 5. Growth Engine (Future)
 
 | Decision | Rationale |
@@ -107,7 +107,7 @@ See `docs/vision/meta-architecture.md` for the full vision.
 | Phase | Version | Focus | Key Types |
 |:---|:---:|:---|:---|
 | **Foundation** | v0.1 | Core guards + CLI + OSS + prebuilt configs | `Guard`, `Severity`, `Finding` |
-| **Ecosystem** | v0.2 | `.agents/` scaffold + 18 rules + 5 skills | `GuardContext`, config schema |
+| **Ecosystem** | v0.2 | `.agents/` scaffold + 19 rules + 5 skills | `GuardContext`, config schema |
 | **Identity** | v0.3 | Ticket-aware guards (TKID Lite) | `TicketRef` |
 | **Memory** | v0.4 | Lesson recording + growth metrics | `Lesson`, `GrowthMetric` |
 | **Intelligence** | v0.5 | DSPy adapter + semantic evaluation | `EvaluationScore` |
@@ -122,6 +122,7 @@ See `docs/vision/meta-architecture.md` for the full vision.
 - `TicketIdentityGuard` enforces non-contradiction: if branch declares TKID `TK-xxx`, commit must not reference a *different* ticket. Severity: `WARN` (advisory, not blocking).
 - **Key architectural insight**: Git worktree IS the Dependency Injection mechanism. `DefendEngine(projectRoot)` receives CWD as the scope boundary. All git operations (`branch`, `staged files`, `config`) resolve relative to this root. When an AAOS worktree (`.worktrees/TK-xxx/`) is the CWD, identity and isolation come free from Git. When a standalone project is the CWD, the same code works without modification. **Zero lock-in by design.**
 - **Lesson**: `.worktrees` path was initially hardcoded in `extractTicketRef` — removed. Branch name is the canonical TKID source; directory name is a generic fallback.
+- **Review Ecosystem Enhancement**: CodeRabbit profile strictly aligned with AAOS guidelines, integrating assertive architectural analysis and Git-ignored `.agents/records/reviews/` flow.
 
 Each phase builds on the previous. Agents MUST NOT implement v0.4 features during v0.3 work unless explicitly tasked.
 

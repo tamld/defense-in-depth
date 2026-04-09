@@ -4,6 +4,7 @@
 
 export { hollowArtifactGuard } from "./hollow-artifact.js";
 export { ssotPollutionGuard } from "./ssot-pollution.js";
+export { rootPollutionGuard } from "./root-pollution.js";
 export { commitFormatGuard } from "./commit-format.js";
 export { branchNamingGuard } from "./branch-naming.js";
 export { phaseGateGuard } from "./phase-gate.js";
@@ -11,6 +12,7 @@ export { ticketIdentityGuard } from "./ticket-identity.js";
 
 import { hollowArtifactGuard } from "./hollow-artifact.js";
 import { ssotPollutionGuard } from "./ssot-pollution.js";
+import { rootPollutionGuard } from "./root-pollution.js";
 import { commitFormatGuard } from "./commit-format.js";
 import { branchNamingGuard } from "./branch-naming.js";
 import { phaseGateGuard } from "./phase-gate.js";
@@ -21,6 +23,7 @@ import type { Guard } from "../core/types.js";
 export const allBuiltinGuards: Guard[] = [
   hollowArtifactGuard,
   ssotPollutionGuard,
+  rootPollutionGuard,
   commitFormatGuard,
   branchNamingGuard,
   phaseGateGuard,

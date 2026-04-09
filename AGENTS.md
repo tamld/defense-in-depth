@@ -55,7 +55,7 @@ These are non-negotiable. No PR, no contributor, no agent may violate:
 | Configuration schema | `docs/user-guide/configuration.md` |
 | CLI commands | `docs/user-guide/cli-reference.md` |
 | Architecture deep-dive | `docs/dev-guide/architecture.md` |
-| Agent API Boundaries | `docs/agents/guard-interface.md`, `docs/agents/provider-interface.md` |
+| Agent Workspace Rules | `docs/dev-guide/agent-workspace-guidelines.md` |
 | Rules & standards | `.agents/rules/` directory |
 | Strategic direction | `STRATEGY.md` |
 | CI/CD | `.github/workflows/ci.yml` |
@@ -98,6 +98,8 @@ defense-in-depth/
 │   ├── dev-guide/          # For developers (architecture, guard authoring)
 │   ├── quickstart.md       # 60-second onboarding
 │   └── vision/             # Meta architecture
+│       ├── meta-architecture.md  # Vision documents
+│       └── system-blueprint.md   # Unified connection mapping
 ├── templates/              # Shipped templates
 ├── .agents/                # Governance ecosystem
 ├── .github/                # CI + issue/PR templates

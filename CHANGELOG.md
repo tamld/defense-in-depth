@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] — Memory Layer & Growth Tracking - 2026-04-09
+
+### Added
+- Review ecosystem strictness: Deep architectural analysis via CodeRabbit (assertive profile) alongside AI Agent validation pipelines.
+- Local memory system for lesson recording without external infrastructure (`lessons.jsonl`).
+- Growth tracking metrics (`growth_metrics.jsonl`).
+- New `lesson` CLI subcommand for recording and searching cases (án lệ).
+- New `growth` CLI subcommand for recording metrics.
+- Internal `fs` and `crypto` modules utilized for standard zero-dep persistence, matching `src/core/types.ts` specifications for `Lesson` and `GrowthMetric`.
+
+---
+
 ## [0.3.0] — Ticket Federation & Providers - 2026-04-08
 
 ### Added
