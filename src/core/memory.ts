@@ -47,6 +47,8 @@ export interface LessonSearchResult {
 
 /**
  * Ensures the target file exists, creating it if necessary.
+ * 
+ * @param filepath - The absolute path of the target file to verify or create
  */
 async function ensureFileExists(filepath: string): Promise<void> {
   try {
@@ -59,6 +61,9 @@ async function ensureFileExists(filepath: string): Promise<void> {
 
 /**
  * Appends a JSON string followed by a newline to a file.
+ * 
+ * @param filepath - The absolute path of the target file
+ * @param data - The JSON object to append
  */
 async function appendJsonl(filepath: string, data: any): Promise<void> {
   await ensureFileExists(filepath);
@@ -68,6 +73,9 @@ async function appendJsonl(filepath: string, data: any): Promise<void> {
 
 /**
  * Reads all lessons from the JSONL file.
+ * 
+ * @param projectRoot - Directory where the lessons.jsonl file resides
+ * @returns Array of Lesson objects read from the file
  */
 async function readAllLessons(projectRoot: string): Promise<Lesson[]> {
   const targetPath = path.join(projectRoot, LESSONS_FILE);

@@ -26,6 +26,12 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
   const relPath = path.relative(projectRoot, path.resolve(projectRoot, targetFile));
   const fullPath = path.resolve(projectRoot, targetFile);
 
+  // Prevent path traversal
+  if (relPath.startsWith(`..${path.sep}`) || relPath === "..") {
+    console.error(`❌ Security Error: Target file resolves outside project root`);
+    process.exit(1);
+  }
+
   // Verify file exists
   try {
     await fs.access(fullPath);
@@ -38,6 +44,16 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
   const config = loadConfig(projectRoot);
   if (config.guards.hollowArtifact) {
     config.guards.hollowArtifact.useDspy = true;
+    
+    // Ensure the target file's extension is in the allowed extensions list
+    const ext = path.extname(relPath).toLowerCase();
+    if (ext) {
+      const exts = config.guards.hollowArtifact.extensions ?? [".md", ".json", ".yml", ".yaml"];
+      if (!exts.includes(ext)) {
+        exts.push(ext);
+      }
+      config.guards.hollowArtifact.extensions = exts;
+    }
   }
 
   const ctx: GuardContext = {

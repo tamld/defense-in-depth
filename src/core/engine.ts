@@ -22,6 +22,9 @@ import { Severity } from "./types.js";
 import { loadConfig } from "./config-loader.js";
 import { createProvider } from "../federation/index.js";
 import type { TicketStateProvider } from "../federation/types.js";
+import { callDspy } from "./dspy-client.js";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 export class DefendEngine {
   private guards: Guard[] = [];
@@ -96,6 +99,9 @@ export class DefendEngine {
     // Phase 2: Enrich with provider (MAY do I/O — file, DB, API)
     const { ticket, provider } = await this.enrichTicketRef(basicRef);
 
+    // Phase 2.5: Precompute semantic evaluations (Orchestration I/O)
+    const semanticEvals = await this.enrichSemanticEvals(stagedFiles);
+
     const ctx: GuardContext = {
       stagedFiles,
       projectRoot: this.projectRoot,
@@ -103,6 +109,7 @@ export class DefendEngine {
       branch: options?.branch,
       config: this.config,
       ticket,
+      semanticEvals,
     };
 
     const results: GuardResult[] = [];
@@ -202,6 +209,51 @@ export class DefendEngine {
       );
       return { ticket: basicRef, provider };
     }
+  }
+
+  /**
+   * Precompute semantic evaluations using DSPy for safe, pure guard context.
+   */
+  private async enrichSemanticEvals(
+    stagedFiles: string[],
+  ): Promise<GuardContext["semanticEvals"]> {
+    const hollowCfg = this.config.guards.hollowArtifact;
+    if (!hollowCfg?.useDspy) return undefined;
+
+    const dspyEndpoint = hollowCfg.dspyEndpoint ?? "http://localhost:8080/evaluate";
+    const dspyTimeout = hollowCfg.dspyTimeoutMs ?? 5000;
+    const semanticExts = new Set([".md", ".json", ".js", ".ts", ".html", ".yml", ".yaml", ".txt"]);
+    
+    // Extensions explicitly configured or default
+    const extensions = hollowCfg.extensions ?? [".md", ".json", ".yml", ".yaml"];
+
+    const dspyEvals: Record<string, { score: number; feedback?: string } | null> = {};
+
+    for (const relPath of stagedFiles) {
+      if (!extensions.some((ext) => relPath.endsWith(ext))) continue;
+
+      const ext = path.extname(relPath).toLowerCase();
+      if (!semanticExts.has(ext)) continue;
+
+      const absPath = path.join(this.projectRoot, relPath);
+      if (!fs.existsSync(absPath)) continue;
+
+      let content: string;
+      try {
+        content = fs.readFileSync(absPath, "utf-8");
+      } catch {
+        continue;
+      }
+
+      const result = await callDspy(
+        { type: "artifact", id: relPath, content },
+        dspyEndpoint,
+        dspyTimeout,
+      );
+      dspyEvals[relPath] = result ? { score: result.score, feedback: result.feedback } : null;
+    }
+
+    return { dspy: dspyEvals };
   }
 
   /** Look up a guard's config section by its id */

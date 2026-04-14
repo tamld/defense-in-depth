@@ -92,18 +92,18 @@ The `hollowArtifact` guard can optionally use [DSPy](https://dspy.ai)'s LLM-as-J
 
 ### How It Works
 
-1. **Deterministic checks run first** (patterns, content length) — these are always free and instant.
-2. **If `useDspy: true`**, files that pass deterministic checks are sent to a DSPy HTTP endpoint for semantic scoring.
-3. **Scores below 0.5** produce a `WARN` (never `BLOCK`) — zero-infrastructure default is preserved.
-4. **If the DSPy service is down**, the guard degrades gracefully with a warning log and continues.
+1. **Deterministic checks run first** (patterns, content length) — these are always free and instant. [CODE]
+2. **If `useDspy: true`**, files that pass deterministic checks are sent to a DSPy HTTP endpoint for semantic scoring. [CODE]
+3. **Scores below 0.5** produce a `WARN` (never `BLOCK`) — zero-infrastructure default is preserved. [CODE]
+4. **If the DSPy service is down**, the guard degrades gracefully with a warning log and continues. [RUNTIME]
 
 ### Configuration Fields
 
 | Field | Type | Default | Description |
 |:---|:---|:---|:---|
-| `useDspy` | boolean | `false` | Enable DSPy semantic evaluation |
-| `dspyEndpoint` | string | `http://localhost:8080/evaluate` | URL of DSPy evaluator service |
-| `dspyTimeoutMs` | number | `5000` | Request timeout in milliseconds |
+| `useDspy` | boolean | `false` [CODE] | Enable DSPy semantic evaluation |
+| `dspyEndpoint` | string | `http://localhost:8080/evaluate` [CODE] | URL of DSPy evaluator service |
+| `dspyTimeoutMs` | number | `5000` [CODE] | Request timeout in milliseconds |
 
 ### Setting Up the DSPy Service
 
@@ -126,11 +126,13 @@ DSPY_PROVIDER=gemini DSPY_API_KEY=your_key python evaluator.py
 
 | Provider | Cost | Best For |
 |:---|:---|:---|
-| Ollama (local) | Free | Development, CI |
-| Google Gemini | [Free tier / pay-per-token](https://ai.google.dev/gemini-api/docs/pricing) | Best free cloud option |
-| OpenAI | [Pay-per-token](https://openai.com/api/pricing/) | Production |
-| Anthropic | [Pay-per-token](https://docs.anthropic.com/en/docs/about-claude/pricing) | Premium quality |
+| Ollama (local) | Free | Development, CI [INFER] |
+| Google Gemini | [Free tier / pay-per-token](https://ai.google.dev/gemini-api/docs/pricing) | Best free cloud option [HYPO] |
+| OpenAI | [Pay-per-token](https://openai.com/api/pricing/) | Production [INFER] |
+| Anthropic | [Pay-per-token](https://docs.anthropic.com/en/docs/about-claude/pricing) | Premium quality [HYPO] |
 
 > **Note:** Pricing changes frequently. Always verify current rates on the provider's official pricing page.
 
 See the [evaluator README](../../examples/dspy-evaluator/README.md) for full provider configuration.
+
+Executor: Gemini-CLI

@@ -23,7 +23,7 @@ import logging
 from contextlib import asynccontextmanager
 
 import dspy
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 # ---------------------------------------------------------------------------
@@ -33,7 +33,7 @@ from pydantic import BaseModel
 PROVIDER = os.getenv("DSPY_PROVIDER", "ollama")         # ollama | openai | gemini | anthropic
 MODEL    = os.getenv("DSPY_MODEL", "")                   # auto-selected per provider if empty
 API_KEY  = os.getenv("DSPY_API_KEY", "")
-API_BASE = os.getenv("DSPY_API_BASE", "http://localhost:11434")  # Ollama default
+API_BASE = os.getenv("DSPY_API_BASE", "")                # empty uses provider default
 PORT     = int(os.getenv("DSPY_PORT", "8080"))
 
 # Provider defaults — sensible model per lane
@@ -83,7 +83,7 @@ def _init_dspy() -> None:
     """Initialize DSPy with the configured provider."""
     defaults = PROVIDER_DEFAULTS.get(PROVIDER, PROVIDER_DEFAULTS["ollama"])
     model = MODEL or defaults["model"]
-    api_base = API_BASE if PROVIDER == "ollama" else (defaults.get("api_base") or None)
+    api_base = API_BASE or defaults.get("api_base", "")
 
     kwargs: dict = {"model": model}
     if api_base:
@@ -132,12 +132,8 @@ async def evaluate(req: EvalRequest) -> EvalResponse:
             feedback=str(result.feedback) if result.feedback else None,
         )
     except Exception as e:
-        log.error("Evaluation failed for %s: %s", req.artifactPath, e)
-        # Graceful degradation — return neutral score so DiD doesn't block
-        return EvalResponse(
-            score=0.75,
-            feedback=f"Evaluation error (defaulting to neutral): {e}",
-        )
+        log.exception("Evaluation failed for %s", req.artifactPath)
+        raise HTTPException(status_code=500, detail=f"Evaluation failed: {str(e)}")
 
 
 @app.get("/health")

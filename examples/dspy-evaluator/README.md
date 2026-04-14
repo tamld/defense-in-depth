@@ -138,3 +138,5 @@ npx defense-in-depth eval <file>  # Standalone evaluation
 | Interactive CLI | gemini | gemini-2.5-flash | 5000ms |
 | PR quality gate | openai | gpt-4o-mini | 8000ms |
 | Deep code review | anthropic | claude-sonnet-4.5 | 15000ms |
+
+Executor: Gemini-CLI

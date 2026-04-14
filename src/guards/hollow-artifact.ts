@@ -16,8 +16,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity } from "../core/types.js";
-import { callDspy } from "../core/dspy-client.js";
+import { Severity, EvidenceLevel } from "../core/types.js";
 
 // DSPy contract schema moved to src/core/dspy-client.ts
 // Re-export for backward compatibility
@@ -57,8 +56,7 @@ function stripBoilerplate(content: string): string {
     .trim();
 }
 
-// v0.5: callDspyEvaluator moved to src/core/dspy-client.ts as callDspy()
-// Kept as thin adapter for backward compatibility with guard API
+// v0.5: Network call moved to src/core/engine.ts to keep guards pure.
 
 export const hollowArtifactGuard: Guard = {
   id: "hollowArtifact",
@@ -81,8 +79,6 @@ export const hollowArtifactGuard: Guard = {
 
     // v0.5: DSPy configuration (opt-in, disabled by default)
     const useDspy = config?.useDspy === true;
-    const dspyEndpoint = config?.dspyEndpoint ?? "http://localhost:8080/evaluate";
-    const dspyTimeout = config?.dspyTimeoutMs ?? DEFAULT_DSPY_TIMEOUT_MS;
 
     // Filter staged files to only check relevant extensions
     const filesToCheck = ctx.stagedFiles.filter((f) =>
@@ -143,17 +139,14 @@ export const hollowArtifactGuard: Guard = {
 
       // Only runs when useDspy is true AND file passed deterministic checks AND file is a safe text type
       if (useDspy && isSemanticText && !findings.some((f) => f.filePath === relPath && f.severity === Severity.BLOCK)) {
-        const evalResult = await callDspy(
-          { type: "artifact", id: relPath, content },
-          dspyEndpoint,
-          dspyTimeout,
-        );
-        if (evalResult && evalResult.score < 0.5) {
+        const dspyEval = ctx.semanticEvals?.dspy?.[relPath];
+        if (dspyEval && dspyEval.score < 0.5) {
           findings.push({
             guardId: "hollowArtifact",
             severity: Severity.WARN,
-            message: `DSPy semantic score ${evalResult.score.toFixed(2)}/${evalResult.maxScore} for ${relPath}. ${evalResult.feedback ?? ""}`,
+            message: `DSPy semantic score ${dspyEval.score.toFixed(2)}/1.0 for ${relPath}. ${dspyEval.feedback ?? ""}`,
             filePath: relPath,
+            evidence: EvidenceLevel.RUNTIME,
           });
         }
       }

@@ -61,6 +61,10 @@ export interface GuardContext {
   config: DefendConfig;
   /** Extracted Ticket Identifier Context (v0.3) */
   ticket?: TicketRef;
+  /** v0.5: Precomputed semantic evaluations for pure guards */
+  semanticEvals?: {
+    dspy?: Record<string, { score: number; feedback?: string } | null>;
+  };
 }
 
 /** The Guard interface — implement this to create a new guard */

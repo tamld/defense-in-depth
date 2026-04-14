@@ -49,6 +49,9 @@ export function computeF1(
 
 /**
  * Interpret an F1 score as a human-readable quality grade.
+ *
+ * @param f1 - The computed F1 score (0 to 1)
+ * @returns A string grade (e.g. "EXCELLENT", "POOR")
  */
 export function gradeF1(f1: number): string {
   if (f1 >= 0.9) return "EXCELLENT";
@@ -60,6 +63,9 @@ export function gradeF1(f1: number): string {
 
 /**
  * Format a GuardF1Metric as a human-readable summary line.
+ *
+ * @param metric - The computed F1 metric object
+ * @returns A formatted string summary
  */
 export function formatF1Summary(metric: GuardF1Metric): string {
   const grade = gradeF1(metric.f1);
