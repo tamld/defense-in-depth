@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0] — DSPy Semantic Evaluation (Opt-in) - 2026-04-15
+
+### Added
+- DSPy semantic evaluation integrated into `hollow-artifact` guard (opt-in via `useDspy: true`).
+- New `eval` CLI subcommand for standalone artifact quality analysis with DSPy.
+- `HollowArtifactConfig` extended with `useDspy`, `dspyEndpoint`, `dspyTimeoutMs` fields.
+- Graceful degradation: DSPy failures produce warnings, never crash the guard pipeline.
+
+### Design Decisions
+- **Zero-infrastructure preserved**: DSPy is disabled by default. All existing deterministic checks unchanged.
+- **Enhancement, not replacement**: DSPy augments the existing `hollowArtifact` guard rather than creating a separate evaluation subsystem. Honors the `defense.config.yml` design intent.
+
+---
+
 ## [0.4.0] — Memory Layer & Growth Tracking - 2026-04-09
 
 ### Added

@@ -27,6 +27,9 @@ const DEFAULT_CONFIG: DefendConfig = {
         "PLACEHOLDER",
       ],
       minContentLength: 50,
+      useDspy: false,
+      dspyEndpoint: "http://localhost:8080/evaluate",
+      dspyTimeoutMs: 5000,
     },
     ssotPollution: {
       enabled: true,

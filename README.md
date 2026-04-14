@@ -443,7 +443,7 @@ These tools govern AI **while it reasons**. defense-in-depth governs AI **when i
 | **v0.2** | `.agents/` scaffold + 19 rules + 5 skills + lazy loading | `GuardContext`, config schema | ✅ Done |
 | **v0.3** | TKID Lite (file-based tickets) + trust-but-verify | `TicketRef` | ✅ Done |
 | **v0.4** | Memory Layer (`lessons.jsonl`) + growth metrics | `Lesson`, `GrowthMetric` | ✅ Done |
-| **v0.5** | DSPy adapter + semantic quality evaluation | `EvaluationScore` | 📋 Planned |
+| **v0.5** | DSPy adapter + semantic quality evaluation | `EvaluationScore` | ✅ Done |
 | **v0.6** | Meta Memory: recall quality measurement | `LessonOutcome`, `RecallMetric` | 📋 Designed |
 | **v0.7** | Meta Growth: growth acceleration tracking | `MetaGrowthSnapshot` | 📋 Designed |
 | **v0.8** | Federation: bidirectional AAOS ↔ defense-in-depth | `FederationPayload` | 📋 Designed |

@@ -8,13 +8,14 @@
  *   - Files with TODO, TBD, FILL IN HERE, <Empty>, [Insert Here], PLACEHOLDER
  *   - Files with only markdown headers and no substantive body
  *   - Files below minimum content length threshold
+ *   - v0.5: Optionally, semantic quality below threshold (via DSPy adapter, opt-in)
  *
  * Pattern source: dspy-reflection-service.ts HOLLOW_PATTERNS + rule-reflection-taxonomy-guard.ts
  */
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
+import type { Guard, GuardContext, GuardResult, Finding, EvaluationScore } from "../core/types.js";
 import { Severity } from "../core/types.js";
 
 /** Default patterns that indicate hollow content */
@@ -33,6 +34,9 @@ const DEFAULT_EXTENSIONS = [".md", ".json", ".yml", ".yaml"];
 /** Minimum meaningful content length (after stripping headers/whitespace) */
 const DEFAULT_MIN_CONTENT_LENGTH = 50;
 
+/** Default DSPy timeout */
+const DEFAULT_DSPY_TIMEOUT_MS = 5000;
+
 /**
  * Strip markdown headers, frontmatter, and whitespace to get "meaningful" content.
  */
@@ -43,6 +47,56 @@ function stripBoilerplate(content: string): string {
     .replace(/^\s*[-*]\s*$/gm, "")         // Empty list items
     .replace(/^\s*$/gm, "")               // Blank lines
     .trim();
+}
+
+/**
+ * v0.5: Call DSPy HTTP endpoint for semantic quality evaluation.
+ * Returns an EvaluationScore or null if the call fails (graceful degradation).
+ *
+ * This function is ONLY called when `useDspy: true` in config.
+ * It never crashes the guard pipeline — errors are caught and reported as warnings.
+ */
+async function callDspyEvaluator(
+  artifactPath: string,
+  content: string,
+  endpoint: string,
+  timeoutMs: number,
+): Promise<EvaluationScore | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ artifactPath, content }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      console.warn(`⚠ DSPy service returned ${response.status} for ${artifactPath}`);
+      return null;
+    }
+
+    const data = await response.json() as Record<string, unknown>;
+
+    return {
+      artifactPath,
+      score: typeof data.score === "number" ? data.score : 0,
+      maxScore: 1.0,
+      evaluator: "dspy-http",
+      feedback: typeof data.feedback === "string" ? data.feedback : undefined,
+      dimensions: typeof data.dimensions === "object" && data.dimensions !== null
+        ? data.dimensions as Record<string, number>
+        : undefined,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn(`⚠ DSPy evaluation failed for ${artifactPath}: ${message}`);
+    return null;
+  }
 }
 
 export const hollowArtifactGuard: Guard = {
@@ -64,6 +118,11 @@ export const hollowArtifactGuard: Guard = {
       ? config.patterns.map((p) => new RegExp(p, "i"))
       : DEFAULT_HOLLOW_PATTERNS;
 
+    // v0.5: DSPy configuration (opt-in, disabled by default)
+    const useDspy = config?.useDspy === true;
+    const dspyEndpoint = config?.dspyEndpoint ?? "http://localhost:8080/evaluate";
+    const dspyTimeout = config?.dspyTimeoutMs ?? DEFAULT_DSPY_TIMEOUT_MS;
+
     // Filter staged files to only check relevant extensions
     const filesToCheck = ctx.stagedFiles.filter((f) =>
       extensions.some((ext) => f.endsWith(ext)),
@@ -81,7 +140,7 @@ export const hollowArtifactGuard: Guard = {
         continue; // Can't read → skip
       }
 
-      // Check 1: Hollow patterns
+      // Check 1: Hollow patterns (deterministic, zero-infrastructure)
       for (const pattern of patterns) {
         if (pattern.test(content)) {
           findings.push({
@@ -116,6 +175,20 @@ export const hollowArtifactGuard: Guard = {
           fix: `Add meaningful content beneath the headers in ${relPath}.`,
         });
       }
+
+      // Check 4 (v0.5): DSPy semantic evaluation — opt-in only
+      // Only runs when useDspy is true AND the file passed the deterministic checks above
+      if (useDspy && !findings.some((f) => f.filePath === relPath && f.severity === Severity.BLOCK)) {
+        const evalResult = await callDspyEvaluator(relPath, content, dspyEndpoint, dspyTimeout);
+        if (evalResult && evalResult.score < 0.5) {
+          findings.push({
+            guardId: "hollowArtifact",
+            severity: Severity.WARN,
+            message: `DSPy semantic score ${evalResult.score.toFixed(2)}/${evalResult.maxScore} for ${relPath}. ${evalResult.feedback ?? ""}`,
+            filePath: relPath,
+          });
+        }
+      }
     }
 
     const hasBlocking = findings.some((f) => f.severity === Severity.BLOCK);
@@ -128,3 +201,4 @@ export const hollowArtifactGuard: Guard = {
     };
   },
 };
+

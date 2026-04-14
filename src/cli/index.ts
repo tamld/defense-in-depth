@@ -48,6 +48,11 @@ async function main(): Promise<void> {
       await handleGrowthCommand(process.cwd(), args.slice(1));
       break;
 
+    case "eval":
+      const { evalCommand } = await import("./eval.js");
+      await evalCommand(process.cwd(), args.slice(1));
+      break;
+
     case "--help":
     case "-h":
     case undefined:
@@ -79,6 +84,7 @@ Commands:
   doctor    Health check — verify config, hooks, and guard status
   lesson    Manage lessons (án lệ) in the local memory (v0.4)
   growth    Manage growth metrics checking the system's learning velocity (v0.4)
+  eval      Evaluate artifact quality with DSPy semantic analysis (v0.5, opt-in)
 
 Options:
   --help    Show this help

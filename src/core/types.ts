@@ -81,6 +81,12 @@ export interface HollowArtifactConfig {
   patterns?: string[];
   /** Minimum content length (chars after stripping headers) */
   minContentLength?: number;
+  /** v0.5: Enable DSPy semantic evaluation for deeper quality analysis (opt-in, default: false) */
+  useDspy?: boolean;
+  /** v0.5: HTTP endpoint for the DSPy evaluation service */
+  dspyEndpoint?: string;
+  /** v0.5: Timeout in ms for DSPy HTTP calls (default: 5000) */
+  dspyTimeoutMs?: number;
 }
 
 export interface SsotPollutionConfig {
