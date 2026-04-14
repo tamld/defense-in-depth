@@ -18,6 +18,13 @@ import * as path from "node:path";
 import type { Guard, GuardContext, GuardResult, Finding, EvaluationScore } from "../core/types.js";
 import { Severity } from "../core/types.js";
 
+/** DSPy Contract Schema */
+export interface DSPyEvalResponse {
+  score: number;
+  feedback?: string;
+  dimensions?: Record<string, number>;
+}
+
 /** Default patterns that indicate hollow content */
 const DEFAULT_HOLLOW_PATTERNS = [
   /\bTODO\b/i,
@@ -36,6 +43,9 @@ const DEFAULT_MIN_CONTENT_LENGTH = 50;
 
 /** Default DSPy timeout */
 const DEFAULT_DSPY_TIMEOUT_MS = 5000;
+
+/** Hard-coded whitelist of semantic text extensions safely scannable by DSPy */
+const SEMANTIC_TEXT_EXTS = new Set([".md", ".json", ".js", ".ts", ".html", ".yml", ".yaml", ".txt"]);
 
 /**
  * Strip markdown headers, frontmatter, and whitespace to get "meaningful" content.
@@ -80,17 +90,15 @@ async function callDspyEvaluator(
       return null;
     }
 
-    const data = await response.json() as Record<string, unknown>;
+    const data = await response.json() as Partial<DSPyEvalResponse>;
 
     return {
       artifactPath,
       score: typeof data.score === "number" ? data.score : 0,
       maxScore: 1.0,
       evaluator: "dspy-http",
-      feedback: typeof data.feedback === "string" ? data.feedback : undefined,
-      dimensions: typeof data.dimensions === "object" && data.dimensions !== null
-        ? data.dimensions as Record<string, number>
-        : undefined,
+      feedback: data.feedback,
+      dimensions: data.dimensions,
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -177,8 +185,11 @@ export const hollowArtifactGuard: Guard = {
       }
 
       // Check 4 (v0.5): DSPy semantic evaluation — opt-in only
-      // Only runs when useDspy is true AND the file passed the deterministic checks above
-      if (useDspy && !findings.some((f) => f.filePath === relPath && f.severity === Severity.BLOCK)) {
+      const ext = path.extname(relPath).toLowerCase();
+      const isSemanticText = SEMANTIC_TEXT_EXTS.has(ext);
+
+      // Only runs when useDspy is true AND file passed deterministic checks AND file is a safe text type
+      if (useDspy && isSemanticText && !findings.some((f) => f.filePath === relPath && f.severity === Severity.BLOCK)) {
         const evalResult = await callDspyEvaluator(relPath, content, dspyEndpoint, dspyTimeout);
         if (evalResult && evalResult.score < 0.5) {
           findings.push({
