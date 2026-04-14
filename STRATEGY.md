@@ -132,7 +132,11 @@ See `docs/vision/meta-architecture.md` for the full vision.
 - `EvaluationScore` type already published in `src/core/types.ts` since v0.1.
 - `hollowArtifact` guard enhanced with opt-in DSPy semantic evaluation (`useDspy: true`, `dspyEndpoint`, `dspyTimeoutMs`).
 - New `eval` CLI subcommand for standalone artifact quality analysis with DSPy.
-- **Key architectural insight**: DSPy is integrated as an enhancement OF the existing guard, not a separate evaluation subsystem. Zero-infrastructure default is preserved — DSPy is fully opt-in and degrades gracefully when the service is unreachable.
+- **Shared DSPy Client** (`src/core/dspy-client.ts`): Extracted and generalized to serve as the universal DSPy integration point across ALL DiD layers. Supports `artifact`, `lesson`, `search`, and `recall` evaluation types.
+- **Lesson Quality Gate** (v0.5.1): `recordLesson()` now optionally evaluates lesson quality via DSPy before persisting. Generic lessons (score < 0.5) are REJECTED. CLI: `--quality-gate` flag.
+- **Semantic Lesson Search** (v0.5.2): `searchLessons()` supports DSPy-powered semantic ranking, replacing `String.includes()` for dramatically better recall. Falls back to string matching when DSPy unavailable. CLI: `--semantic` flag.
+- **Guard F1 Metrics**: `GuardF1Metric` type + `computeF1()` utility for measuring guard precision, recall, and F1 score. Applies Information Retrieval scoring to the guard pipeline.
+- **Key architectural insight**: DSPy is integrated as an enhancement OF the existing guard, not a separate evaluation subsystem. Zero-infrastructure default is preserved — DSPy is fully opt-in and degrades gracefully when the service is unreachable. Tagline: **"Works without AI. Excels WITH AI."**
 
 Each phase builds on the previous. Agents MUST NOT implement v0.6 features during v0.5 work unless explicitly tasked.
 

@@ -15,15 +15,13 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding, EvaluationScore } from "../core/types.js";
+import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
 import { Severity } from "../core/types.js";
+import { callDspy } from "../core/dspy-client.js";
 
-/** DSPy Contract Schema */
-export interface DSPyEvalResponse {
-  score: number;
-  feedback?: string;
-  dimensions?: Record<string, number>;
-}
+// DSPy contract schema moved to src/core/dspy-client.ts
+// Re-export for backward compatibility
+export type { DSPyEvalResponse } from "../core/dspy-client.js";
 
 /** Default patterns that indicate hollow content */
 const DEFAULT_HOLLOW_PATTERNS = [
@@ -59,53 +57,8 @@ function stripBoilerplate(content: string): string {
     .trim();
 }
 
-/**
- * v0.5: Call DSPy HTTP endpoint for semantic quality evaluation.
- * Returns an EvaluationScore or null if the call fails (graceful degradation).
- *
- * This function is ONLY called when `useDspy: true` in config.
- * It never crashes the guard pipeline — errors are caught and reported as warnings.
- */
-async function callDspyEvaluator(
-  artifactPath: string,
-  content: string,
-  endpoint: string,
-  timeoutMs: number,
-): Promise<EvaluationScore | null> {
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ artifactPath, content }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timer);
-
-    if (!response.ok) {
-      console.warn(`⚠ DSPy service returned ${response.status} for ${artifactPath}`);
-      return null;
-    }
-
-    const data = await response.json() as Partial<DSPyEvalResponse>;
-
-    return {
-      artifactPath,
-      score: typeof data.score === "number" ? data.score : 0,
-      maxScore: 1.0,
-      evaluator: "dspy-http",
-      feedback: data.feedback,
-      dimensions: data.dimensions,
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.warn(`⚠ DSPy evaluation failed for ${artifactPath}: ${message}`);
-    return null;
-  }
-}
+// v0.5: callDspyEvaluator moved to src/core/dspy-client.ts as callDspy()
+// Kept as thin adapter for backward compatibility with guard API
 
 export const hollowArtifactGuard: Guard = {
   id: "hollowArtifact",
@@ -190,7 +143,11 @@ export const hollowArtifactGuard: Guard = {
 
       // Only runs when useDspy is true AND file passed deterministic checks AND file is a safe text type
       if (useDspy && isSemanticText && !findings.some((f) => f.filePath === relPath && f.severity === Severity.BLOCK)) {
-        const evalResult = await callDspyEvaluator(relPath, content, dspyEndpoint, dspyTimeout);
+        const evalResult = await callDspy(
+          { type: "artifact", id: relPath, content },
+          dspyEndpoint,
+          dspyTimeout,
+        );
         if (evalResult && evalResult.score < 0.5) {
           findings.push({
             guardId: "hollowArtifact",

@@ -1,4 +1,5 @@
 import { recordLesson, searchLessons } from "../core/memory.js";
+import type { RecordLessonResult, LessonSearchResult } from "../core/memory.js";
 import { EvidenceLevel, Lesson } from "../core/types.js";
 import * as fs from "fs/promises";
 import * as path from "path";
@@ -29,6 +30,7 @@ export async function handleLessonCommand(
 async function runRecord(projectRoot: string, args: string[]): Promise<void> {
   // Simple payload ingestion: we expect --data '<json_string>' or --file <path.json>
   let rawJson = "";
+  const useDspy = args.includes("--quality-gate");
 
   const fileIdx = args.indexOf("--file");
   const dataIdx = args.indexOf("--data");
@@ -84,32 +86,62 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  // Record it
-  const created = await recordLesson(payload as Omit<Lesson, "id" | "createdAt">, projectRoot);
-  console.log(`✅ Lesson recorded successfully [ID: ${created.id}]`);
+  // Record it (with optional DSPy quality gate)
+  const result: RecordLessonResult = await recordLesson(
+    payload as Omit<Lesson, "id" | "createdAt">,
+    projectRoot,
+    useDspy ? { enabled: true } : undefined,
+  );
+
+  if (!result.persisted) {
+    console.error(`🚫 Lesson REJECTED by quality gate (score: ${result.qualityScore?.toFixed(2) ?? "N/A"})`);
+    if (result.qualityFeedback) {
+      console.error(`   💡 Feedback: ${result.qualityFeedback}`);
+    }
+    console.error(`   Tip: Make the lesson more specific — describe concrete files, exact errors, and actionable fixes.`);
+    process.exit(1);
+  }
+
+  console.log(`✅ Lesson recorded successfully [ID: ${result.lesson.id}]`);
+  if (result.qualityScore !== null) {
+    console.log(`📊 Quality score: ${result.qualityScore.toFixed(2)}/1.00`);
+  }
 }
 
 async function runSearch(projectRoot: string, args: string[]): Promise<void> {
-  const query = args.join(" ").trim();
+  const useSemantic = args.includes("--semantic");
+  const filteredArgs = args.filter(a => a !== "--semantic");
+  const query = filteredArgs.join(" ").trim();
+
   if (!query) {
     console.error("❌ You must provide a search query.");
     printLessonUsage();
     process.exit(1);
   }
 
-  const results = await searchLessons(query, projectRoot);
+  const results: LessonSearchResult[] = await searchLessons(
+    query,
+    projectRoot,
+    useSemantic ? { enabled: true } : undefined,
+  );
+
   if (results.length === 0) {
     console.log(`🤷 No lessons found for "${query}"`);
     return;
   }
 
-  console.log(`🔍 Found ${results.length} lesson(s) matching "${query}":\n`);
+  const mode = useSemantic ? "semantic" : "keyword";
+  console.log(`🔍 Found ${results.length} lesson(s) matching "${query}" [${mode} mode]:\n`);
+
   for (const r of results) {
-    console.log(`[ID] ${r.id}`);
-    console.log(`[Title] ${r.title}`);
-    console.log(`[Insight] ${r.insight}`);
-    console.log(`[Evidence] ${r.evidence}`);
-    console.log(`[Created] ${r.createdAt}`);
+    console.log(`[ID] ${r.lesson.id}`);
+    console.log(`[Title] ${r.lesson.title}`);
+    console.log(`[Insight] ${r.lesson.insight}`);
+    console.log(`[Evidence] ${r.lesson.evidence}`);
+    if (r.relevanceScore !== null) {
+      console.log(`[Relevance] ${(r.relevanceScore * 100).toFixed(0)}%`);
+    }
+    console.log(`[Created] ${r.lesson.createdAt}`);
     console.log(`---`);
   }
 }
@@ -120,10 +152,13 @@ function printLessonUsage(): void {
 
 Commands:
   record    Record a new lesson (Án Lệ) into the project memory.
-            --file <path>   Load JSON payload from a file
-            --data '<js>'   Provide JSON payload inline string
+            --file <path>      Load JSON payload from a file
+            --data '<js>'      Provide JSON payload inline string
+            --quality-gate     Enable DSPy quality evaluation (opt-in, v0.5)
 
-  search    Search existing lessons by keyword.
+  search    Search existing lessons by keyword or semantic similarity.
+            --semantic         Use DSPy semantic ranking (opt-in, v0.5)
             Example: npx defense-in-depth lesson search "git hook"
+            Example: npx defense-in-depth lesson search --semantic "pre-commit validation"
 `);
 }

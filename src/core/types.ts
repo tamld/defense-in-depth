@@ -255,6 +255,58 @@ export interface GrowthMetric {
   /** Trend direction */
   trend?: "improving" | "stable" | "degrading";
 }
+// ─── Guard Effectiveness Metrics (F1 Scoring) ───
+
+/**
+ * v0.5: Guard F1 Metric — measures guard pipeline quality.
+ *
+ * Applies Information Retrieval metrics to the guard system:
+ *   Precision = TP / (TP + FP) → "When we flag, are we right?"
+ *   Recall    = TP / (TP + FN) → "Are we catching everything?"
+ *   F1        = 2 * (P * R) / (P + R)
+ *
+ * TP = Guard correctly flags a real problem
+ * FP = Guard flags something that's actually fine (developer friction)
+ * FN = Guard passes something that should have been caught (governance leak)
+ * TN = Guard correctly passes clean code
+ */
+export interface GuardF1Metric {
+  /** Guard ID this metric applies to */
+  guardId: string;
+  /** Measurement period (ISO interval) */
+  period: string;
+  /** Total guard runs in this period */
+  totalRuns: number;
+  /** True positives — correctly flagged issues */
+  truePositives: number;
+  /** False positives — incorrectly flagged clean code */
+  falsePositives: number;
+  /** False negatives — missed real issues */
+  falseNegatives: number;
+  /** Computed precision (0-1) */
+  precision: number;
+  /** Computed recall (0-1) */
+  recall: number;
+  /** Computed F1 score (0-1) */
+  f1: number;
+  /** When this metric was computed */
+  computedAt: string;
+}
+
+/**
+ * v0.5: DSPy configuration — shared across all layers.
+ *
+ * This is the canonical config shape for any DiD module that uses DSPy.
+ * Guards, memory, and meta layers all reference this same shape.
+ */
+export interface DSPyConfig {
+  /** Enable DSPy for this module (default: false) */
+  enabled: boolean;
+  /** HTTP endpoint for the DSPy evaluation service */
+  endpoint?: string;
+  /** Timeout in ms for DSPy HTTP calls (default: 5000) */
+  timeoutMs?: number;
+}
 
 // ─── Meta Layer: Memory About Memory (Layer 2) ───
 
