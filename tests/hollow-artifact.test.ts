@@ -144,4 +144,117 @@ test("Hollow Artifact Guard (v0.5)", async (t) => {
 
     cleanup();
   });
+
+  // ── Edge-case tests (v0.5 hardening) ──────────────────────────────
+
+  await t.test("DSPy graceful degradation on HTTP 500", async (st) => {
+    const { dir, cleanup } = createTempWorkspace();
+    fs.writeFileSync(path.join(dir, "doc.md"), "This is a fully valid document with enough words to pass the minimum length check and should not be blocked by deterministic patterns.");
+
+    globalThis.fetch = async () => {
+      return new Response("Internal Server Error", { status: 500 });
+    };
+
+    const ctx = {
+      projectRoot: dir,
+      stagedFiles: ["doc.md"],
+      config: {
+        guards: { hollowArtifact: { useDspy: true } }
+      }
+    } as any;
+
+    const result = await hollowArtifactGuard.check(ctx);
+
+    // HTTP 500 should degrade gracefully — pass with zero findings
+    assert.strictEqual(result.passed, true);
+    assert.strictEqual(result.findings.length, 0);
+
+    cleanup();
+  });
+
+  await t.test("DSPy graceful degradation on malformed JSON response", async (st) => {
+    const { dir, cleanup } = createTempWorkspace();
+    fs.writeFileSync(path.join(dir, "doc.md"), "This is a fully valid document with enough words to pass the minimum length check and should not be blocked by deterministic patterns.");
+
+    globalThis.fetch = async () => {
+      return new Response("{invalid json!!!}", {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    };
+
+    const ctx = {
+      projectRoot: dir,
+      stagedFiles: ["doc.md"],
+      config: {
+        guards: { hollowArtifact: { useDspy: true } }
+      }
+    } as any;
+
+    const result = await hollowArtifactGuard.check(ctx);
+
+    // Malformed JSON should be caught by try/catch → graceful degradation
+    assert.strictEqual(result.passed, true);
+    assert.strictEqual(result.findings.length, 0);
+
+    cleanup();
+  });
+
+  await t.test("DSPy boundary: score exactly 0.5 should NOT warn", async (st) => {
+    const { dir, cleanup } = createTempWorkspace();
+    fs.writeFileSync(path.join(dir, "borderline.md"), "This document is on the boundary of quality. It is exactly at the threshold and should not trigger a warning because the condition is strictly less than 0.5.");
+
+    globalThis.fetch = async () => {
+      return new Response(JSON.stringify({ score: 0.5, feedback: "Borderline quality" }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    };
+
+    const ctx = {
+      projectRoot: dir,
+      stagedFiles: ["borderline.md"],
+      config: {
+        guards: { hollowArtifact: { useDspy: true } }
+      }
+    } as any;
+
+    const result = await hollowArtifactGuard.check(ctx);
+
+    // score === 0.5 is NOT < 0.5, so no warning
+    assert.strictEqual(result.passed, true);
+    assert.strictEqual(result.findings.length, 0, "Score exactly 0.5 should not produce a warning");
+
+    cleanup();
+  });
+
+  await t.test("DSPy boundary: score 0.0 should warn", async (st) => {
+    const { dir, cleanup } = createTempWorkspace();
+    fs.writeFileSync(path.join(dir, "zero.md"), "This document will receive the absolute worst score from the evaluator, testing the lower boundary of the scoring system to ensure it triggers a warning.");
+
+    globalThis.fetch = async () => {
+      return new Response(JSON.stringify({ score: 0.0, feedback: "Completely empty semantics" }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    };
+
+    const ctx = {
+      projectRoot: dir,
+      stagedFiles: ["zero.md"],
+      config: {
+        guards: { hollowArtifact: { useDspy: true } }
+      }
+    } as any;
+
+    const result = await hollowArtifactGuard.check(ctx);
+
+    assert.strictEqual(result.passed, true, "Score 0.0 is WARN not BLOCK");
+    assert.strictEqual(result.findings.length, 1);
+    assert.strictEqual(result.findings[0].severity, Severity.WARN);
+    assert.ok(result.findings[0].message.includes("0.00"));
+    assert.ok(result.findings[0].message.includes("Completely empty semantics"));
+
+    cleanup();
+  });
 });

@@ -76,9 +76,11 @@ docker run -p 8080:8080 \
 | Provider | Default Model | Cost | Best For |
 |:---|:---|:---|:---|
 | `ollama` | `llama3.2:3b` | Free (local) | Development, testing |
-| `openai` | `gpt-4o-mini` | ~$0.15/1M tokens | Production (fast) |
-| `gemini` | `gemini-2.5-flash` | Free tier / ~$0.075/1M | Best free cloud option |
-| `anthropic` | `claude-haiku-3.5` | ~$0.80/1M tokens | Premium quality |
+| `openai` | `gpt-4o-mini` | [Pay-per-token](https://openai.com/api/pricing/) | Production (fast) |
+| `gemini` | `gemini-2.5-flash` | [Free tier / pay-per-token](https://ai.google.dev/gemini-api/docs/pricing) | Best free cloud option |
+| `anthropic` | `claude-haiku-3.5` | [Pay-per-token](https://docs.anthropic.com/en/docs/about-claude/pricing) | Premium quality |
+
+> **Note:** Pricing changes frequently. Always verify current rates on the provider's official pricing page linked above.
 
 ## API Contract
 

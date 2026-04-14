@@ -127,8 +127,10 @@ DSPY_PROVIDER=gemini DSPY_API_KEY=your_key python evaluator.py
 | Provider | Cost | Best For |
 |:---|:---|:---|
 | Ollama (local) | Free | Development, CI |
-| Google Gemini | Free tier / pay-per-token | Best free cloud option |
-| OpenAI | Pay-per-token | Production |
-| Anthropic | Pay-per-token | Premium quality |
+| Google Gemini | [Free tier / pay-per-token](https://ai.google.dev/gemini-api/docs/pricing) | Best free cloud option |
+| OpenAI | [Pay-per-token](https://openai.com/api/pricing/) | Production |
+| Anthropic | [Pay-per-token](https://docs.anthropic.com/en/docs/about-claude/pricing) | Premium quality |
+
+> **Note:** Pricing changes frequently. Always verify current rates on the provider's official pricing page.
 
 See the [evaluator README](../../examples/dspy-evaluator/README.md) for full provider configuration.
