@@ -113,11 +113,13 @@ reviews:
 1. Visit [jules.google.com](https://jules.google.com)
 2. Connect your GitHub repository
 3. Set the environment setup script:
+
    ```bash
    npm ci
    npm run build
    npm test
    ```
+
 4. Jules will now respond to issues labeled `jules`
 
 ### 4. Set Up Branch Protection
@@ -131,7 +133,7 @@ In your GitHub repo settings → Branches → Branch protection rules for `main`
 
 ## The Review Pipeline
 
-```
+```text
 1. Create Issue → 2. Label "jules" → 3. Jules creates PR
                                           ↓
 4. CI runs (npm test + defense-in-depth verify)

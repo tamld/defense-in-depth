@@ -62,11 +62,11 @@ flowchart TD
 | Update docs | ✅ Best | ✅ OK | ⚠️ Slow |
 | Simple refactoring | ✅ Best | ✅ OK | ⚠️ Slow |
 | New guard (template) | ⚠️ Maybe | ✅ Best | ⚠️ Slow |
-| Architectural change | ❌ No | ✅ Best | ✅ Oversight |
-| Type system changes | ❌ No | ✅ Best | ✅ Oversight |
-| Governance changes | ❌ No | ❌ No | ✅ Only |
-| Security patches | ❌ No | ⚠️ Maybe | ✅ Best |
-| Breaking changes | ❌ No | ⚠️ Maybe | ✅ Required |
+| Architectural change | ❌ Avoid | ✅ Best | ✅ Oversight |
+| Type system changes | ❌ Avoid | ✅ Best | ✅ Oversight |
+| Governance changes | ❌ Avoid | ❌ Avoid | ✅ Only |
+| Security patches | ❌ Avoid | ⚠️ Maybe | ✅ Best |
+| Breaking changes | ❌ Avoid | ⚠️ Maybe | ✅ Required |
 
 ## Jules Task Lifecycle
 
@@ -127,7 +127,7 @@ If CodeRabbit and human disagree:
 | ❌ Don't | ✅ Do Instead |
 |---|---|
 | Give Jules vague tasks | Write specific, scoped issue descriptions |
-| Let Jules modify governance files | Restrict to `src/`, `tests/`, `docs/` |
+| Let Jules modify governance files | Use `feat/jules-<description>` for non-governance tasks |
 | Auto-merge Jules PRs | Always require human review |
 | Ignore CodeRabbit feedback | Address or explicitly acknowledge each comment |
 | Run multiple Jules tasks on overlapping files | Serialize related tasks |
