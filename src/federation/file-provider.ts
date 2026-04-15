@@ -76,6 +76,13 @@ export class FileTicketProvider implements TicketStateProvider {
         }
       }
 
+      // v0.6: Extract parentId for federation governance
+      if (frontmatter.parentId) {
+        ref.parentId = typeof frontmatter.parentId === "string"
+          ? frontmatter.parentId
+          : String(frontmatter.parentId);
+      }
+
       return ref;
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code === "ENOENT") {

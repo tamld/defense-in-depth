@@ -10,6 +10,7 @@ export { branchNamingGuard } from "./branch-naming.js";
 export { phaseGateGuard } from "./phase-gate.js";
 export { ticketIdentityGuard } from "./ticket-identity.js";
 export { hitlReviewGuard } from "./hitl-review.js";
+export { federationGuard } from "./federation.js";
 
 import { hollowArtifactGuard } from "./hollow-artifact.js";
 import { ssotPollutionGuard } from "./ssot-pollution.js";
@@ -19,6 +20,7 @@ import { branchNamingGuard } from "./branch-naming.js";
 import { phaseGateGuard } from "./phase-gate.js";
 import { ticketIdentityGuard } from "./ticket-identity.js";
 import { hitlReviewGuard } from "./hitl-review.js";
+import { federationGuard } from "./federation.js";
 import type { Guard } from "../core/types.js";
 
 /** All built-in guards, ready to register with the engine */
@@ -31,4 +33,5 @@ export const allBuiltinGuards: Guard[] = [
   phaseGateGuard,
   ticketIdentityGuard,
   hitlReviewGuard,
+  federationGuard,
 ];

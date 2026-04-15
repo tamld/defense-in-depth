@@ -148,6 +148,21 @@ export interface HitlReviewConfig {
   protectedBranches?: string[];
 }
 
+/** v0.6: Federation guard configuration — parent↔child ticket governance */
+export interface FederationGuardConfig {
+  enabled: boolean;
+  /** Parent project's ticket resolution endpoint (for HttpTicketProvider) */
+  parentEndpoint?: string;
+  /** Severity: 'warn' (advisory) or 'block' (enforcement, default) */
+  severity?: 'warn' | 'block';
+  /** Parent phases that BLOCK child execution (default: BLOCKED, CANCELLED, ARCHIVED) */
+  blockedParentPhases?: string[];
+  /** Provider type for resolving parent state: 'http' | 'file' (default: 'file') */
+  provider?: string;
+  /** Provider-specific configuration */
+  providerConfig?: Record<string, unknown>;
+}
+
 /** Root configuration loaded from defense.config.yml */
 export interface DefendConfig {
   version: string;
@@ -160,6 +175,7 @@ export interface DefendConfig {
     phaseGate?: PhaseGateConfig;
     ticketIdentity?: TicketIdentityConfig;
     hitlReview?: HitlReviewConfig;
+    federation?: FederationGuardConfig;
   };
 }
 
@@ -187,6 +203,12 @@ export interface TicketRef {
   phase?: string;
   /** Ticket type */
   type?: "feat" | "fix" | "chore" | "docs" | "refactor";
+  /** v0.6: Parent ticket ID from the root/upstream project */
+  parentId?: string;
+  /** v0.6: Parent ticket's current phase (resolved via provider) */
+  parentPhase?: string;
+  /** v0.6: Authorization status from parent (true = allowed to proceed) */
+  authorized?: boolean;
 }
 
 /**

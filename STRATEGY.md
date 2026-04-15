@@ -114,9 +114,10 @@ See `docs/vision/meta-architecture.md` for the full vision.
 | **Identity** | v0.3 | Ticket-aware guards (TKID Lite) | `TicketRef` |
 | **Memory** | v0.4 | Lesson recording + growth metrics | `Lesson`, `GrowthMetric` |
 | **Intelligence** | v0.5 | DSPy adapter + semantic evaluation | `EvaluationScore` |
-| **Meta Memory** | v0.6 | Recall quality measurement | `LessonOutcome`, `RecallMetric` |
-| **Meta Growth** | v0.7 | Growth acceleration tracking | `MetaGrowthSnapshot` |
-| **Telemetry Sync** | v0.8 | Bidirectional Internal ↔ OSS data flow | `TelemetryPayload` |
+| **Federation** | v0.6 | Parent↔child governance guards | `FederationGuardConfig`, `HttpTicketProvider` |
+| **Meta Memory** | v0.7 | Recall quality measurement | `LessonOutcome`, `RecallMetric` |
+| **Meta Growth** | v0.8 | Growth acceleration tracking | `MetaGrowthSnapshot` |
+| **Telemetry Sync** | v0.9 | Bidirectional Internal ↔ OSS data flow | `TelemetryPayload` |
 | **Stable** | v1.0 | Public API freeze + npm publish | All types frozen |
 
 **Status Update (v0.4)**: Foundation (v0.1), Ecosystem (v0.2), Identity (v0.3) shipped. Memory Layer & Root Pollution Guard (v0.4) **shipped**:
@@ -138,8 +139,17 @@ See `docs/vision/meta-architecture.md` for the full vision.
 - **Guard F1 Metrics**: `GuardF1Metric` type + `computeF1()` utility for measuring guard precision, recall, and F1 score. Applies Information Retrieval scoring to the guard pipeline.
 - **Key architectural insight**: DSPy is integrated as an enhancement OF the existing guard, not a separate evaluation subsystem. Zero-infrastructure default is preserved — DSPy is fully opt-in and degrades gracefully when the service is unreachable. Tagline: **"Works without AI. Excels WITH AI."**
 
-Each phase builds on the previous. Agents MUST NOT implement v0.6 features during v0.5 work unless explicitly tasked.
+Each phase builds on the previous. Agents MUST NOT implement future-phase features unless explicitly tasked.
+
+**Status Update (v0.6)**: Foundation through Intelligence (v0.1–v0.5) shipped. Federation (v0.6) **shipped**:
+
+- **Federation Guard** (`federationGuard`): Pure guard that cross-validates child project execution against parent ticket lifecycle phase. Configurable `blockedParentPhases`, severity modes (`block`/`warn`).
+- **HttpTicketProvider**: Network-aware provider using `globalThis.fetch` with `AbortController` for timeout enforcement. Enables cross-project federation via REST endpoints.
+- **Engine enrichment pipeline**: `enrichParentTicket()` resolves parent state as a second-stage enrichment BEFORE the guard pipeline runs, preserving guard purity.
+- **Graceful degradation**: All provider failures (timeout, network error, 404) degrade to WARN findings, never crash the pipeline.
+- **Key architectural insight**: Guard purity is enforced by architecture, not discipline. The engine's enrichment phase handles ALL I/O. Guards only read `ctx.ticket.*` fields. This eliminates an entire class of provider-crash-kills-pipeline bugs.
+- **Bugs caught by TDD**: (1) `FileTicketProvider` leaked empty-string `parentId` through `!= null` check. (2) `HttpTicketProvider` silently dropped `parentId` from JSON responses. Both caught by edge/integration tests before release.
+- **Test suite**: 99 tests total, 37 federation-specific (17 guard unit, 8 HTTP provider, 6 file provider, 6 engine integration).
 
 ---
-
 

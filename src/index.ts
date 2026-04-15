@@ -20,6 +20,7 @@ export type {
   EngineVerdict,
   Finding,
   DefendConfig,
+  FederationGuardConfig,
 } from "./core/types.js";
 
 // Guards
@@ -30,10 +31,11 @@ export {
   branchNamingGuard,
   phaseGateGuard,
   ticketIdentityGuard,
+  federationGuard,
   allBuiltinGuards,
 } from "./guards/index.js";
 
-// Federation (v0.3)
-export { createProvider, FileTicketProvider } from "./federation/index.js";
+// Federation (v0.3 → v0.6)
+export { createProvider, FileTicketProvider, HttpTicketProvider } from "./federation/index.js";
 export type { TicketStateProvider } from "./federation/types.js";
 export type { TicketRef } from "./core/types.js";

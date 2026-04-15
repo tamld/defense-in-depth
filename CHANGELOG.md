@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.0] — Federation Governance Guards - 2026-04-15
+
+### Added
+- **Federation Guard** (`federationGuard`) — cross-validates child project execution against parent ticket lifecycle phase. Pure guard (zero I/O), all parent state resolved by engine enrichment phase.
+- **HttpTicketProvider** — network-aware provider using `globalThis.fetch` with `AbortController` timeout (default: 3000ms). Resolves ticket state from remote REST endpoints for cross-project federation.
+- `TicketRef` extended with optional `parentId`, `parentPhase`, `authorized` fields for parent↔child governance.
+- `FederationGuardConfig` type in `DefendConfig.guards.federation` — configurable `blockedParentPhases`, severity, provider selection.
+- `FileTicketProvider` enhanced to extract `parentId` from TICKET.md YAML frontmatter.
+- `DefendEngine.enrichParentTicket()` — second-stage enrichment that resolves parent ticket state before guard pipeline runs.
+- 6 engine integration tests covering full pipeline (FE.01-04): enrichment, blocking, graceful degradation on 404/network error/timeout.
+- 17 federation guard unit tests including edge cases (case-insensitive phases, empty parentId, dual findings) and worst cases (missing config, concurrent block+deny).
+
+### Design Decisions
+- **Zero-infrastructure default**: Federation is opt-in (`enabled: false`). Projects without federation config run exactly as before, zero regression.
+- **Guard purity contract**: Federation guard performs ZERO I/O. All resolution happens during engine enrichment phase (Invariant #1).
+- **Graceful degradation**: Provider failures produce WARN findings, never crash the pipeline.
+
+### Fixed
+- `FileTicketProvider` empty-string `parentId` leak — changed `!= null` check to truthy check (caught by edge case test).
+- `HttpTicketProvider` silently dropped `parentId` from JSON responses — added extraction logic (caught by integration test).
+
+---
+
 ## [0.5.0] — DSPy Semantic Evaluation (Opt-in) - 2026-04-15
 
 ### Added

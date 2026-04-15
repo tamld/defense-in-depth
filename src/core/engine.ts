@@ -169,6 +169,8 @@ export class DefendEngine {
    * This runs BEFORE the guard pipeline. If the provider fails or is
    * unavailable, the basic ref is returned unchanged — guards degrade
    * gracefully to non-phase-aware mode.
+   *
+   * v0.6: Also resolves parent ticket state for federation governance.
    */
   private async enrichTicketRef(
     basicRef: TicketRef | undefined,
@@ -201,6 +203,10 @@ export class DefendEngine {
       const ticket: TicketRef = enriched
         ? { ...basicRef, ...enriched }
         : basicRef;
+
+      // v0.6: Resolve parent ticket state for federation governance
+      await this.enrichParentTicket(ticket);
+
       return { ticket, provider };
     } catch (err) {
       // Provider errors never crash the guard pipeline
@@ -208,6 +214,56 @@ export class DefendEngine {
         `⚠ Ticket provider '${provider.name}' failed for ${basicRef.id}: ${err instanceof Error ? err.message : String(err)}`,
       );
       return { ticket: basicRef, provider };
+    }
+  }
+
+  /**
+   * v0.6: Resolve parent ticket state for federation governance.
+   *
+   * If the child ticket declares a `parentId` and the federation guard
+   * is enabled, this creates a second provider to resolve the parent
+   * ticket's phase. The result is injected into the TicketRef so the
+   * federation guard can check it without performing any I/O.
+   */
+  private async enrichParentTicket(ticket: TicketRef): Promise<void> {
+    if (!ticket.parentId) return;
+
+    const fedConfig = this.config.guards.federation;
+    if (!fedConfig?.enabled) return;
+
+    const blockedPhases = (fedConfig.blockedParentPhases ?? ["BLOCKED", "CANCELLED", "ARCHIVED"])
+      .map(p => p.toUpperCase());
+
+    const parentProvider = createProvider(
+      fedConfig.provider ?? "file",
+      { ...(fedConfig.providerConfig ?? {}), endpoint: fedConfig.parentEndpoint },
+      this.projectRoot,
+    );
+
+    try {
+      const parentTimeoutMs =
+        typeof fedConfig.providerConfig?.timeout === "number"
+          ? fedConfig.providerConfig.timeout
+          : 3000;
+
+      const parentRef = await Promise.race([
+        parentProvider.resolve(ticket.parentId),
+        new Promise<undefined>((_, reject) =>
+          setTimeout(() => reject(new Error(`Parent resolution timed out after ${parentTimeoutMs}ms`)), parentTimeoutMs),
+        ),
+      ]);
+
+      if (parentRef) {
+        ticket.parentPhase = parentRef.phase;
+        ticket.authorized = !blockedPhases.includes((parentRef.phase ?? "").toUpperCase());
+      }
+
+      await parentProvider.dispose?.();
+    } catch (err) {
+      console.warn(
+        `⚠ Federation: Failed to resolve parent ticket ${ticket.parentId}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      // Leave parentPhase/authorized undefined → guard degrades gracefully
     }
   }
 
