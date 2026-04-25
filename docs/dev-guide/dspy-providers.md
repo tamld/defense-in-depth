@@ -7,6 +7,50 @@
 
 ---
 
+## Architecture: DSPy is NOT Mandatory
+
+> **Critical design principle**: DSPy is an **optional intelligence layer**, never the
+> primary enforcement mechanism. Governance integrity is guaranteed by deterministic
+> code — not by AI inference.
+
+The `hollowArtifact` guard has a **three-layer defense chain**. Each layer is
+independently sufficient. DSPy only activates as an additive signal on top:
+
+```
+Layer 1 (Always ON) — Deterministic Pattern Matching
+  └─ Regex: TODO, TBD, PLACEHOLDER, [Insert Here], <Empty>, FILL IN HERE
+  └─ Source: hollow-artifact.ts → DEFAULT_HOLLOW_PATTERNS
+  └─ Result on match: BLOCK (hard stop, no DSPy call needed)
+
+Layer 2 (Always ON) — Content Length Heuristic
+  └─ Strips frontmatter + headers + blank lines → measures real content
+  └─ If stripped.length < minContentLength (default: 50) → WARN
+  └─ If stripped.length === 0 → BLOCK (headers-only file)
+  └─ Source: hollow-artifact.ts → stripBoilerplate()
+
+Layer 3 (Opt-in) — DSPy Semantic Evaluation
+  └─ Only runs when: useDspy=true AND file passed L1+L2 AND file is text type
+  └─ Score < 0.5 → WARN (never BLOCK — DSPy has no veto power)
+  └─ On failure (timeout/network/non-2xx) → null returned, pipeline continues
+  └─ Source: dspy-client.ts → callDspy() with AbortController timeout
+```
+
+**What this means in practice:**
+
+- If DSPy is **down** → L1+L2 continue enforcing. Zero regression.
+- If DSPy is **misconfigured** → `callDspy()` returns `null`, logs a `WARN`, pipeline continues.
+- If DSPy returns a **low score** → raises a `WARN` only. A human still decides.
+- DSPy findings are **never** `BLOCK` severity — by architectural contract (`dspy-client.ts` line 4: `WARN-NOT-BLOCK`).
+
+---
+
+> **Open questions being tracked:**
+> - [Issue #13](https://github.com/tamld/defense-in-depth/issues/13) — Clarify in README/docs why DSPy is opt-in, not the primary engine
+> - [Issue #14](https://github.com/tamld/defense-in-depth/issues/14) — Audit and harden the fallback chain with dedicated tests
+> - [Issue #15](https://github.com/tamld/defense-in-depth/issues/15) — Design a `--dry-run-dspy` CLI flag to simulate DSPy failure locally
+
+---
+
 ## Philosophy: Zero-Infrastructure First
 
 The `useDspy` feature is **disabled by default**. When disabled, the guard runs
@@ -38,6 +82,7 @@ The DiD server (`dspyEndpoint`) wraps a DSPy `Predict` call and exposes it over
 HTTP. You run this server separately — DiD's guard POSTs to it.
 
 ---
+
 
 ## Option 1: Ollama (Local, Fully Free)
 
