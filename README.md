@@ -494,9 +494,11 @@ These tools govern AI **while it reasons**. defense-in-depth governs AI **when i
 | **v0.3** | TKID Lite (file-based tickets) + trust-but-verify | `TicketRef` | ✅ Done |
 | **v0.4** | Memory Layer (`lessons.jsonl`) + growth metrics | `Lesson`, `GrowthMetric` | ✅ Done |
 | **v0.5** | DSPy adapter + semantic quality evaluation | `EvaluationScore` | ✅ Done |
-| **v0.6** | Meta Memory: recall quality measurement | `LessonOutcome`, `RecallMetric` | 📋 Designed |
-| **v0.7** | Meta Growth: growth acceleration tracking | `MetaGrowthSnapshot` | 📋 Designed |
-| **v0.8** | Federation: bidirectional AAOS ↔ defense-in-depth | `FederationPayload` | 📋 Designed |
+| **v0.6** | Federation: Parent↔child governance guards | `FederationGuardConfig` | ✅ Done |
+| **v0.6.2** | Test & Operational Hardening (Coverage gates, End-to-End tests) | | ✅ Done |
+| **v0.7** | Meta Memory: recall quality measurement | `LessonOutcome`, `RecallMetric` | 📋 Designed |
+| **v0.8** | Meta Growth: growth acceleration tracking | `MetaGrowthSnapshot` | 📋 Designed |
+| **v0.9** | Telemetry Sync: Bidirectional Internal ↔ OSS data flow | `TelemetryPayload` | 📋 Designed |
 | **v1.0** | Stable API + npm publish | All types frozen | 📋 Planned |
 
 > All types for v0.1–v0.8 are ALREADY published in `src/core/types.ts` — compiled, documented, importable. Implementation follows incrementally. See [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md) for the full vision.

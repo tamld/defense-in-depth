@@ -95,10 +95,10 @@ This is meta-prompting — not telling agents what to do, but teaching them how 
 | Layer | Type | What it measures |
 |:---|:---|:---|
 | 0: Guards | `Guard`, `Finding` | Is this commit clean? (SHIPPED) |
-| 1: Memory | `Lesson`, `GrowthMetric` | What did we learn? (DESIGNED) |
-| 2: Meta Memory | `LessonOutcome`, `RecallMetric` | Are lessons recalled and helpful? |
-| 3: Meta Growth | `MetaGrowthSnapshot` | Is the growth system improving? |
-| F: Federation | `TelemetryPayload` | Bidirectional Internal ↔ OSS data flow |
+| 1: Memory | `Lesson`, `GrowthMetric` | What did we learn? (SHIPPED) |
+| 2: Meta Memory | `LessonOutcome`, `RecallMetric` | Are lessons recalled and helpful? (DESIGNED) |
+| 3: Meta Growth | `MetaGrowthSnapshot` | Is the growth system improving? (DESIGNED) |
+| F: Federation | `TelemetryPayload` | Bidirectional Internal ↔ OSS data flow (SHIPPED) |
 
 All types are published in `src/core/types.ts` — compiled, documented, importable.
 See `docs/vision/meta-architecture.md` for the full vision.
