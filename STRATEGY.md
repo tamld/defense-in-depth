@@ -159,5 +159,14 @@ Each phase builds on the previous. Agents MUST NOT implement future-phase featur
 - **Key clarification**: This multi-agent setup is DiD's **internal development strategy** for optimizing its own workflow. It is NOT a requirement imposed on DiD package users.
 - **Architectural insight**: The distinction between "operational agent" (trusted, human-commanded) and "external agent" (constrained, config-bounded) is itself a defense-in-depth principle applied to AI governance.
 
+**Status Update (v0.6.2)**: Test & Operational Hardening **shipped** (Preparing for v0.7):
+
+- **Test Hardening Track**: Massive expansion of test coverage. Added adversarial scenarios and explicit mock audits for `DefendEngine`, `hollowArtifactGuard`, `phaseGateGuard`, `branchNamingGuard`, `commitFormatGuard`, and `ssotPollutionGuard` (PRs 7, 8, 9).
+- **CLI Subprocess Tests**: Added ground-truth End-to-End CLI tests using `spawnSync` against the compiled binary (PR 10).
+- **Coverage Gate**: Implemented strict CI coverage thresholds using native Node.js `--experimental-test-coverage` to enforce an immutable floor, ratcheting upwards with test additions (PR 12).
+- **Documentation Semantics**: Explicit `fail-fast-policy.md` added to clearly document engine behavior (collect-all vs fail-fast) ensuring strict system contracts (PR 11).
+- **Server-Side Enforcement**: Composite GitHub Action created to enforce governance rules server-side. Eliminates the gap of users bypassing local git hooks with `--no-verify`.
+- **Key architectural insight**: System robustness isn't just code; it's proven through deterministic, adversarial CI gates. We established a strict ceiling for dependencies by enforcing everything in purely native Node APIs.
+
 ---
 
