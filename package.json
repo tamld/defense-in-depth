@@ -23,6 +23,7 @@
   "scripts": {
     "pretest": "npm run build",
     "build": "tsc",
+    "postbuild": "node -e \"require('fs').chmodSync('dist/cli/index.js', 0o755)\"",
     "dev": "tsc --watch",
     "test": "node --test",
     "lint": "tsc --noEmit",
