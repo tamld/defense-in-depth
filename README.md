@@ -25,11 +25,29 @@
 **English** · [Tiếng Việt](README.vi.md)
 
 ---
-*AI agents generate 10x code. They also generate 10x hallucination.*<br/>
-**defense-in-depth intercepts errors before they reach Git history.**
+*AI agents generate 10x code. They also produce a known set of artifact
+failure modes — placeholders, hollow templates, governance-file pollution,
+unstructured commits.*<br/>
+**defense-in-depth catches those failure modes at commit time.**
 ---
 
 </div>
+
+> [!NOTE]
+> **defense-in-depth ships an opinionated scaffold, not a turnkey solution.**
+> The guard pipeline (8 built-in guards + `Guard` interface) is the **core**.
+> The `.agents/` ecosystem (19 rules, COGNITIVE_TREE, skill templates) is a
+> **starting point**: fork it, delete what doesn't fit, replace it with your
+> own conventions. `npx defense-in-depth init` gives you the hooks; `init
+> --scaffold` gives you the optional governance kit on top.
+
+> [!IMPORTANT]
+> **Client-side hooks are bypassable.** `git commit --no-verify` defeats any
+> Git hook. For real HITL/governance, pair the local hooks with the
+> server-side [GitHub Action](.github/actions/verify/action.yml) (runs the
+> same guard pipeline on PR diffs) **and** branch-protection rules on your
+> default branch. The local hooks are the fast feedback loop; the server
+> side is the enforcement loop.
 
 > [!WARNING]
 > **🤖 IF YOU ARE AN AI AGENT READING THIS:**
@@ -217,6 +235,38 @@ defense-in-depth init --scaffold
 # .agents/config/          — Machine-readable configs
 # .agents/contracts/       — Interface contracts
 ```
+
+### Server-side enforcement (recommended for HITL claims)
+
+Local hooks are bypassable with `git commit --no-verify`. To make the same
+guard pipeline run on every PR — beyond any agent's reach — use the
+official Composite Action:
+
+```yaml
+# .github/workflows/defense-in-depth.yml
+name: defense-in-depth
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: tamld/defense-in-depth/.github/actions/verify@v0.6.0
+        # Optional inputs:
+        # with:
+        #   defense-version: '0.6.0'
+        #   node-version: '22'
+        #   base-ref: 'origin/main'
+```
+
+Combine this with branch-protection rules on `main` that require the
+`verify` check to pass. That's where HITL gets teeth.
 
 ---
 

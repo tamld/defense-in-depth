@@ -37,8 +37,12 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Self-verify (dogfooding)
-        run: npx defense-in-depth verify || true
+      - name: Self-verify CLI smoke test
+        # CI checkout has no staged files → verify exits 0 with a friendly
+        # message. This step asserts the built CLI launches without crashing.
+        # When meaningful diff-based dogfooding lands, replace this with a
+        # `--files` invocation against the PR diff.
+        run: npx defense-in-depth verify
 
   lint:
     name: Lint & Type Check

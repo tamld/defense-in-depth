@@ -1,0 +1,97 @@
+name: Release
+
+# Triggers on tags `vX.Y.Z` or `vX.Y.Z-<prerelease>`. Builds, tests, then
+# publishes to npm and creates a GitHub Release. The npm version on the
+# published package must match `package.json#version`; the workflow asserts
+# this before publish.
+#
+# Pre-release tags (any version containing a hyphen, e.g. v0.6.0-rc.1) are
+# published with the `next` npm dist-tag and marked prerelease on GitHub.
+# Stable tags (e.g. v0.6.0) go to the `latest` dist-tag.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: write   # to create GitHub Releases
+  id-token: write   # for npm provenance
+
+jobs:
+  release:
+    name: Build, Test, Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+        # Intentionally no `registry-url`. setup-node@v4 with registry-url
+        # writes an .npmrc containing `_authToken=${NODE_AUTH_TOKEN}`. With
+        # OIDC Trusted Publisher, that placeholder hijacks auth and blocks
+        # npm CLI from auto-acquiring the OIDC token, producing a 404 PUT.
+        # Default registry (registry.npmjs.org) + no _authToken is correct.
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Verify tag matches package.json version, detect prerelease
+        id: version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Tag and package.json agree on $PKG_VERSION"
+          if [[ "$PKG_VERSION" == *"-"* ]]; then
+            echo "npm_tag=next" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "Detected prerelease — publishing under dist-tag 'next'"
+          else
+            echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "Stable release — publishing under dist-tag 'latest'"
+          fi
+
+      - name: Publish to npm (OIDC Trusted Publisher)
+        # No NODE_AUTH_TOKEN — npm CLI auto-acquires an OIDC token because
+        # `id-token: write` permission is set and the package has a Trusted
+        # Publisher configured for tamld/defense-in-depth + release.yml.
+        #
+        # Trusted publisher OIDC auto-acquire requires npm CLI >= 11.5.1
+        # (https://docs.npmjs.com/trusted-publishers/). Node 22 LTS ships
+        # with npm 10.x, so we invoke npm@latest via npx instead of trying
+        # to self-upgrade the global npm (which breaks with
+        # "Cannot find module 'promise-retry'" mid-upgrade).
+        #
+        # Provenance is attached automatically with trusted publishing; the
+        # explicit --provenance flag is no longer required.
+        run: npx -y npm@latest publish --access public --tag ${{ steps.version.outputs.npm_tag }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          body: |
+            See `CHANGELOG.md` for the curated, human-written notes.
+
+            Auto-generated commit log follows.

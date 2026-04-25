@@ -1,0 +1,92 @@
+name: 'defense-in-depth verify'
+description: 'Run defense-in-depth guards against the PR diff (server-side enforcement of HITL/governance).'
+author: 'tamld'
+
+# This Composite Action gives downstream projects server-side teeth that
+# `git commit --no-verify` cannot bypass. Use it in your repo's PR workflow:
+#
+#   - uses: tamld/defense-in-depth/.github/actions/verify@v0.6.0
+#
+# It checks out (if not already checked out), installs Node, installs
+# defense-in-depth from npm, computes the PR diff, and runs `verify --files`
+# against the changed paths. Exits non-zero on BLOCK findings.
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+  defense-version:
+    description: 'defense-in-depth version (npm dist-tag or semver). Defaults to latest.'
+    required: false
+    default: 'latest'
+  base-ref:
+    description: 'Git ref to diff against. Defaults to the PR base or origin/main.'
+    required: false
+    default: ''
+  working-directory:
+    description: 'Directory to run from (relative to GITHUB_WORKSPACE).'
+    required: false
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Resolve base ref
+      id: base
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if [ -n "${{ inputs.base-ref }}" ]; then
+          echo "ref=${{ inputs.base-ref }}" >> "$GITHUB_OUTPUT"
+        elif [ -n "${{ github.base_ref }}" ]; then
+          echo "ref=origin/${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "ref=origin/main" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Fetch base ref
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        git fetch origin --no-tags --prune --depth=200 \
+          "+refs/heads/*:refs/remotes/origin/*" || true
+
+    - name: Compute changed files
+      id: diff
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        BASE='${{ steps.base.outputs.ref }}'
+        if git rev-parse --verify "$BASE" >/dev/null 2>&1; then
+          CHANGED=$(git diff --name-only --diff-filter=ACMR "$BASE"...HEAD)
+        else
+          echo "::warning::Base ref $BASE not found; falling back to last commit."
+          CHANGED=$(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD || true)
+        fi
+        if [ -z "$CHANGED" ]; then
+          echo "No changed files. Skipping verify."
+          echo "files=" >> "$GITHUB_OUTPUT"
+        else
+          # Encode newlines for output via a delimited block.
+          {
+            echo "files<<__EOF__"
+            echo "$CHANGED"
+            echo "__EOF__"
+          } >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run defense-in-depth verify
+      if: steps.diff.outputs.files != ''
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        DID_FILES: ${{ steps.diff.outputs.files }}
+      run: |
+        # shellcheck disable=SC2086
+        echo "$DID_FILES" | xargs npx --yes defense-in-depth@${{ inputs.defense-version }} verify --files

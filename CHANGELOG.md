@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — Operational Hardening
+
+> Pre-release pass to close gaps between as-shipped capability and the
+> "deterministic governance" pitch. No source-code changes; CI, docs, and
+> distribution only.
+
+### Added
+- **Server-side Composite Action** (`.github/actions/verify/action.yml`) — runs the same guard pipeline against the PR diff in CI. Gives HITL/governance claims actual teeth, since `git commit --no-verify` cannot bypass it. Documented in README §3 and SECURITY.md.
+- **Release workflow** (`.github/workflows/release.yml`) — tag `v*.*.*` triggers build → test → npm publish (with provenance) → GitHub Release. Closes the long-standing gap between local v0.6.0 and the v0.1.0 currently on npm.
+- **SECURITY.md threat model** — documents v0.5+ outbound network calls (`hollowArtifact.useDspy`, `HttpTicketProvider`, `federation.parentEndpoint`) and the explicit out-of-scope items (server-side enforcement, third-party guard sandboxing).
+
+### Changed
+- **README framing** — added scaffold-vs-turnkey callout and a server-side enforcement section. Toned down the "10x hallucination" tagline to match current as-shipped capability (artifact failure modes), preserving the stronger semantic claim for v0.5+ DSPy follow-ups.
+- **CI dogfooding** (`ci.yml`) — removed the `|| true` swallow on `Self-verify`. Step is now an honest CLI smoke test; meaningful diff-based dogfooding is a follow-up that requires a repo-local `defense.config.yml` tuned for self-application.
+- **SECURITY.md supported versions** — corrected from `0.1.x` to `0.6.x` to match the current minor line.
+
+### Migration
+
+No code or config changes are required for users on v0.6.0. The Composite
+Action is opt-in. The release workflow only fires on tag pushes, so it has
+no effect on the regular PR/main flow.
+
+---
+
 ## [0.6.0] — Federation Governance Guards - 2026-04-15
 
 ### Added
