@@ -39,11 +39,6 @@ jobs:
         # npm CLI from auto-acquiring the OIDC token, producing a 404 PUT.
         # Default registry (registry.npmjs.org) + no _authToken is correct.
 
-      - name: Upgrade npm to >= 11.5.1 (required for OIDC trusted publishing)
-        # Node 22 LTS ships with npm 10.x. Trusted publisher OIDC auto-acquire
-        # requires npm CLI >= 11.5.1 (see npmjs.com/docs/trusted-publishers).
-        run: npm install -g npm@latest
-
       - name: Install dependencies
         run: npm ci
 
@@ -80,10 +75,16 @@ jobs:
         # No NODE_AUTH_TOKEN — npm CLI auto-acquires an OIDC token because
         # `id-token: write` permission is set and the package has a Trusted
         # Publisher configured for tamld/defense-in-depth + release.yml.
+        #
+        # Trusted publisher OIDC auto-acquire requires npm CLI >= 11.5.1
+        # (https://docs.npmjs.com/trusted-publishers/). Node 22 LTS ships
+        # with npm 10.x, so we invoke npm@latest via npx instead of trying
+        # to self-upgrade the global npm (which breaks with
+        # "Cannot find module 'promise-retry'" mid-upgrade).
+        #
         # Provenance is attached automatically with trusted publishing; the
-        # explicit --provenance flag is no longer required (and could conflict
-        # on older CLI paths).
-        run: npm publish --access public --tag ${{ steps.version.outputs.npm_tag }}
+        # explicit --provenance flag is no longer required.
+        run: npx -y npm@latest publish --access public --tag ${{ steps.version.outputs.npm_tag }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
