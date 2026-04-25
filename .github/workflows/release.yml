@@ -39,6 +39,11 @@ jobs:
         # npm CLI from auto-acquiring the OIDC token, producing a 404 PUT.
         # Default registry (registry.npmjs.org) + no _authToken is correct.
 
+      - name: Upgrade npm to >= 11.5.1 (required for OIDC trusted publishing)
+        # Node 22 LTS ships with npm 10.x. Trusted publisher OIDC auto-acquire
+        # requires npm CLI >= 11.5.1 (see npmjs.com/docs/trusted-publishers).
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm ci
 
@@ -71,11 +76,14 @@ jobs:
             echo "Stable release — publishing under dist-tag 'latest'"
           fi
 
-      - name: Publish to npm (OIDC Trusted Publisher + provenance)
-        # No NODE_AUTH_TOKEN — auth is handled by GitHub Actions OIDC.
-        # Requires the package's npm "Trusted publishers" to be configured
-        # for tamld/defense-in-depth + .github/workflows/release.yml.
-        run: npm publish --provenance --access public --tag ${{ steps.version.outputs.npm_tag }}
+      - name: Publish to npm (OIDC Trusted Publisher)
+        # No NODE_AUTH_TOKEN — npm CLI auto-acquires an OIDC token because
+        # `id-token: write` permission is set and the package has a Trusted
+        # Publisher configured for tamld/defense-in-depth + release.yml.
+        # Provenance is attached automatically with trusted publishing; the
+        # explicit --provenance flag is no longer required (and could conflict
+        # on older CLI paths).
+        run: npm publish --access public --tag ${{ steps.version.outputs.npm_tag }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
