@@ -161,8 +161,17 @@ export async function recordLesson(
           persisted: false,
         };
       }
+    } else {
+      // DSPy was enabled but returned null (service unavailable / timeout / 500).
+      // The lesson is still persisted below (graceful degradation preserves
+      // progress), but we MUST signal the bypass so the user knows the quality
+      // guarantee was skipped for this record. Without this WARN, users who
+      // opt into --quality-gate get a false sense of safety during outages.
+      process.stderr.write(
+        "⚠  [quality-gate] DSPy evaluation skipped: service unavailable. " +
+          "Lesson persisted WITHOUT quality check.\n",
+      );
     }
-    // If DSPy fails (returns null), degrade gracefully → persist anyway
   }
 
   const targetPath = path.join(projectRoot, LESSONS_FILE);

@@ -5,15 +5,13 @@
  * correctly across four DSPy states: down (unreachable), down (HTTP 500),
  * low score (gate rejects), high score (happy path).
  *
- * Critical bug DOCUMENTED here (NOT fixed):
- *   When DSPy is enabled but the call fails (network down OR 500 response),
- *   recordLesson silently persists the lesson without emitting any WARN to
- *   the user. The user has no way of knowing the quality gate was bypassed.
- *
- *   This is the "silent degradation" bug noted in maintainer-comment #14.
- *   Tests in scenarios 1 and 2 assert the CURRENT (buggy) behavior so a
- *   future refactor cannot accidentally re-introduce it without conscious
- *   review. PR B (separate) will fix the bug and flip the assertions.
+ * HISTORY:
+ *   - PR A (#17) shipped these scenarios asserting the CURRENT (buggy)
+ *     behavior where scenarios 1+2 emitted NO WARN on DSPy failure.
+ *   - PR B (this PR, issue #19) adds the quality-gate-bypass WARN to
+ *     src/core/memory.ts and flips scenarios 1+2 to assert the WARN
+ *     IS NOW EMITTED. That is the "red → green" arc of the silent-
+ *     degradation bug.
  *
  * Real local HTTP stub server (tests/helpers/dspy-stub.js) exercises
  * src/core/memory.ts → callDspy() end-to-end — no fetch mocks.
@@ -49,20 +47,33 @@ const BASE_LESSON = {
 
 let tmp;
 let savedWarn;
+let savedStderrWrite;
 let warnCapture;
+let stderrCapture;
 
 beforeEach(() => {
   tmp = fs.mkdtempSync(path.join(os.tmpdir(), "did-memory-gate-"));
   warnCapture = [];
+  stderrCapture = [];
   savedWarn = console.warn;
   console.warn = (...args) => {
     warnCapture.push(args.map((a) => String(a)).join(" "));
+  };
+  // Capture stderr writes. memory.ts emits the quality-gate-bypass WARN
+  // through process.stderr.write (not console.warn) so tests can assert
+  // against a predictable sink — console.warn in some Node versions adds
+  // timestamps or labels that break regex-based matching.
+  savedStderrWrite = process.stderr.write.bind(process.stderr);
+  process.stderr.write = (chunk, encoding, cb) => {
+    stderrCapture.push(String(chunk));
+    return savedStderrWrite(chunk, encoding, cb);
   };
 });
 
 afterEach(() => {
   fs.rmSync(tmp, { recursive: true, force: true });
   console.warn = savedWarn;
+  process.stderr.write = savedStderrWrite;
 });
 
 function readPersistedCount() {
@@ -75,10 +86,10 @@ function readPersistedCount() {
 }
 
 describe("recordLesson + DSPy quality gate — Scenario 1: DSPy unreachable", () => {
-  // BUG: quality gate silently passes when DSPy is down (no WARN emitted).
-  // This test documents current behavior. Fix tracked in PR B (separate issue).
-  // DO NOT change this assertion without also fixing memory.ts and adding the WARN.
-  it("persists the lesson with qualityScore=null and emits NO user-facing WARN", async () => {
+  // Fixed in PR B (#19): the gate now emits a WARN to stderr whenever DSPy
+  // is enabled but callDspy() returns null, so users immediately see that
+  // the quality guarantee was bypassed for this record.
+  it("persists the lesson with qualityScore=null AND emits quality-gate-bypass WARN to stderr", async () => {
     const { endpoint } = await getClosedPort();
 
     const result = await recordLesson(BASE_LESSON, tmp, {
@@ -92,18 +103,14 @@ describe("recordLesson + DSPy quality gate — Scenario 1: DSPy unreachable", ()
     assert.equal(result.qualityFeedback, null, "qualityFeedback must be null when DSPy is down");
     assert.equal(readPersistedCount(), 1, "lessons.jsonl must contain the persisted lesson");
 
-    // BUG ASSERTION (PR A): the only warning emitted is the dspy-client's
-    // internal "DSPy evaluation failed" log. There is NO WARN that tells
-    // the user "Lesson persisted WITHOUT quality check" — the silent-
-    // degradation bug. PR B will introduce that WARN and this assertion
-    // will flip from "no quality-gate warning" to "quality-gate WARN present".
-    const qualityGateWarn = warnCapture.find((line) =>
-      /quality.?gate/i.test(line) && /persisted WITHOUT/i.test(line),
+    // PR B contract: the quality-gate-bypass WARN MUST be emitted to stderr
+    // so users cannot miss it. This closes the silent-degradation bug.
+    const qualityGateWarn = stderrCapture.find(
+      (line) => /\[quality-gate\]/.test(line) && /persisted WITHOUT/.test(line),
     );
-    assert.equal(
+    assert.ok(
       qualityGateWarn,
-      undefined,
-      "BUG: no quality-gate-bypass WARN is emitted today; PR B will add it",
+      `expected a quality-gate-bypass WARN on stderr; captured: ${JSON.stringify(stderrCapture)}`,
     );
   });
 });
@@ -119,10 +126,9 @@ describe("recordLesson + DSPy quality gate — Scenario 2: DSPy returns HTTP 500
     await stub.close();
   });
 
-  // BUG: quality gate silently passes when DSPy is down (no WARN emitted).
-  // This test documents current behavior. Fix tracked in PR B (separate issue).
-  // DO NOT change this assertion without also fixing memory.ts and adding the WARN.
-  it("persists the lesson with qualityScore=null and emits NO user-facing WARN", async () => {
+  // Fixed in PR B (#19): same silent-degradation bug as Scenario 1 —
+  // a 500 from DSPy must not be swallowed silently.
+  it("persists the lesson with qualityScore=null AND emits quality-gate-bypass WARN to stderr", async () => {
     const result = await recordLesson(BASE_LESSON, tmp, {
       enabled: true,
       endpoint: stub.endpoint,
@@ -134,13 +140,12 @@ describe("recordLesson + DSPy quality gate — Scenario 2: DSPy returns HTTP 500
     assert.equal(readPersistedCount(), 1, "lessons.jsonl must contain the persisted lesson");
     assert.ok(stub.requests.length >= 1, "stub server must have been contacted");
 
-    const qualityGateWarn = warnCapture.find((line) =>
-      /quality.?gate/i.test(line) && /persisted WITHOUT/i.test(line),
+    const qualityGateWarn = stderrCapture.find(
+      (line) => /\[quality-gate\]/.test(line) && /persisted WITHOUT/.test(line),
     );
-    assert.equal(
+    assert.ok(
       qualityGateWarn,
-      undefined,
-      "BUG: no quality-gate-bypass WARN is emitted today; PR B will add it",
+      `expected a quality-gate-bypass WARN on stderr; captured: ${JSON.stringify(stderrCapture)}`,
     );
   });
 });

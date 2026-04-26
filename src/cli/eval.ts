@@ -2,6 +2,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { loadConfig } from "../core/config-loader.js";
 import { hollowArtifactGuard } from "../guards/hollow-artifact.js";
+import { callDspy, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "../core/dspy-client.js";
 import type { GuardContext } from "../core/types.js";
 
 /**
@@ -56,14 +57,47 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
     }
   }
 
+  // Precompute the DSPy semantic evaluation for this single file so the
+  // guard can use it in its Check 4. Previously `eval` set `useDspy = true`
+  // but never populated `ctx.semanticEvals`, so the guard's DSPy branch was
+  // silently dead code. We also need the null-vs-value distinction here to
+  // decide whether to emit the "DSPy unavailable" banner after the run.
+  const dspyEndpoint =
+    config.guards.hollowArtifact?.dspyEndpoint ?? DEFAULT_DSPY_ENDPOINT;
+  const dspyTimeoutMs =
+    config.guards.hollowArtifact?.dspyTimeoutMs ?? DEFAULT_DSPY_TIMEOUT_MS;
+
+  let fileContent = "";
+  try {
+    fileContent = await fs.readFile(fullPath, "utf-8");
+  } catch {
+    // Already verified existence above; a read error here is exotic —
+    // leave dspyEval null and let the banner fire.
+  }
+
+  const dspyEval = fileContent
+    ? await callDspy(
+        { type: "artifact", id: relPath, content: fileContent },
+        dspyEndpoint,
+        dspyTimeoutMs,
+      )
+    : null;
+
   const ctx: GuardContext = {
     stagedFiles: [relPath],
     projectRoot,
     config,
+    semanticEvals: {
+      dspy: {
+        [relPath]: dspyEval
+          ? { score: dspyEval.score, feedback: dspyEval.feedback }
+          : null,
+      },
+    },
   };
 
   console.log(`\n🔍 Evaluating artifact: ${relPath}`);
-  console.log(`🔗 DSPy endpoint: ${config.guards.hollowArtifact?.dspyEndpoint ?? "http://localhost:8080/evaluate"}`);
+  console.log(`🔗 DSPy endpoint: ${dspyEndpoint}`);
 
   const result = await hollowArtifactGuard.check(ctx);
 
@@ -83,6 +117,16 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
   }
 
   console.log(`\n${result.passed ? "✅ PASSED" : "❌ FAILED"}`);
+
+  // DSPy-unavailable banner: useDspy was forced on, but callDspy returned
+  // null (service unavailable / timeout / 500). Tell the user the L3
+  // semantic layer was skipped so they know this result reflects L1+L2
+  // only — identical contract to memory.ts silent-degradation WARN.
+  if (config.guards.hollowArtifact?.useDspy && dspyEval === null) {
+    process.stderr.write(
+      "⚠  DSPy unavailable: semantic evaluation skipped. Results reflect L1+L2 only.\n",
+    );
+  }
 
   if (!result.passed) {
     process.exitCode = 1;
