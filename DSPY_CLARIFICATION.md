@@ -1,0 +1,1 @@
+> **Note:** DSPy is **opt-in** (useDspy defaults false), Layer 3 of defense chain (after L1 regex + L2 length heuristic). Findings are always WARN-level, never BLOCK. Pipeline operates normally when unavailable.
