@@ -15,6 +15,8 @@
  *   - tests/hollow-artifact-dspy-fallback.test.js (issue #14)
  *   - tests/memory-dspy-gate.test.js (issue #14 scope update)
  *   - tests/cli-dry-run-dspy.test.js (issue #15) — indirectly via closed port
+ *
+ * Executor: Devin-AI
  */
 
 import http from "node:http";

@@ -169,7 +169,7 @@ describe("DSPy fallback — Scenario 2: endpoint returns HTTP 500", () => {
     assert.equal(observed.dspy["doc.md"], null, "500 ⇒ null entry");
     assert.ok(stub.requests.length > 0, "stub server must have been contacted at least once");
     assert.ok(
-      warnCapture.some((line) => /500/.test(line)),
+      warnCapture.some((line) => /DSPy service returned 500/.test(line)),
       "callDspy should emit a WARN about the 500 status",
     );
   });
@@ -238,6 +238,14 @@ describe("DSPy fallback — Scenario 4: server-side hang triggers AbortControlle
     const elapsed = Date.now() - startedAt;
 
     assert.equal(result, null, "timeout must surface as null (graceful degradation)");
+    // Lower bound: AbortController must actually have waited the full timeout.
+    // Without this, a future regression that bails out before issuing fetch()
+    // (e.g. callDspy returning null instantly) would still pass the upper-bound
+    // check, silently breaking the timeout contract.
+    assert.ok(
+      elapsed >= timeoutMs - 50,
+      `callDspy returned in ${elapsed}ms but timeoutMs is ${timeoutMs}; AbortController likely did not gate the request`,
+    );
     assert.ok(
       elapsed < timeoutMs + 1500,
       `callDspy elapsed ${elapsed}ms; expected < ${timeoutMs + 1500}ms (timeoutMs + buffer)`,
