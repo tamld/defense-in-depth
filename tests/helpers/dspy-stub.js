@@ -54,20 +54,30 @@ export function createDspyStub(options = {}) {
         } catch {
           requests.push({ url: req.url, method: req.method, body });
         }
-        if (mode === "timeout") {
-          // Never respond — client AbortController must fire.
-          return;
+        switch (mode) {
+          case "timeout":
+            // Never respond — client AbortController must fire.
+            return;
+          case "500":
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            return res.end("internal server error");
+          case "malformed":
+            res.writeHead(200, { "Content-Type": "application/json" });
+            return res.end("not valid json{");
+          case "score":
+            res.writeHead(status, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ score, feedback }));
+          default:
+            // DEFENSIVE GUARD: unknown mode — fail loudly so test authors
+            // catch typos immediately. Without this, unknown modes would
+            // silently fall through to the healthy-score response, producing
+            // false-passing tests (the stub responds 200 + score 0.8 even
+            // though the test author intended a failure scenario).
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            return res.end(
+              `dspy-stub: unrecognised mode "${mode}". Valid: score | 500 | timeout | malformed`,
+            );
         }
-        if (mode === "500") {
-          res.writeHead(500, { "Content-Type": "text/plain" });
-          return res.end("internal server error");
-        }
-        if (mode === "malformed") {
-          res.writeHead(200, { "Content-Type": "application/json" });
-          return res.end("not valid json{");
-        }
-        res.writeHead(status, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ score, feedback }));
       });
       req.on("error", () => {});
     });
@@ -98,6 +108,16 @@ export function createDspyStub(options = {}) {
  * Grab a port that is guaranteed to be closed (server shut down).
  * Callers use this for "DSPy unreachable" scenarios — any connection
  * attempt yields ECONNREFUSED.
+ *
+ * NOTE: technically there is a TOCTOU window between this function
+ * returning the port and the test issuing a connect() to it — another
+ * process on the same machine could theoretically bind the same
+ * ephemeral port in that gap. In practice on CI runners and dev
+ * machines this never happens because (a) the kernel does not hand
+ * the same ephemeral port out twice in rapid succession, and (b) the
+ * tests run within milliseconds of receiving the port. If you ever
+ * see a flake here, switch to the inline `port = 1` pattern used in
+ * tests/cli-dry-run-dspy.test.js.
  *
  * @returns {Promise<{ port: number, endpoint: string }>}
  */

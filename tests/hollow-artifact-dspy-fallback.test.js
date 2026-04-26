@@ -246,13 +246,49 @@ describe("DSPy fallback — Scenario 4: server-side hang triggers AbortControlle
       elapsed >= timeoutMs - 50,
       `callDspy returned in ${elapsed}ms but timeoutMs is ${timeoutMs}; AbortController likely did not gate the request`,
     );
+    // Upper bound: keep tight (+500ms) so a real regression — e.g. the
+    // AbortController stops working and the call hangs until Node's test
+    // runner kills the process — surfaces as a failed assertion, not as a
+    // long-running test. Bump only if a specific CI runner needs more
+    // headroom (document the runner in the comment).
     assert.ok(
-      elapsed < timeoutMs + 1500,
-      `callDspy elapsed ${elapsed}ms; expected < ${timeoutMs + 1500}ms (timeoutMs + buffer)`,
+      elapsed < timeoutMs + 500,
+      `callDspy elapsed ${elapsed}ms; expected < ${timeoutMs + 500}ms (timeoutMs + buffer)`,
     );
     assert.ok(
       warnCapture.some((line) => /DSPy evaluation failed/.test(line)),
       "callDspy should emit a WARN about the abort/timeout",
+    );
+  });
+});
+
+describe("DSPy fallback — Scenario 5: server returns malformed JSON", () => {
+  let stub;
+
+  beforeEach(async () => {
+    stub = await createDspyStub({ mode: "malformed" });
+  });
+
+  afterEach(async () => {
+    await stub.close();
+  });
+
+  // AC: malformed JSON body ⇒ response.json() throws ⇒ callDspy's outer
+  // try/catch treats it as a graceful failure and returns null. This proves
+  // the dspy-client.ts try/catch (lines 65-101) actually covers JSON parse
+  // errors, not just network errors.
+  it("returns null and emits a WARN when the server responds with invalid JSON", async () => {
+    const result = await callDspy(
+      { type: "artifact", id: "doc.md", content: SUBSTANTIVE },
+      stub.endpoint,
+      1000,
+    );
+
+    assert.equal(result, null, "malformed JSON must surface as null");
+    assert.ok(stub.requests.length === 1, "stub server must have been contacted exactly once");
+    assert.ok(
+      warnCapture.some((line) => /DSPy evaluation failed/.test(line)),
+      "callDspy should emit a WARN about the JSON parse error",
     );
   });
 });
