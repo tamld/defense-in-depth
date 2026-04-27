@@ -1,0 +1,40 @@
+name: Git Shield
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Run gitleaks against the checked-out workspace. We avoid PR-API mode
+      # because some token configurations return 403 "Resource not accessible
+      # by integration" — repo-mode keeps the job reproducible regardless of
+      # token scope.
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          VERSION="8.24.3"
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          tar -xzf /tmp/gitleaks.tgz -C /tmp
+          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Run gitleaks
+        env:
+          GITLEAKS_CONFIG: .gitleaks.toml
+        run: |
+          set -euo pipefail
+          gitleaks detect --source . --config "$GITLEAKS_CONFIG" --redact --no-banner --no-git

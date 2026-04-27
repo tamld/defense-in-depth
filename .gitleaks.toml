@@ -1,0 +1,33 @@
+# Gitleaks configuration for defense-in-depth.
+#
+# Strategy: rely on gitleaks' built-in default rule set (covers AWS / GCP /
+# Azure / GitHub PAT / OpenAI / Stripe / generic high-entropy patterns) and
+# narrow the scan with a project-specific allowlist below.
+#
+# This config is read by `.github/workflows/git-shield.yml` (CI fail-safe).
+# The local pre-commit guard equivalent is tracked in issue #41 (Track A2
+# secret-detection guard).
+
+[allowlist]
+description = "defense-in-depth global allowlist"
+paths = [
+    '''node_modules/''',
+    '''dist/''',
+    '''coverage/''',
+    '''\.test\.js$''',
+    '''\.test\.ts$''',
+    '''\.spec\.ts$''',
+    '''tests/''',
+    '''package-lock\.json''',
+    '''pnpm-lock\.yaml''',
+    '''yarn\.lock'''
+]
+
+[[rules]]
+# Gitleaks ships a default rule set; this file does not override it. Any
+# project-specific patterns (e.g. internal token formats) should be added as
+# additional `[[rules]]` blocks here, never by disabling the default set.
+id = "placeholder-do-not-remove"
+description = "Placeholder rule — keeps the file valid TOML even when no project-specific rules are active. Default gitleaks rules apply implicitly."
+regex = '''(?i)A_RULE_THAT_NEVER_MATCHES_BECAUSE_THIS_PROJECT_RELIES_ON_DEFAULTS_____'''
+tags = ["meta"]
