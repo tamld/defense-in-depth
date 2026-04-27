@@ -55,17 +55,6 @@ export interface EngineVerdict {
   };
 }
 
-/** 
- * v0.7: Progressive Discovery Hint
- * Defines the shape of a post-execution UX hint.
- */
-export interface DiscoveryHint {
-  id: string;
-  message: string;
-  command?: string;
-  tier: 1 | 2;
-}
-
 // ─── Guard Contract ───
 
 /** Runtime context passed to each guard */
@@ -184,12 +173,6 @@ export interface FederationGuardConfig {
   providerConfig?: Record<string, unknown>;
 }
 
-/** v0.7: Progressive Discovery UX Configuration */
-export interface HintsConfig {
-  /** Days to wait before showing the same hint again if not dismissed (default: 7) */
-  cooldownDays?: number;
-}
-
 /** Root configuration loaded from defense.config.yml */
 export interface DefendConfig {
   version: string;
@@ -204,7 +187,6 @@ export interface DefendConfig {
     hitlReview?: HitlReviewConfig;
     federation?: FederationGuardConfig;
   };
-  hints?: HintsConfig;
 }
 
 // ─── Evidence System (Trust-but-Verify) ───

@@ -10,7 +10,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { loadConfig } from "../core/config-loader.js";
-import { shouldShowHint, recordHintShown } from "../core/hints.js";
 
 export async function doctor(projectRoot: string): Promise<void> {
   console.log("🩺 defense-in-depth doctor\n");
@@ -75,20 +74,5 @@ export async function doctor(projectRoot: string): Promise<void> {
     console.log("✅ All checks passed. Your project is defended!\n");
   } else {
     console.log(`⚠️  ${issues} issue(s) found. Run 'defense-in-depth init' to fix.\n`);
-  }
-
-  // 5. Progressive Discovery Hints
-  try {
-    const config = loadConfig(projectRoot);
-    if (!config.guards.hollowArtifact?.useDspy) {
-      if (await shouldShowHint(projectRoot, "dspy-opt-in", config)) {
-        console.log("\x1b[90m💡 Hint: You have no DSPy config. Want to enable it for semantic checks?\x1b[0m");
-        console.log("\x1b[90m   Set hollowArtifact.useDspy: true in defense.config.yml\x1b[0m");
-        console.log("\x1b[90m   (Dismiss: npx defense-in-depth hint dismiss dspy-opt-in)\x1b[0m\n");
-        await recordHintShown(projectRoot, "dspy-opt-in");
-      }
-    }
-  } catch {
-    // Ignore config errors for hints
   }
 }
