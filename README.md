@@ -49,6 +49,17 @@ unstructured commits.*<br/>
 > default branch. The local hooks are the fast feedback loop; the server
 > side is the enforcement loop.
 
+> [!NOTE]
+> **Current status (`v0.7.0-rc.1`, April 2026)** — release candidate, not yet promoted to `npm latest`.
+>
+> **Shipped**: 8 built-in guards (v0.1–v0.3), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1).
+>
+> **In flight (Track A — Adoption)**: docs reconcile, guard breadth bump, API freeze → v1.0 GA promotion. Tracked under [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42) with the canonical execution order pinned in the comments.
+>
+> **Designed but gated (Track B — Meta Growth, v1.1.x)**: F1 aggregator, Án Lệ injection contract, dedup, forgetting, quality gate. **Hard-gated** behind Track A4 exit (≥10 external users + ≥100 captured events) per [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md).
+>
+> **Right next read** — Quick start: [`docs/quickstart.md`](docs/quickstart.md). Roadmap & gating: [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). Strategic direction: [`STRATEGY.md`](STRATEGY.md). Vision (4 layers + types ledger): [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md).
+
 > [!WARNING]
 > **🤖 IF YOU ARE AN AI AGENT READING THIS:**
 > Do NOT read this entire file. It is written for human architects and developers.
@@ -496,14 +507,15 @@ These tools govern AI **while it reasons**. defense-in-depth governs AI **when i
 | **v0.3** | TKID Lite (file-based tickets) + trust-but-verify | `TicketRef` | ✅ Done |
 | **v0.4** | Memory Layer (`lessons.jsonl`) + growth metrics | `Lesson`, `GrowthMetric` | ✅ Done |
 | **v0.5** | Optional DSPy semantic layer (opt-in, graceful degradation) + semantic quality evaluation | `EvaluationScore` | ✅ Done |
-| **v0.6** | Federation: Parent↔child governance guards | `FederationGuardConfig` | ✅ Done |
+| **v0.6** | Federation: Parent↔child governance guards | `FederationGuardConfig`, `HttpTicketProvider` | ✅ Done |
 | **v0.6.2** | Test & Operational Hardening (Coverage gates, End-to-End tests) | | ✅ Done |
-| **v0.7** | Meta Memory: recall quality measurement | `LessonOutcome`, `RecallMetric` | 📋 Designed |
-| **v0.8** | Meta Growth: growth acceleration tracking | `MetaGrowthSnapshot` | 📋 Designed |
-| **v0.9** | Telemetry Sync: Bidirectional Internal ↔ OSS data flow | `TelemetryPayload` | 📋 Designed |
-| **v1.0** | Stable API + npm publish | All types frozen | 📋 Planned |
+| **v0.7-rc.1** | Path A memory loop MVP + Progressive Discovery hints | `Hint`, `HintState`, `LessonOutcome`, `RecallMetric`, `RecallEvent`, `FeedbackEvent`, `GuardF1Metric` | 🚚 rc.1 (PRs [#27](https://github.com/tamld/defense-in-depth/pull/27), [#28](https://github.com/tamld/defense-in-depth/pull/28), [#31](https://github.com/tamld/defense-in-depth/pull/31)) |
+| **Track A1–A4** | Docs reconcile, guard breadth bump, API freeze, `npm latest` promo (30-day bake → v1.0 GA) | (no new types — release engineering) | 🔄 In flight (umbrella [#42](https://github.com/tamld/defense-in-depth/issues/42)) |
+| **v1.0** | Stable API + `npm latest` GA | All types frozen | 📋 Planned (Track A4 exit) |
+| **v1.1.x** | Meta Growth: F1 aggregator + Án Lệ injection + dedup + forgetting + quality gate. **Gated** on Track A4 exit (≥10 external users + ≥100 captured events). | `MetaGrowthSnapshot` | 📋 Designed (Track B) |
+| **v0.9** | Telemetry Sync: Bidirectional Internal ↔ OSS data flow (numbering revisited after v1.1.x) | `FederationPayload` | 📋 Designed |
 
-> All types for v0.1–v0.8 are ALREADY published in `src/core/types.ts` — compiled, documented, importable. Implementation follows incrementally. See [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md) for the full vision.
+> All types across the roadmap (Layers 0–3 + Federation + Telemetry Sync) are ALREADY published in `src/core/types.ts` — compiled, documented, importable. Implementation follows incrementally per the gating contract in [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). See [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md) for the full vision and types ledger.
 
 ---
 
