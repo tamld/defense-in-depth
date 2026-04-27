@@ -102,6 +102,28 @@ export async function verify(
     `\n📊 ${verdict.passedGuards}/${verdict.totalGuards} guards passed (${Math.round(verdict.durationMs)}ms)`,
   );
 
+  // DSPy-unavailable banner — fourth and final silent-degradation site
+  // closed by the contract from án lệ L-2026-04-29-silent-tier1-degradation.
+  // When the project opts into Tier-1 (config.guards.hollowArtifact.useDspy =
+  // true) but the precompute returned null for at least one file, the
+  // hollow-artifact guard's Check 4 produced no finding for that file —
+  // identical contract surface to the bug PR #20 fixed in `eval`.
+  // We treat any null as "DSPy was unavailable for at least one file" and
+  // emit one banner per run, matching `eval`'s wording for predictability.
+  // The --dry-run-dspy banner above (which forces useDspy=false at config
+  // load time) means this branch is only reached for real configs that
+  // expected DSPy and didn't get it.
+  const effectiveConfig = config ?? engine.getConfig();
+  if (effectiveConfig.guards.hollowArtifact?.useDspy) {
+    const dspyEvals = verdict.semanticEvals?.dspy ?? {};
+    const anyNull = Object.values(dspyEvals).some((v) => v === null);
+    if (anyNull) {
+      process.stderr.write(
+        "⚠  DSPy unavailable: semantic evaluation skipped. Results reflect L1+L2 only.\n",
+      );
+    }
+  }
+
   if (!verdict.passed) {
     process.exit(1);
   }
