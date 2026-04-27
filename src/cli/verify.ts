@@ -16,6 +16,7 @@ import { loadConfig } from "../core/config-loader.js";
 import { allBuiltinGuards } from "../guards/index.js";
 import { Severity } from "../core/types.js";
 import type { DefendConfig } from "../core/types.js";
+import { shouldShowHint, recordHintShown } from "../core/hints.js";
 
 export async function verify(
   projectRoot: string,
@@ -122,6 +123,20 @@ export async function verify(
         "⚠  DSPy unavailable: semantic evaluation skipped. Results reflect L1+L2 only.\n",
       );
     }
+  }
+
+  // Progressive Discovery Hints
+  try {
+    if (verdict.failedGuards > 0) {
+      if (await shouldShowHint(projectRoot, "lesson-search", effectiveConfig)) {
+        console.log("\n\x1b[90m💡 Hint: You have failing guards. Want to see if the system remembers a fix?\x1b[0m");
+        console.log("\x1b[90m   Run: npx defense-in-depth lesson search <keyword>\x1b[0m");
+        console.log("\x1b[90m   (Dismiss: npx defense-in-depth hint dismiss lesson-search)\x1b[0m");
+        await recordHintShown(projectRoot, "lesson-search");
+      }
+    }
+  } catch {
+    // Ignore errors for hints
   }
 
   if (!verdict.passed) {
