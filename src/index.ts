@@ -10,9 +10,14 @@
  *   npx defense-in-depth doctor
  */
 
+// ─── Engine + Config ───
 export { DefendEngine } from "./core/engine.js";
 export { loadConfig, DEFAULT_CONFIG } from "./core/config-loader.js";
-export { Severity } from "./core/types.js";
+
+// ─── Core enums ───
+export { Severity, EvidenceLevel } from "./core/types.js";
+
+// ─── Core types ───
 export type {
   Guard,
   GuardContext,
@@ -20,22 +25,41 @@ export type {
   EngineVerdict,
   Finding,
   DefendConfig,
+  TicketRef,
+  Lesson,
+  EvaluationScore,
+  GuardF1Metric,
+  DSPyConfig,
+  FeedbackEvent,
+} from "./core/types.js";
+
+// ─── Per-guard configuration types ───
+export type {
+  HollowArtifactConfig,
+  SsotPollutionConfig,
+  RootPollutionConfig,
+  CommitFormatConfig,
+  BranchNamingConfig,
+  PhaseGateConfig,
+  TicketIdentityConfig,
+  HitlReviewConfig,
   FederationGuardConfig,
 } from "./core/types.js";
 
-// Guards
+// ─── Built-in guards ───
 export {
   hollowArtifactGuard,
   ssotPollutionGuard,
+  rootPollutionGuard,
   commitFormatGuard,
   branchNamingGuard,
   phaseGateGuard,
   ticketIdentityGuard,
+  hitlReviewGuard,
   federationGuard,
   allBuiltinGuards,
 } from "./guards/index.js";
 
-// Federation (v0.3 → v0.6)
+// ─── Federation (v0.3 → v0.6) ───
 export { createProvider, FileTicketProvider, HttpTicketProvider } from "./federation/index.js";
 export type { TicketStateProvider } from "./federation/types.js";
-export type { TicketRef } from "./core/types.js";
