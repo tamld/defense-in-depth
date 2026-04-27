@@ -87,6 +87,9 @@ const DEFAULT_CONFIG: DefendConfig = {
       provider: "file",
     },
   },
+  hints: {
+    cooldownDays: 7,
+  },
 };
 
 const CONFIG_FILE_NAMES = [
