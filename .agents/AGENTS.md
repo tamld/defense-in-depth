@@ -69,6 +69,8 @@ flowchart TD
 │   │   └── SKILL.md           (growth engine — 5-phase reflection)
 │   ├── skill-deep-research/
 │   │   └── SKILL.md           (research pipeline with cross-check)
+│   ├── skill-impact-predictor/
+│   │   └── SKILL.md           (pre-implementation blast-radius analysis)
 │   └── _template/
 │       └── SKILL.md
 ├── config/                    # Machine-readable configs

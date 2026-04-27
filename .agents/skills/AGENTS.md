@@ -38,6 +38,7 @@ Threat modeling a new check       → skill-threat-modeling-expert/SKILL.md
 Writing adversarial tests         → skill-test-architect/SKILL.md
 Code review of a PR               → skill-review-code/SKILL.md
 Refactoring existing guard code   → skill-surgical-refactorer/SKILL.md
+Mapping blast radius of a change  → skill-impact-predictor/SKILL.md
 CI/CD pipeline or GitHub Actions  → skill-devops-github-actions/SKILL.md
 DSPy evaluation quality / tuning  → skill-ai-dspy-validator/SKILL.md
 ```
@@ -53,6 +54,7 @@ DSPy evaluation quality / tuning  → skill-ai-dspy-validator/SKILL.md
 | [skill-test-architect](skill-test-architect/SKILL.md) | Testing | Adversarial test design |
 | [skill-review-code](skill-review-code/SKILL.md) | Quality | PR code review |
 | [skill-surgical-refactorer](skill-surgical-refactorer/SKILL.md) | Refactoring | Safe guard refactors |
+| [skill-impact-predictor](skill-impact-predictor/SKILL.md) | Governance | Pre-implementation blast-radius analysis |
 | [skill-devops-github-actions](skill-devops-github-actions/SKILL.md) | CI/CD | GitHub Actions / CI gates |
 | [skill-ai-dspy-validator](skill-ai-dspy-validator/SKILL.md) | Intelligence | DSPy eval quality |
 
