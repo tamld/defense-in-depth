@@ -47,4 +47,3 @@ defense.config.yml
 
 # Agent records
 .agents/records/reviews/
-.agents/records/hints.jsonl
