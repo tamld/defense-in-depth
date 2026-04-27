@@ -328,13 +328,4 @@ export class DefendEngine {
   }
 }
 
-// Re-export everything consumers need
-export { Severity } from "./types.js";
-export type {
-  Guard,
-  GuardContext,
-  GuardResult,
-  EngineVerdict,
-  DefendConfig,
-  Finding,
-} from "./types.js";
+
