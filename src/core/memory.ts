@@ -3,6 +3,7 @@ import * as path from "path";
 import * as crypto from "crypto";
 import { Lesson, GrowthMetric } from "./types.js";
 import { callDspy, callDspyRank, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "./dspy-client.js";
+import { recordRecall } from "./lesson-outcome.js";
 
 /**
  * Handles operations related to Layer 1 (Memory): lesson recording and growth metrics.
@@ -23,6 +24,20 @@ export interface MemoryDspyOptions {
   endpoint?: string;
   /** Timeout in ms */
   timeoutMs?: number;
+}
+
+/** Options for {@link searchLessons} that govern recall-event capture
+ *  (issue #23). Defaults preserve backward compatibility — callers that
+ *  pass nothing still get a recall event written with `executor="human"`. */
+export interface SearchLessonsOptions {
+  /** TKID to attribute the recall event to. Empty string allowed
+   *  (Persona A on a standalone repo). */
+  ticketId?: string;
+  /** Executor label for the recall event. Defaults to `"human"`. */
+  executor?: string;
+  /** Disable recall-event capture entirely. Use when the caller is the
+   *  scanner re-walking history (would create circular events). */
+  captureRecall?: boolean;
 }
 
 /** Result of a lesson recording, including optional quality evaluation */
@@ -187,15 +202,22 @@ export async function recordLesson(
  * Mode 2 (semantic): DSPy ranks all lessons by semantic relevance to query.
  *   Falls back to Mode 1 if DSPy is unavailable.
  *
+ * v0.7 (#23): every returned result is also written to
+ * `.agents/records/lesson-recalls.jsonl` so the meta-memory layer can
+ * later answer "which recalls were helpful?". Idempotent within a 1-hour
+ * window, fire-and-forget — a disk error never breaks the search hot path.
+ *
  * @param query The search query
  * @param projectRoot The root directory containing lessons.jsonl
  * @param dspy Optional DSPy configuration for semantic search
+ * @param options Optional recall-capture context (ticketId, executor)
  * @returns Array of LessonSearchResult sorted by relevance
  */
 export async function searchLessons(
   query: string,
   projectRoot: string = process.cwd(),
   dspy?: MemoryDspyOptions,
+  options?: SearchLessonsOptions,
 ): Promise<LessonSearchResult[]> {
   const lessons = await readAllLessons(projectRoot);
   if (lessons.length === 0) return [];
@@ -227,6 +249,7 @@ export async function searchLessons(
           matchMethod: "semantic",
         });
       }
+      captureRecalls(projectRoot, query, results, options);
       return results;
     }
     // DSPy failed (service unavailable / timeout / 500). Falling through to
@@ -245,7 +268,7 @@ export async function searchLessons(
 
   // Mode 1: String matching (original implementation)
   const lowerQuery = query.toLowerCase();
-  return lessons
+  const stringResults: LessonSearchResult[] = lessons
     .filter(lesson => {
       if (lesson.title.toLowerCase().includes(lowerQuery)) return true;
       if (lesson.insight.toLowerCase().includes(lowerQuery)) return true;
@@ -258,6 +281,48 @@ export async function searchLessons(
       relevanceScore: null,
       matchMethod: "string" as const,
     }));
+
+  captureRecalls(projectRoot, query, stringResults, options);
+  return stringResults;
+}
+
+/**
+ * Fire-and-forget recall capture. Wraps {@link recordRecall} per result in
+ * an isolated try/catch so a JSONL write error never propagates to the
+ * search caller (the search hot path stays read-only from the caller's
+ * perspective). Each failure is signalled to stderr but does not throw.
+ *
+ * Disable via `options.captureRecall === false` — the scanner uses this
+ * to avoid creating circular events when re-walking history.
+ */
+function captureRecalls(
+  projectRoot: string,
+  query: string,
+  results: LessonSearchResult[],
+  options: SearchLessonsOptions | undefined,
+): void {
+  if (options?.captureRecall === false) return;
+  if (results.length === 0) return;
+  const ticketId = options?.ticketId ?? "";
+  const executor = options?.executor ?? "human";
+  for (const r of results) {
+    try {
+      recordRecall(projectRoot, {
+        lessonId: r.lesson.id,
+        ticketId,
+        query,
+        matchMethod: r.matchMethod,
+        source: "search",
+        executor,
+      });
+    } catch (err: unknown) {
+      // Storage failure must not break search — surface to stderr only.
+      const message = err instanceof Error ? err.message : String(err);
+      process.stderr.write(
+        `⚠  [recall] failed to record recall for lesson ${r.lesson.id}: ${message}\n`,
+      );
+    }
+  }
 }
 
 /**

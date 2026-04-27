@@ -264,6 +264,18 @@ export interface Lesson {
   relatedFiles?: string[];
   /** ISO timestamp */
   createdAt: string;
+  /**
+   * v0.7 (#23): Optional regex/string fragment that signifies the
+   * `wrongApproach` was repeated. When `did lesson scan-outcomes` walks
+   * commit diffs, a hit on this pattern marks the recall `helpful=false`
+   * (the lesson was recalled but the user did the wrong thing anyway).
+   *
+   * Persona A may leave this empty — the scanner falls back to DSPy fuzzy
+   * match on `wrongApproach` text when DSPy is enabled, otherwise emits
+   * `helpful=null` with `source="scanner-no-match"`. This keeps the field
+   * backward-compatible for existing lessons.
+   */
+  wrongApproachPattern?: string;
 }
 
 /** v0.5: Quality evaluation score — interface for DSPy/LLM evaluators */
@@ -391,28 +403,87 @@ export interface FeedbackEvent {
 // ─── Meta Layer: Memory About Memory (Layer 2) ───
 
 /**
- * v0.6: Lesson Outcome — tracks whether a lesson was recalled and useful.
+ * v0.7 (#23): Recall Event — written every time `searchLessons()` returns a
+ * lesson, OR when a human invokes `did lesson outcome` for a lesson.
  *
- * This is the META MEMORY layer. A lesson that exists but is never recalled
- * is the same as a lesson that doesn't exist. This type enables measuring
- * how well the memory system actually WORKS.
+ * This is the *input* side of the meta-memory layer: a fact that "this lesson
+ * was surfaced for this query in this ticket context". The *outcome* (was it
+ * helpful?) is captured separately in {@link LessonOutcome} because that
+ * answer is only knowable after the user finishes the work.
  *
- * Usage: After each guard run or task completion, check if any existing lesson
- * SHOULD HAVE been recalled for the current scenario. Log the outcome.
+ * Append-only JSONL at `.agents/records/lesson-recalls.jsonl`. Idempotent on
+ * `id`, with id deliberately excluding timestamp — same logical recall within
+ * the dedupe window collapses to a single event. Same lesson lesson learned
+ * in PR #26 / án lệ L-2026-04-29: timestamp in id breaks the idempotent
+ * contract across second boundaries.
+ */
+export interface RecallEvent {
+  /** Stable id — sha256(`lessonId|ticketId|queryHash|matchMethod`) prefix.
+   *  No timestamp in the id (see comment above). */
+  id: string;
+  /** The lesson that was surfaced. */
+  lessonId: string;
+  /** TKID context. Empty string when no ticket can be extracted (Persona A
+   *  on a standalone repo is allowed to skip ticket attribution). */
+  ticketId: string;
+  /** Hex prefix of sha256(query) — stable hash so re-searching the same
+   *  query for the same lesson dedupes within the window. */
+  queryHash: string;
+  /** Which path produced the match. */
+  matchMethod: "string" | "semantic";
+  /** Provenance: where this recall event came from. */
+  source: "search" | "cli-explicit";
+  /** ISO timestamp at write time. */
+  timestamp: string;
+  /** Who triggered the recall: `"human"` for cli-explicit, `"agent:<name>"`
+   *  for an agent-invoked search, `"scraper:v1"` reserved for future
+   *  retroactive backfills. */
+  executor: string;
+}
+
+/**
+ * v0.7 (#23): Lesson Outcome — was a recall actually helpful?
+ *
+ * Two production paths:
+ *   1. `did lesson outcome <id> --helpful/--not-helpful` (explicit human)
+ *   2. `did lesson scan-outcomes` (passive scanner that walks git history,
+ *      matches `Lesson.wrongApproachPattern` against commit diffs since the
+ *      recall, and infers helpful=false on hit / helpful=true on no hit)
+ *
+ * Append-only JSONL at `.agents/records/lesson-outcomes.jsonl`. Idempotent
+ * on `id` = sha256(`recallId|label`) — re-running the explicit cli writes
+ * one event per (recall, label); re-running the scanner is a no-op once the
+ * pattern decision is stable.
+ *
+ * Schema is the single source of truth that `RecallMetric` consumes (v0.8
+ * dashboard). Producers/consumers join on `recallId`.
  */
 export interface LessonOutcome {
-  /** The lesson that was (or should have been) recalled */
+  /** Stable id — sha256(`recallId|label`) prefix. No timestamp in the id. */
+  id: string;
+  /** Links back to the {@link RecallEvent} that this outcome evaluates. */
+  recallId: string;
+  /** Denormalized for query convenience — same as the linked recall. */
   lessonId: string;
-  /** Was this lesson recalled when a similar situation arose? */
-  recalled: boolean;
-  /** Was the recall actually helpful to the agent? */
+  /** Was the recall helpful? `null` is a valid outcome — it means we
+   *  honestly don't know (no `wrongApproachPattern` and DSPy fuzzy match
+   *  was disabled or unavailable). Never assume `null === false`. */
   helpful: boolean | null;
-  /** The scenario that triggered (or should have triggered) recall */
-  triggerScenario: string;
-  /** Who was the agent/executor at the time? */
-  executor?: string;
-  /** ISO timestamp */
+  /** How we decided. `cli-explicit` came from a human; `scanner-pattern-
+   *  match` came from a regex hit on `wrongApproachPattern`; `scanner-no-
+   *  match` came from a window-walk that found no hit (or could not run). */
+  source: "cli-explicit" | "scanner-pattern-match" | "scanner-no-match";
+  /** Optional pattern that matched (only present for scanner-pattern-
+   *  match — useful for audit). */
+  matchedPattern?: string;
+  /** Optional human note. Plaintext — callers are responsible for
+   *  redaction. */
+  note?: string;
+  /** ISO timestamp at write time. */
   timestamp: string;
+  /** Who wrote it: `"human"` for cli-explicit, `"scanner:v1"` for the
+   *  passive evaluator. Versioned so analysts can filter by algo version. */
+  executor: string;
 }
 
 /**
