@@ -1,0 +1,33 @@
+# Gitleaks configuration for defense-in-depth.
+#
+# Strategy: extend gitleaks' built-in default rule set (covers AWS / GCP /
+# Azure / GitHub PAT / OpenAI / Stripe / generic high-entropy patterns) and
+# narrow the scan with a project-specific allowlist below.
+#
+# IMPORTANT: gitleaks 8.x replaces the default rule set when a config file
+# defines `[[rules]]` blocks without an `[extend]` directive. The `[extend]`
+# block below is required to inherit the defaults — without it, scans miss
+# every real secret pattern.
+#
+# This config is read by `.github/workflows/git-shield.yml` (CI fail-safe).
+# The local pre-commit guard equivalent is tracked in issue #41 (Track A2
+# secret-detection guard).
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "defense-in-depth global allowlist (build artefacts + lockfiles only)"
+# Per `.agents/rules/rule-security-continuity.md` ("No secrets in source code"),
+# test files are intentionally NOT excluded — they are source code and must be
+# scanned. False positives in test fixtures should be silenced with targeted
+# `gitleaks:allow` inline comments or per-rule allowlists, never blanket path
+# exclusions.
+paths = [
+    '''node_modules/''',
+    '''dist/''',
+    '''coverage/''',
+    '''package-lock\.json''',
+    '''pnpm-lock\.yaml''',
+    '''yarn\.lock'''
+]
