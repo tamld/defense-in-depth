@@ -19,18 +19,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Scan the full git log so secrets that were committed and later removed
-      # are still detected. `fetch-depth: 0` (above) gives us complete history;
-      # `gitleaks detect` defaults to git-mode and walks every commit.
+      # Pin gitleaks to a specific version + sha256 of the linux_x64 tarball.
+      # Bumping the version requires updating SHA256 in lockstep; cross-check
+      # against the official checksums file:
+      #   https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_checksums.txt
       - name: Install gitleaks
         run: |
           set -euo pipefail
           VERSION="8.24.3"
+          SHA256="9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c"
           curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          echo "${SHA256}  /tmp/gitleaks.tgz" | sha256sum -c -
           tar -xzf /tmp/gitleaks.tgz -C /tmp
           sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
           gitleaks version
 
+      # Scan the full git log so secrets that were committed and later removed
+      # are still detected. `fetch-depth: 0` (above) gives us complete history;
+      # `gitleaks detect` defaults to git-mode and walks every commit.
       - name: Run gitleaks
         env:
           GITLEAKS_CONFIG: .gitleaks.toml
