@@ -229,7 +229,18 @@ export async function searchLessons(
       }
       return results;
     }
-    // DSPy failed → fall through to string matching
+    // DSPy failed (service unavailable / timeout / 500). Falling through to
+    // string matching preserves progress (graceful degradation), but we MUST
+    // signal the bypass — users who explicitly passed dspy.enabled=true
+    // (CLI: `lesson search --semantic`) need to know they are reading a
+    // string-match result, not a semantic one. Without this WARN, semantic
+    // search silently downgrades to lower-recall string match. Same contract
+    // as memory.recordLesson and cli/eval (án lệ L-2026-04-29-silent-tier1-
+    // degradation; closes the search-mode site of issue #24).
+    process.stderr.write(
+      "⚠  [search] DSPy semantic ranking unavailable: falling back to string match. " +
+        "Results may have lower recall.\n",
+    );
   }
 
   // Mode 1: String matching (original implementation)

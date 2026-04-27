@@ -160,6 +160,7 @@ export class DefendEngine {
       warnedGuards,
       results,
       durationMs,
+      semanticEvals,
     };
   }
 

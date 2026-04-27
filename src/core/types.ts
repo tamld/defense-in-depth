@@ -43,6 +43,16 @@ export interface EngineVerdict {
   warnedGuards: number;
   results: GuardResult[];
   durationMs: number;
+  /**
+   * Precomputed semantic evaluations from Phase 2.5. Exposed so callers
+   * (e.g. the `verify` CLI) can detect Tier-1 silent degradation —
+   * useDspy was on, but the call returned null for one or more files —
+   * and emit a contract-level WARN to stderr. Same shape as
+   * GuardContext.semanticEvals.
+   */
+  semanticEvals?: {
+    dspy?: Record<string, { score: number; feedback?: string } | null>;
+  };
 }
 
 // ─── Guard Contract ───
