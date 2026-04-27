@@ -17,15 +17,16 @@
 useDefault = true
 
 [allowlist]
-description = "defense-in-depth global allowlist"
+description = "defense-in-depth global allowlist (build artefacts + lockfiles only)"
+# Per `.agents/rules/rule-security-continuity.md` ("No secrets in source code"),
+# test files are intentionally NOT excluded — they are source code and must be
+# scanned. False positives in test fixtures should be silenced with targeted
+# `gitleaks:allow` inline comments or per-rule allowlists, never blanket path
+# exclusions.
 paths = [
     '''node_modules/''',
     '''dist/''',
     '''coverage/''',
-    '''\.test\.js$''',
-    '''\.test\.ts$''',
-    '''\.spec\.ts$''',
-    '''tests/''',
     '''package-lock\.json''',
     '''pnpm-lock\.yaml''',
     '''yarn\.lock'''

@@ -19,10 +19,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Run gitleaks against the checked-out workspace. We avoid PR-API mode
-      # because some token configurations return 403 "Resource not accessible
-      # by integration" — repo-mode keeps the job reproducible regardless of
-      # token scope.
+      # Scan the full git log so secrets that were committed and later removed
+      # are still detected. `fetch-depth: 0` (above) gives us complete history;
+      # `gitleaks detect` defaults to git-mode and walks every commit.
       - name: Install gitleaks
         run: |
           set -euo pipefail
@@ -37,4 +36,4 @@ jobs:
           GITLEAKS_CONFIG: .gitleaks.toml
         run: |
           set -euo pipefail
-          gitleaks detect --source . --config "$GITLEAKS_CONFIG" --redact --no-banner --no-git
+          gitleaks detect --source . --config "$GITLEAKS_CONFIG" --redact --no-banner
