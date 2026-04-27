@@ -2,7 +2,7 @@
 domain: governance
 name: skill-impact-predictor
 description: Trace import graph + test coverage of files about to be modified and produce an impact report before any code changes are made.
-version: 1.0.0
+version: 1.0.1
 type: specialist
 role: The Blast Radius Calculator
 ---
@@ -36,7 +36,7 @@ The skill is a **planning artifact**. It runs before the diff exists. Running it
 |:--:|:--|:--|
 | G1 | Run BEFORE any source edit. The agent's working tree must be clean (or contain only doc edits) when the report is produced. | STOP — post-hoc analysis is rejected. |
 | G2 | The report cites real files in `src/`, `tests/`, or `.agents/`. No invented paths. | STOP — re-run discovery with `grep`/`rg`. |
-| G3 | If a direct target is a public-API file (`src/core/types.ts`, `src/core/engine.ts`, `src/guards/index.ts`, `src/cli/index.ts`) AND risk is HIGH AND test coverage of the target is below 70% by file count, BLOCK and demand tests first. | BLOCK — return to issue queue. |
+| G3 | If a direct target is a public-API file (any file re-exported by `src/index.ts`, including its transitive barrel exports such as `src/guards/index.ts` and `src/federation/index.ts`) AND risk is HIGH AND test coverage of the target is below 70% by file count, BLOCK and demand tests first. The agent MUST resolve the public-API set by reading the current `src/index.ts` at analysis time — never from a cached list. | BLOCK — return to issue queue. |
 | G4 | If blast radius (direct + inbound consumers) exceeds 50 files, HALT and require splitting the work into smaller issues. | HALT — open child issues, do not proceed in one PR. |
 | G5 | The skill must NOT widen its scope into refactoring, fixing unrelated issues, or modifying tests of unrelated modules. Pure analysis only. | STOP — file separate issues for collateral findings. |
 
@@ -50,13 +50,18 @@ Read the issue / PR description. Extract every file path the agent intends to ed
 
 ### Step 2 — Trace inbound consumers (1st degree)
 
-For each direct target, find every file that imports it.
+For each direct target, find every file that imports it. **Preferred tool**: if the CRG MCP server is mounted and exposes `get_impact_radius_tool`, use it — it understands the TypeScript module graph and avoids the blind spots listed below. Fall back to `rg` only when CRG is unavailable.
 
 ```bash
-# In repo root
+# rg fallback — run from repo root
 rg -l "from ['\"][^'\"]*<basename>['\"]" --type ts src tests
 rg -l "require\\(['\"][^'\"]*<basename>['\"]\\)" src tests
 ```
+
+> **Known blind spots of the `rg` regex above** (document them in the Impact Report when relevant):
+> 1. **Dynamic imports** — `await import("...")` and `import(condition ? a : b)` are NOT matched. If the codebase uses dynamic imports for the target's basename, manually grep for `import\(` and inspect.
+> 2. **Barrel re-exports** — a file that re-exports the target via `export * from "./<basename>"` will be matched, but consumers of THAT barrel won't be — Step 3 (2nd degree) is what catches them. Do not stop at depth 1 if a 1st-degree match is itself a barrel.
+> 3. **`.js` extension imports** — TypeScript NodeNext / ESM style `from "./<basename>.js"` IS matched by the regex (the basename appears verbatim), but if the target is renamed across an `.ts` ↔ `.js` boundary, audit manually.
 
 Record the absolute count and the file list. Pay special attention to:
 - `src/guards/index.ts` (barrel export — touching it ripples to every guard consumer)
