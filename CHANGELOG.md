@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.7.0-rc.1] — Memory Layer + Progressive Discovery (Path A) - 2026-04-27
+
+> First v0.7 release candidate. Closes the three Path A tickets that turn the Tier-2 memory layer from a one-way write surface into a learning loop, and bridges Persona A → Persona B with non-blocking earned-signal hints.
+
+### Added
+- **`did feedback` MVP** (#22) — first-class CLI for labelling guard findings as TP/FP/FN/TN. Append-only `.agents/records/feedback.jsonl`, deterministic event ids, query/list/show subcommands. Foundation for F1 measurement of guard precision.
+- **LessonOutcome MVP** (#23) — `did lesson outcome <id> --helpful|--not-helpful` records explicit recall outcomes; `did lesson scan-outcomes` walks git diffs and matches `Lesson.wrongApproachPattern` to detect implicit re-occurrences. Append-only `.agents/records/lesson-recalls.jsonl` + `lesson-outcomes.jsonl`. Idempotent ids exclude timestamps (Án Lệ #2). Fire-and-forget recall capture in `searchLessons`. Optional DSPy fuzzy match path emits the silent-degradation WARN per Án Lệ #1.
+- **Progressive Discovery UX hints** (#21) — earned-signal hint engine (`src/core/hint-engine.ts`) with 4-rule v1 catalog (`H-001-no-dspy`, `H-002-no-lessons`, `H-003-no-feedback`, `H-004-no-federation`). Atomic JSON state at `.agents/state/hints-shown.json` (temp-file rename writes, corruption-resilient). `did doctor` / `did doctor --hints` / `did doctor --hints dismiss <id>` / `did doctor --hints reset` CLI surface. Hints also fire on a clean `did verify` exit. Three-layer anti-nag: earned trigger, 7-day cooldown, `NO_HINTS=1` / `CI=true` / `hints.enabled: false` user controls.
+- **`docs/user-guide/hints.md`** — full reference for the Progressive Discovery surface.
+- **24 new test cases** covering hint engine rules, cooldown / dismissal, state corruption resilience, and CLI subprocess wiring (NO_HINTS, CI, reset, dismiss, unknown-id error path).
+
+### Changed
+- `searchLessons()` now records a `RecallEvent` per result (fire-and-forget; JSONL write errors never break the search hot path). Optional `ticketId` / `executor` / `captureRecall` toggles for callers.
+- `defense.config.yml` minimal template ships with a `hints: { enabled, cooldownDays, channels }` block so users discover the knobs.
+- `Lesson` schema gains optional `wrongApproachPattern` (regex string) for outcome-scanner matching.
+- `LessonOutcome` schema tightened to align with `FeedbackEvent` (id + source + executor required).
+- `DefendConfig` gains optional `hints?: HintsConfig` block.
+
+### Notes for upgraders
+- All v0.7-rc.1 surfaces are opt-in. Existing v0.6.0 configs run unchanged.
+- The hint engine is **earned-trigger only** — fresh repos see zero hints. CI logs stay clean (`CI=true` short-circuits emission).
+- `did feedback` and `did lesson outcome` write append-only JSONL under `.agents/records/`. Add the directory to `.gitignore` if you do not want recall traces in git history.
+
+### Test suite
+- **366 green** (up from 322 at v0.6.0): +20 feedback, +13 lesson-outcome, +24 progressive-discovery, +misc.
+
+---
+
 ## [Unreleased] — Operational Hardening
 
 > Pre-release pass to close gaps between as-shipped capability and the
