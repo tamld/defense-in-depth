@@ -24,18 +24,18 @@ Mechanical checks that run as Git hooks. Deterministic, pure functions, zero-inf
 
 **What it proves:** AI-generated code can be validated before it reaches Git history.
 
-### Layer 1: Memory (v0.4 — DESIGNED)
+### Layer 1: Memory (v0.4 — SHIPPED)
 File-based lesson recording (`lessons.jsonl`). Every lesson is an Án Lệ (Case Law) with mandatory `wrongApproach` and `correctApproach`.
 
 **What it proves:** Systems can remember mistakes without databases.
 
-### Layer 2: Meta Memory (v0.6 — DESIGNED)
-Tracking whether lessons are actually recalled and helpful. `LessonOutcome` + `RecallMetric`.
+### Layer 2: Meta Memory (v0.7-rc.1 — SHIPPED, MVP)
+Tracking whether lessons are actually recalled and helpful. `LessonOutcome` + `RecallMetric` shipped as a Path A MVP in [v0.7.0-rc.1](https://github.com/tamld/defense-in-depth/releases/tag/v0.7.0-rc.1) (PRs [#27](https://github.com/tamld/defense-in-depth/pull/27), [#28](https://github.com/tamld/defense-in-depth/pull/28), [#31](https://github.com/tamld/defense-in-depth/pull/31)) — recall capture, outcome scanner, Progressive Discovery hints. Aggregation, F1 metric, dedup and the full quality gate are deferred to Track B (v1.1.x) per `docs/vision/meta-growth-roadmap.md`.
 
 **What it proves:** A lesson that's never recalled is the same as no lesson at all. Memory systems need quality measurement.
 
-### Layer 3: Meta Growth (v0.7 — DESIGNED)
-Measuring whether the growth rate itself is accelerating. `MetaGrowthSnapshot` tracks the second derivative of improvement.
+### Layer 3: Meta Growth (v1.1.x — DESIGNED, gated on Track A4 adoption exit)
+Measuring whether the growth rate itself is accelerating. `MetaGrowthSnapshot` tracks the second derivative of improvement. Implementation is **gated** behind Track A adoption exit (≥10 external users + ≥100 captured events) per `docs/vision/meta-growth-roadmap.md`.
 
 **What it proves:** The difference between a system that improves and a system that improves at improving.
 
@@ -144,10 +144,12 @@ Implementation timeline:
 | EvidenceLevel | ✅ | ✅ | v0.1 |
 | TicketRef | ✅ | ✅ | v0.3 |
 | Lesson, GrowthMetric | ✅ | ✅ | v0.4 |
-| EvaluationScore | ✅ | ❌ | v0.5 |
-| LessonOutcome, RecallMetric | ✅ | ❌ | v0.6 |
-| MetaGrowthSnapshot | ✅ | ❌ | v0.7 |
-| FederationPayload | ✅ | ❌ | v0.8 |
+| EvaluationScore, DSPyConfig | ✅ | ✅ | v0.5 |
+| FederationGuardConfig | ✅ | ✅ | v0.6 |
+| Hint, HintState, HintsConfig | ✅ | ✅ | v0.7-rc.1 |
+| LessonOutcome, RecallMetric, RecallEvent, FeedbackEvent, GuardF1Metric | ✅ | ✅ (MVP) | v0.7-rc.1 |
+| MetaGrowthSnapshot | ✅ | ❌ | v1.1.x (Track B — gated on Track A4 exit) |
+| FederationPayload | ✅ | ❌ | v0.9 (Enterprise / Telemetry Sync) |
 
 **Publishing types before implementation is deliberate.** It communicates vision, invites feedback, and ensures type compatibility is locked before code is written.
 
