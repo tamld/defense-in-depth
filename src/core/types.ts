@@ -344,6 +344,50 @@ export interface DSPyConfig {
   timeoutMs?: number;
 }
 
+/**
+ * v0.7: Feedback Event — input pipeline for {@link GuardF1Metric}.
+ *
+ * Persona A (solo dev) and Persona B (AI-augmented team) generate these in
+ * two ways:
+ *   1. Active CLI: `did feedback tp/fp/fn/tn ...` writes one event per call
+ *   2. Passive scraper: `did feedback scan-history` infers events from git
+ *      history (fix-up commits → TP, `[guard-override:X]` → FP, reverts → FN)
+ *
+ * Append-only JSONL at `.agents/records/feedback.jsonl`. Idempotent on `id`.
+ * Schema is the single source of truth that {@link GuardF1Metric} consumes —
+ * see `src/core/feedback.ts#computeF1FromFeedback`.
+ *
+ * Tracked in issue #22. The schema is also reused by issue #23
+ * ({@link LessonOutcome}) so that recall outcomes share the same provenance
+ * chain (`source` + `executor`) as guard feedback.
+ */
+export interface FeedbackEvent {
+  /** Stable ID — sha256(guardId + ticketId + findingHash + timestamp) prefix */
+  id: string;
+  /** Which guard this feedback is about (e.g. "hollowArtifact"). For
+   *  scraper R2 (revert → FN) where we cannot attribute, use
+   *  `"unassigned-fn"`. */
+  guardId: string;
+  /** TKID context. Empty string when no ticket can be extracted — Persona A
+   *  on a standalone repo is allowed to skip ticket attribution. */
+  ticketId: string;
+  /** Hex hash of the finding text being labeled. Stable across re-runs so
+   *  re-feedback on the same finding dedupes. */
+  findingHash: string;
+  /** Confusion-matrix label. */
+  label: "TP" | "FP" | "FN" | "TN";
+  /** Provenance: where this event came from. */
+  source: "cli" | "scraper-fixup" | "scraper-revert" | "scraper-override" | "scraper-clean";
+  /** Optional human note. Plaintext — callers are responsible for redaction. */
+  note?: string;
+  /** ISO timestamp at write time. */
+  timestamp: string;
+  /** Who wrote it: `"human"` for `cli`, `"scraper:v1"` (or higher) for the
+   *  passive scraper. Versioned so analysts can filter out events written
+   *  by a specific scraper algorithm version. */
+  executor: string;
+}
+
 // ─── Meta Layer: Memory About Memory (Layer 2) ───
 
 /**

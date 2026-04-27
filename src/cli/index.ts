@@ -14,6 +14,7 @@ import { verify } from "./verify.js";
 import { doctor } from "./doctor.js";
 import { handleLessonCommand } from "./lesson.js";
 import { handleGrowthCommand } from "./growth.js";
+import { handleFeedbackCommand } from "./feedback.js";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -46,6 +47,10 @@ async function main(): Promise<void> {
 
     case "growth":
       await handleGrowthCommand(process.cwd(), args.slice(1));
+      break;
+
+    case "feedback":
+      await handleFeedbackCommand(process.cwd(), args.slice(1));
       break;
 
     case "eval":
@@ -84,6 +89,7 @@ Commands:
   doctor    Health check — verify config, hooks, and guard status
   lesson    Manage lessons (án lệ) in the local memory (v0.4)
   growth    Manage growth metrics checking the system's learning velocity (v0.4)
+  feedback  Record TP/FP/FN/TN labels for guards (v0.7, F1 input pipeline)
   eval      Evaluate artifact quality with DSPy semantic analysis (v0.5, opt-in)
 
 Options:
