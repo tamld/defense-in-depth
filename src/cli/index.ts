@@ -11,7 +11,7 @@
 
 import { init } from "./init.js";
 import { verify } from "./verify.js";
-import { doctor } from "./doctor.js";
+import { doctor, type DoctorOptions } from "./doctor.js";
 import { handleLessonCommand } from "./lesson.js";
 import { handleGrowthCommand } from "./growth.js";
 import { handleFeedbackCommand } from "./feedback.js";
@@ -38,7 +38,7 @@ async function main(): Promise<void> {
       break;
 
     case "doctor":
-      await doctor(process.cwd());
+      await doctor(process.cwd(), parseDoctorOptions(args.slice(1)));
       break;
 
     case "lesson":
@@ -103,6 +103,13 @@ Verify-only options:
                     Useful for verifying L1+L2 governance still passes when
                     your DSPy endpoint is offline. Banner is written to stderr.
 
+Doctor-only options:
+  --hints                      Show ALL eligible Progressive Discovery hints
+  --hints dismiss <id>         Permanently dismiss a hint (e.g. H-001-no-dspy)
+  --hints reset                Wipe hint state file (.agents/state/hints-shown.json)
+  NO_HINTS=1 (env)             Disable hint emission for this invocation
+  CI=true (env)                Suppress hints entirely (default in CI)
+
 Examples:
   npx defense-in-depth init
   npx defense-in-depth verify
@@ -112,6 +119,29 @@ Examples:
 
 Learn more: https://github.com/tamld/defense-in-depth
 `);
+}
+
+/**
+ * v0.7 (#21): parse the `--hints` flag family for `did doctor`.
+ *
+ * Accepted forms:
+ *   did doctor                          → no hint subcommand (default 0-1).
+ *   did doctor --hints                  → emit ALL eligible hints.
+ *   did doctor --hints dismiss <id>     → permanently dismiss <id>.
+ *   did doctor --hints reset            → wipe state file.
+ */
+function parseDoctorOptions(rest: string[]): DoctorOptions {
+  const hintsIdx = rest.indexOf("--hints");
+  if (hintsIdx === -1) return {};
+  const sub = rest[hintsIdx + 1];
+
+  if (sub === "dismiss") {
+    return { hintsAction: "dismiss", hintsActionArg: rest[hintsIdx + 2] };
+  }
+  if (sub === "reset") {
+    return { hintsAction: "reset" };
+  }
+  return { hintsAction: "all" };
 }
 
 main().catch((err) => {

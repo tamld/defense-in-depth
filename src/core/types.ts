@@ -187,6 +187,30 @@ export interface DefendConfig {
     hitlReview?: HitlReviewConfig;
     federation?: FederationGuardConfig;
   };
+  /** v0.7 (#21): Progressive Discovery UX — earned, dim-formatted hints. */
+  hints?: HintsConfig;
+}
+
+/**
+ * v0.7 (#21) Progressive Discovery — top-level config.
+ *
+ * The hint engine is the bridge between Persona A (solo dev) and Persona B
+ * (AI-augmented team). Hints fire only on earned signals (e.g. you actually
+ * had a guard block, you actually committed N times) — never on cold-start
+ * repos. All knobs default to the least-noisy option.
+ */
+export interface HintsConfig {
+  /** Master switch. When false, no hints are emitted on any surface. */
+  enabled?: boolean;
+  /** Minimum days between re-showings of the same hint. Defaults to 7. */
+  cooldownDays?: number;
+  /**
+   * CLI surfaces allowed to emit hints. Defaults to ["doctor", "verify-success"].
+   * - "doctor": at most 1 hint after the 4-check summary (or all hints with --hints).
+   * - "verify-success": at most 1 hint after a clean `verify` exit. Never emitted
+   *   on a BLOCK exit (avoids piling onto an error message).
+   */
+  channels?: ReadonlyArray<"doctor" | "verify-success">;
 }
 
 // ─── Evidence System (Trust-but-Verify) ───
@@ -566,4 +590,58 @@ export interface FederationPayload {
   }>;
   /** ISO timestamp of payload generation */
   generatedAt: string;
+}
+
+// ─── v0.7 (#21) Progressive Discovery — hint surface ─────────────────────
+
+/**
+ * A discovery hint. Hints are read-only signals from the hint engine to the
+ * user, surfaced after a successful CLI invocation. They are NOT errors and
+ * MUST NOT change exit codes.
+ *
+ * Stable IDs (`H-001-no-dspy`, `H-002-no-lessons`, `H-003-no-feedback`,
+ * `H-004-no-federation`) let users dismiss specific hints without disabling
+ * the whole subsystem.
+ */
+export interface Hint {
+  /** Stable, hyphen-separated id. Format: `H-NNN-slug`. */
+  id: string;
+  /**
+   * Visual / urgency tier. Both render dim by default; "suggestion" is reserved
+   * for the rare hint that recommends a concrete next action (e.g. "run
+   * 'did lesson record'").
+   */
+  severity: "info" | "suggestion";
+  /**
+   * One-paragraph hint body. Plain text — the renderer adds the lightbulb,
+   * dim ANSI codes, and the dismiss footer. Keep under ~240 chars so it fits
+   * comfortably in a terminal without wrapping awkwardly.
+   */
+  body: string;
+  /** Hints are always dismissible in v1. Field is reserved for v0.8 sticky alerts. */
+  dismissible: true;
+}
+
+/**
+ * Per-repo persistent state for the hint engine. Stored at
+ * `.agents/state/hints-shown.json`. Atomic writes via temp-file rename.
+ */
+export interface HintState {
+  /** Schema version. Bump when the file shape changes incompatibly. */
+  version: 1;
+  /**
+   * One entry per hint id the engine has ever proposed. `dismissedAt` is
+   * permanent; `lastShownAt` powers the cooldown window.
+   */
+  shown: Record<string, HintShownEntry>;
+}
+
+export interface HintShownEntry {
+  /** ISO timestamp of the most recent emission, or null if dismissed before
+   *  ever being shown. */
+  lastShownAt: string | null;
+  /** ISO timestamp of permanent dismissal, or null if still active. */
+  dismissedAt: string | null;
+  /** Total emissions across the lifetime of this repo. */
+  shownCount: number;
 }

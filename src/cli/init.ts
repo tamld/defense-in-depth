@@ -72,6 +72,16 @@ guards:
     protectedBranches:
       - main
       - master
+
+# v0.7 (#21) Progressive Discovery — earned hints surfaced after
+# 'did doctor' and successful 'did verify'. Disable per-channel,
+# globally, or via NO_HINTS=1 / CI=true env vars.
+hints:
+  enabled: true
+  cooldownDays: 7
+  channels:
+    - doctor
+    - verify-success
 `;
       fs.writeFileSync(configPath, minimalConfig, "utf-8");
       console.log("  ✅ Created defense.config.yml (customize as needed)");

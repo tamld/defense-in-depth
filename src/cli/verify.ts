@@ -16,6 +16,7 @@ import { loadConfig } from "../core/config-loader.js";
 import { allBuiltinGuards } from "../guards/index.js";
 import { Severity } from "../core/types.js";
 import type { DefendConfig } from "../core/types.js";
+import { emitOneHint } from "./hints-emit.js";
 
 export async function verify(
   projectRoot: string,
@@ -126,6 +127,15 @@ export async function verify(
 
   if (!verdict.passed) {
     process.exit(1);
+  }
+
+  // v0.7 (#21) Progressive Discovery: emit at most one earned hint to stderr
+  // on a clean verify exit. Never on hook mode (the hook should be silent
+  // when nothing is wrong) and never on a BLOCK exit (we already exited
+  // above). The renderer in `hints-emit.ts` handles NO_HINTS, CI=true, and
+  // the per-channel allowlist — see issue #21 for the anti-nag contract.
+  if (!hookMode) {
+    emitOneHint(projectRoot, "verify-success");
   }
 }
 
