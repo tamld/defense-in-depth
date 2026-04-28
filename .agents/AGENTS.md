@@ -18,7 +18,7 @@ through 5 phases:
 ```mermaid
 flowchart TD
     A["🤖 Agent enters project"] --> P1["① IDENTIFY\nRead AGENTS.md, detect platform"]
-    P1 --> P2["② DISCOVER\nRead all 11 rules + COGNITIVE_TREE"]
+    P1 --> P2["② DISCOVER\nRead all 20 rules + COGNITIVE_TREE"]
     P2 --> P3["③ SCAFFOLD\nCheck/create required artifacts"]
     P3 --> P4["④ CONTRIBUTE\nLearn evidence tags, lesson schema"]
     P4 --> P5["⑤ VERIFY\nRun defense-in-depth doctor"]
@@ -37,9 +37,9 @@ flowchart TD
 ```
 .agents/
 ├── AGENTS.md                  ← YOU ARE HERE
-├── philosophy/                # System mindset
+├── philosophy/                # System mindset (1 total)
 │   └── COGNITIVE_TREE.md      (3 branches + HITL trunk)
-├── rules/                     # Immutable project standards (19 total)
+├── rules/                     # Immutable project standards (20 total)
 │   ├── rule-consistency.md           (project standards)
 │   ├── rule-guard-lifecycle.md       (guard maturity)
 │   ├── rule-contribution-workflow.md (how to contribute)
@@ -48,19 +48,24 @@ flowchart TD
 │   ├── rule-lesson-quality.md        (specificity gate)
 │   ├── rule-zero-theater.md          (substance mandate)
 │   ├── rule-adaptive-language.md     (language policy)
+│   ├── rule-translation-glossary.md  (canonical bilingual terms)
 │   ├── rule-anti-yes-man.md          (brainstorm mandate)
 │   ├── rule-agent-workspace.md       (workspace zones)
 │   ├── rule-security-continuity.md   (fortress mandate)
 │   ├── rule-git-governance.md        (version control)
+│   ├── rule-coderabbit-integration.md (PR review bot contract)
 │   ├── rule-living-document.md       (anti-staleness)
 │   ├── rule-cross-platform.md        (OS compatibility)
 │   ├── rule-context-discipline.md    (context hygiene)
 │   ├── rule-document-budget.md       (doc size limits)
 │   ├── rule-flowchart-mandate.md     (visual compliance)
 │   └── rule-file-type-contract.md    (format selection)
-├── workflows/                 # Operational procedures
-│   └── procedure-task-execution.md
-├── skills/                    # Agent capabilities
+├── workflows/                 # Operational procedures (2 total)
+│   ├── procedure-task-execution.md         (task lifecycle)
+│   └── procedure-multi-agent-coordination.md (cross-agent handoffs)
+├── skills/                    # Agent capabilities (13 total + meta)
+│   ├── AGENTS.md              (skill-index router for agents)
+│   ├── SKILL_STANDARDS.md     (frontmatter + structure contract)
 │   ├── skill-bootstrap-agent/
 │   │   └── SKILL.md           (5-phase onboarding wizard)
 │   ├── skill-creator/
@@ -71,12 +76,27 @@ flowchart TD
 │   │   └── SKILL.md           (research pipeline with cross-check)
 │   ├── skill-impact-predictor/
 │   │   └── SKILL.md           (pre-implementation blast-radius analysis)
+│   ├── skill-review-code/
+│   │   └── SKILL.md           (PR-level governance review)
+│   ├── skill-threat-modeling-expert/
+│   │   └── SKILL.md           (adversary-first threat coverage)
+│   ├── skill-guard-governance/
+│   │   └── SKILL.md           (canonical guard design / impl / register)
+│   ├── skill-surgical-refactorer/
+│   │   └── SKILL.md           (minimum-blast guard refactors)
+│   ├── skill-test-architect/
+│   │   └── SKILL.md           (adversarial test-suite design)
+│   ├── skill-ai-dspy-validator/
+│   │   └── SKILL.md           (DSPy integration quality / WARN-not-BLOCK)
+│   ├── skill-devops-github-actions/
+│   │   └── SKILL.md           (CI/CD workflow authoring)
 │   └── _template/
 │       └── SKILL.md
-├── config/                    # Machine-readable configs
+├── config/                    # Machine-readable configs (1 total)
 │   └── guards.yml
-└── contracts/                 # Interface contracts
-    └── guard-interface.md
+└── contracts/                 # Interface contracts (2 total)
+    ├── guard-interface.md     (Guard / Provider contract)
+    └── jules.md               (Jules async-builder contract)
 ```
 
 ---
