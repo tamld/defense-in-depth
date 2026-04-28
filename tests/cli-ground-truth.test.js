@@ -222,25 +222,37 @@ describe("CLI ground truth — doctor command", () => {
   });
 });
 
-describe("CLI ground truth — PINNED bug in default hollowArtifact patterns", () => {
-  // The default config in src/core/config-loader.ts ships
+describe("CLI ground truth — default hollowArtifact patterns are literal substrings (issue #59)", () => {
+  // src/core/config-loader.ts ships
   //   patterns: ["TODO", "TBD", "FILL IN HERE", "<Empty>", "[Insert Here]", "PLACEHOLDER"]
-  // and src/guards/hollow-artifact.ts compiles each entry with new RegExp(p, "i").
-  // "[Insert Here]" is a *character class*, so it matches any single occurrence of
-  // I, n, s, e, r, t, space, or H — i.e. almost any prose. This is shipped behavior
-  // as of 0.6.0-rc.1 and must be fixed in a separate PR (escape special regex chars,
-  // or store the patterns as already-escaped literals).
+  // and src/guards/hollow-artifact.ts now escapes each entry before compiling with
+  // `new RegExp(escapeRegExp(p), "i")`. The previous behavior — `[Insert Here]`
+  // compiling into a character class that matched any letter `I/n/s/e/r/t/space/H`
+  // and false-positiving on common English text — is fixed.
   //
-  // This test pins the bug so a future fix has a deterministic regression target.
-  it("any substantive prose under default config triggers the [Insert Here] regex (pinned)", () => {
+  // This test is the regression target: substantive prose under the shipped default
+  // config must NOT trigger any hollow-pattern BLOCK, and the literal placeholder
+  // string MUST still trigger one.
+  it("substantive prose under default config does NOT trigger any hollow pattern", () => {
     // No defense.config.yml → loadConfig returns DEFAULT_CONFIG.
     write("docs/innocent.md", SUBSTANTIVE);
     const r = runCli(["verify", "--files", "docs/innocent.md"]);
     assert.equal(
       r.status,
-      1,
-      "Default patterns should currently match all prose; fix in a follow-up PR.",
+      0,
+      `Default patterns must not match clean prose. stdout=${r.stdout}\nstderr=${r.stderr}`,
     );
-    assert.match(r.stdout, /\[Insert Here\]/);
+    assert.doesNotMatch(r.stdout, /Hollow content detected/);
+  });
+
+  it("the literal placeholder string still triggers a BLOCK under default config", () => {
+    write("docs/with-placeholder.md", `${SUBSTANTIVE}\n\nValue: [Insert Here] for owner.`);
+    const r = runCli(["verify", "--files", "docs/with-placeholder.md"]);
+    assert.equal(
+      r.status,
+      1,
+      `Literal placeholder must still BLOCK. stdout=${r.stdout}\nstderr=${r.stderr}`,
+    );
+    assert.match(r.stdout, /Hollow content detected/);
   });
 });

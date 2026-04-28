@@ -91,7 +91,12 @@ export interface HollowArtifactConfig {
   enabled: boolean;
   /** File extensions to scan (default: .md, .json, .yml, .yaml) */
   extensions?: string[];
-  /** Patterns indicating hollow content */
+  /**
+   * Patterns indicating hollow content. Each entry is treated as a
+   * **literal case-insensitive substring** — regex metacharacters are
+   * escaped automatically. Use multiple entries instead of regex
+   * alternation (e.g. `["TODO", "FIXME"]`, not `"TODO|FIXME"`).
+   */
   patterns?: string[];
   /** Minimum content length (chars after stripping headers) */
   minContentLength?: number;

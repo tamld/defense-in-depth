@@ -146,10 +146,14 @@ describe("hollowArtifactGuard — multibyte / international content", () => {
 });
 
 describe("hollowArtifactGuard — custom pattern configuration", () => {
-  it("custom pattern catches 'T0DO' that defaults miss", async () => {
+  it("custom pattern catches 'T0DO' (zero-instead-of-O typo) that defaults miss", async () => {
+    // After the issue #59 fix, custom patterns are escaped and treated as
+    // literal case-insensitive substrings. To cover multiple spellings of
+    // the same typo, list each one as its own entry instead of relying on
+    // regex alternation.
     write("a.md", `${SUBSTANTIVE}\n\nT0DO fix later`);
     const result = await hollowArtifactGuard.check(
-      ctxIn(["a.md"], { patterns: ["T0DO|T[\\u039F\\u004F]DO"] }),
+      ctxIn(["a.md"], { patterns: ["T0DO", "TΟDO"] }),
     );
     assert.equal(result.passed, false);
   });

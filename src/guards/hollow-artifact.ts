@@ -32,6 +32,21 @@ const DEFAULT_HOLLOW_PATTERNS = [
   /\bPLACEHOLDER\b/i,
 ];
 
+/**
+ * Escape regex metacharacters so user-supplied `patterns` strings from
+ * `defense.config.yml` are treated as literal substrings (case-insensitive),
+ * not as regular expressions. Without this, a default pattern like
+ * `[Insert Here]` compiles into a character class that matches any letter
+ * `I/n/s/e/r/t/space/H` and false-positives on common English text.
+ *
+ * The escaped set is the union of all regex metacharacters defined by
+ * ECMAScript: `\ ^ $ . | ? * + ( ) [ ] { }` plus `-` (which is special
+ * inside character classes — escape it for safety even outside them).
+ */
+function escapeRegExp(s: string): string {
+  return s.replace(/[\\^$.|?*+()[\]{}\-]/g, "\\$&");
+}
+
 /** Default file extensions to scan */
 const DEFAULT_EXTENSIONS = [".md", ".json", ".yml", ".yaml"];
 
@@ -72,9 +87,12 @@ export const hollowArtifactGuard: Guard = {
     const extensions = config?.extensions ?? DEFAULT_EXTENSIONS;
     const minLength = config?.minContentLength ?? DEFAULT_MIN_CONTENT_LENGTH;
 
-    // Build regex patterns from config or defaults
+    // Build regex patterns from config or defaults.
+    // User-supplied strings are escaped so they match as literal substrings
+    // (case-insensitive). The DEFAULT_HOLLOW_PATTERNS array uses real RegExp
+    // literals with anchors / word boundaries and is consumed verbatim.
     const patterns: RegExp[] = config?.patterns
-      ? config.patterns.map((p) => new RegExp(p, "i"))
+      ? config.patterns.map((p) => new RegExp(escapeRegExp(p), "i"))
       : DEFAULT_HOLLOW_PATTERNS;
 
     // v0.5: DSPy configuration (opt-in, disabled by default)
