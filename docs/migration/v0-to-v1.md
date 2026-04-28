@@ -325,6 +325,103 @@ This is a clean break — no shim. The legacy positional form will fail TypeScri
 
 The `mode` and `dryRun` fields are accepted on the type but currently have **no runtime effect**. They are reserved for follow-up work that adds full-tree scans and side-effect-free dry runs (also tracked under #50). Setting them today is forward-compatible — readers will start consuming them in a later release without breaking your call site.
 
+### 6.6 Guard lifecycle — optional `init` / `dispose` / `priority` (v1.0, MINOR)
+
+v1.0 extends the `Guard` interface with five optional fields so guards can do per-run setup, cleanup, and ordering without leaking those concerns into `check()`. **All five fields are optional** — existing guards (in this repo and in user codebases) continue to compile unchanged. The SemVer impact is **MINOR**, not MAJOR.
+
+```typescript
+import type { Guard, GuardMeta } from "defense-in-depth";
+
+interface Guard {
+  // ─── Existing (since v0.1) ───
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  check(ctx: GuardContext): Promise<GuardResult>;
+
+  // ─── New optional fields (v1.0 — issue #49) ───
+
+  /** Runs once before THIS guard's `check()`. Per-guard, not pipeline-wide.
+   *  Crashes record a BLOCK and skip check. */
+  init?(ctx: GuardContext): Promise<void>;
+
+  /** Runs once after the pipeline (in finally). Errors are warned and swallowed. */
+  dispose?(): Promise<void>;
+
+  /** Higher number = runs first. Default 0. Stable on ties. */
+  readonly priority?: number;
+
+  /** Reserved — per-file filtering hint, not yet wired. */
+  supports?(file: string): boolean;
+
+  /** Free-form metadata for tooling. */
+  readonly meta?: GuardMeta;
+}
+```
+
+#### Example — opt in to `init` / `dispose` for a per-run cache
+
+```typescript
+import type { Guard, GuardContext, GuardResult } from "defense-in-depth";
+import { Severity } from "defense-in-depth";
+
+let cache: Map<string, string> | undefined;
+
+export const myGuard: Guard = {
+  id: "my-guard",
+  name: "My Guard",
+  description: "Scans staged files for the FORBIDDEN_TOKEN.",
+  priority: 100, // run before lower-priority guards
+
+  async init(_ctx: GuardContext) {
+    // Warm a per-run cache. Only called once per `engine.run()`.
+    cache = new Map();
+  },
+
+  async check(ctx: GuardContext): Promise<GuardResult> {
+    const findings = [];
+    for (const file of ctx.stagedFiles) {
+      const cached = cache?.get(file);
+      // … use the cache …
+    }
+    return { guardId: this.id, passed: findings.length === 0, findings, durationMs: 0 };
+  },
+
+  async dispose() {
+    // Always runs — even if init() or check() threw.
+    cache?.clear();
+    cache = undefined;
+  },
+
+  meta: {
+    version: "1.0.0",
+    author: "your-team",
+    homepage: "https://example.com/my-guard",
+  },
+};
+```
+
+#### Crash semantics
+
+| Phase | Throws | Engine behaviour |
+|---|---|---|
+| `init()` | Yes | Records `GuardCrashError` BLOCK finding with prefix `"Guard init crashed: …"`. **Skips `check()`** for that guard. `dispose()` still runs. Pipeline continues. |
+| `check()` | Yes | Records `GuardCrashError` BLOCK finding with prefix `"Guard crashed: …"` (unchanged from v0.x). `dispose()` still runs. Pipeline continues. |
+| `dispose()` | Yes | Logs a `console.warn` line (`⚠ Guard 'X' dispose failed: …`). **Verdict is unaffected.** Pipeline continues. |
+
+#### Priority semantics
+
+Higher number runs first. Default 0. Ties preserve registration order (stable sort).
+
+```typescript
+new DefendEngine(root, config)
+  .use(myGuardA) // no priority → 0
+  .use(myGuardB) // priority: 100 → runs first
+  .use(myGuardC) // priority: 50  → runs second
+```
+
+The engine sorts once per `run()` so `init()` and `check()` see the same order. `supports?(file)` and `meta` are reserved — accepted on the type but not consulted by the engine today. Setting them is forward-compatible.
+
 ---
 
 ## 7. Recommended Upgrade Steps

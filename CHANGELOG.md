@@ -70,6 +70,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`DefendEngine.run()` now accepts a single options object** of type `EngineRunOptions { files: string[]; mode?; commitMessage?; branch?; dryRun? }`. v0.x took positional `(stagedFiles, options?)` — that signature is removed. Library consumers must rewrite call sites; the legacy positional form will not type-check. `mode` and `dryRun` are accepted on the type but **not yet wired** to runtime behaviour — they are reserved slots for future full-scan / patch / dry-run modes (also #50). See `docs/migration/v0-to-v1.md` §6.4 for before/after snippets.
 - **`EngineRunOptions` type** is exported from the library barrel (`defense-in-depth`) alongside the existing `EngineVerdict`, `Guard`, `GuardContext`, etc. Plugin authors and embedders should import it instead of inlining the option shape.
 
+### Added (Guard lifecycle — #49, MINOR)
+- **Optional `init?(ctx)` and `dispose?()` lifecycle methods** on the `Guard` interface. The engine calls `init()` once per guard before its `check()` runs and `dispose()` once per guard in a `finally` block — so cleanup runs even when `check()` throws or `init()` itself crashes. Crashes from `init()` are recorded as a typed `GuardCrashError` BLOCK finding with prefix `"Guard init crashed: …"`, and the crashed guard's `check()` is **not** invoked. Errors thrown from `dispose()` never propagate to the verdict — they are logged to `console.warn` and swallowed (cleanup must not mask the verdict).
+- **Optional `priority?: number`** on the `Guard` interface. Higher number = runs first. Default 0. Ties preserve registration order (stable sort). Use to enforce ordering when one guard's BLOCK should short-circuit another (e.g. a future `secrets` guard at priority 100 should run before an expensive `dependency-audit` guard at priority 50).
+- **Optional `supports?(file): boolean`** and **optional `meta?: GuardMeta`** on the `Guard` interface. Reserved for tooling — accepted on the type but not consulted by the engine today. Plugin authors may still expose them for downstream registries / UIs.
+- **`GuardMeta` type** exported from the library barrel alongside `Guard`, `GuardContext`, `EngineRunOptions`, etc.
+- **17 new lifecycle tests** in `tests/engine-lifecycle.test.js` pinning the contract: init runs before check; init runs once; dispose runs after check; dispose runs even on check throw; dispose runs even on init throw; dispose errors are swallowed (warn only); priority sorts descending; default priority is 0; ties preserve registration order; init crash skips check but still records BLOCK; non-Error init crash gets stringified; disabled-in-config guards do NOT have init / check / dispose called; **`TicketStateProvider.dispose()` errors are also swallowed and warned** (parity with guard dispose; flagged by Devin Review on PR #69).
+
+### Notes for upgraders (Guard lifecycle)
+- **All five new fields are optional.** Existing guards (in this repo and in user codebases) continue to satisfy the interface unchanged — the SemVer impact is **MINOR**, not MAJOR.
+- The engine's existing crash-recording semantics for `check()` are preserved bit-for-bit. The new behaviour only fires when a guard opts in by defining `init`, `dispose`, or `priority`.
+- See `docs/migration/v0-to-v1.md` §6.6 for a worked example of a guard that uses `init` to warm a cache and `dispose` to flush it.
+
 ### Migration
 
 No code or config changes are required for users on v0.6.0. The Composite

@@ -109,12 +109,70 @@ export interface GuardContext {
   };
 }
 
+/**
+ * Optional descriptive metadata a guard can attach for tooling
+ * (registry UIs, dashboards, hint engine). Reserved for future use —
+ * the engine accepts the field but does not consult it at runtime.
+ */
+export interface GuardMeta {
+  /** Semver string, free-form. */
+  readonly version?: string;
+  /** Author or owning team. */
+  readonly author?: string;
+  /** Documentation URL. */
+  readonly homepage?: string;
+}
+
 /** The Guard interface — implement this to create a new guard */
 export interface Guard {
   readonly id: string;
   readonly name: string;
   readonly description: string;
   check(ctx: GuardContext): Promise<GuardResult>;
+
+  // ─── Optional lifecycle (v1.0 — issue #49) ───
+
+  /**
+   * Called once by the engine before this guard's `check()` runs, in
+   * priority order. Use for per-guard setup (warm caches, build
+   * per-run indices). Note: higher-priority guards will have already
+   * completed both `init()` and `check()` by the time a lower-priority
+   * guard's `init()` is invoked — the pipeline interleaves init→check
+   * per guard, it does not pre-init every guard before the first check.
+   * If `init` throws, the guard is treated as crashed: the engine
+   * records a typed `GuardCrashError` BLOCK finding with a
+   * `"Guard init crashed: …"` prefix and **skips the `check()` call**
+   * for that guard. `dispose()` is still invoked.
+   */
+  init?(ctx: GuardContext): Promise<void>;
+
+  /**
+   * Called once by the engine after the pipeline finishes, in a
+   * `finally` block — so it runs even when `check()` or `init()`
+   * throws. Use for cleanup (close handles, flush caches). Errors
+   * thrown from `dispose()` are **never** propagated to the verdict;
+   * the engine logs them with `console.warn` and continues.
+   */
+  dispose?(): Promise<void>;
+
+  /**
+   * Higher number = runs first. Default 0. Ties preserve registration
+   * order (stable sort). Use for ordering when one guard's BLOCK should
+   * short-circuit another (e.g. a future `secrets` guard at priority
+   * 100 runs before an expensive `dependency-audit` guard at 50).
+   */
+  readonly priority?: number;
+
+  /**
+   * Hint that a guard only applies to a subset of staged files.
+   * Reserved for future per-guard file filtering — accepted on the
+   * type but not consulted by the engine today. Plugin authors may
+   * still expose it for downstream tooling.
+   */
+  supports?(file: string): boolean;
+
+  /** Free-form metadata for tooling. See `GuardMeta`. */
+  readonly meta?: GuardMeta;
 }
 
 // ─── Configuration Schema ───

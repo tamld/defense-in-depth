@@ -20,6 +20,7 @@ export { Severity, EvidenceLevel } from "./core/types.js";
 // ─── Core types ───
 export type {
   Guard,
+  GuardMeta,
   GuardContext,
   GuardResult,
   EngineVerdict,

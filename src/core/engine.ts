@@ -120,43 +120,115 @@ export class DefendEngine {
 
     const results: GuardResult[] = [];
 
-    for (const guard of this.guards) {
-      // Skip guards disabled in config
-      const guardCfg = this.getGuardConfig(guard.id);
-      if (guardCfg !== undefined && !guardCfg.enabled) {
-        continue;
+    // v1.0 (#49): sort guards by `priority` (descending; default 0).
+    // Stable on registration order for ties so consumers can predict
+    // execution order. We materialise the sort once here so init() and
+    // check() see the same order.
+    const orderedGuards = this.guards
+      .map((g, idx) => ({ g, idx, p: g.priority ?? 0 }))
+      .sort((a, b) => b.p - a.p || a.idx - b.idx)
+      .map(({ g }) => g);
+
+    // v1.0 (#49): track which guards we have invoked init() on so
+    // dispose() runs only for them. Init crashes still get dispose() —
+    // the lifecycle contract guarantees that pairing.
+    const initialized: Guard[] = [];
+
+    try {
+      for (const guard of orderedGuards) {
+        // Skip guards disabled in config
+        const guardCfg = this.getGuardConfig(guard.id);
+        if (guardCfg !== undefined && !guardCfg.enabled) {
+          continue;
+        }
+
+        // v1.0 (#49): init phase. On crash, record a BLOCK finding and
+        // skip this guard's check(). dispose() still runs in the
+        // finally below.
+        if (guard.init) {
+          try {
+            await guard.init(ctx);
+            initialized.push(guard);
+          } catch (err) {
+            const crash = new GuardCrashError(
+              `Guard init crashed: ${err instanceof Error ? err.message : String(err)}`,
+              guard.id,
+              err,
+            );
+            results.push({
+              guardId: guard.id,
+              passed: false,
+              findings: [
+                {
+                  guardId: guard.id,
+                  severity: Severity.BLOCK,
+                  message: crash.message,
+                },
+              ],
+              durationMs: 0,
+            });
+            initialized.push(guard);
+            continue;
+          }
+        } else {
+          initialized.push(guard);
+        }
+
+        try {
+          const result = await guard.check(ctx);
+          results.push(result);
+        } catch (err) {
+          // Guard crashed — wrap in a typed GuardCrashError, record a
+          // hard BLOCK finding, and continue. The pipeline never
+          // re-throws; the typed cause is reachable via the wrapped
+          // error's `.cause` for telemetry consumers.
+          const crash = new GuardCrashError(
+            `Guard crashed: ${err instanceof Error ? err.message : String(err)}`,
+            guard.id,
+            err,
+          );
+          results.push({
+            guardId: guard.id,
+            passed: false,
+            findings: [
+              {
+                guardId: guard.id,
+                severity: Severity.BLOCK,
+                message: crash.message,
+              },
+            ],
+            durationMs: 0,
+          });
+        }
+      }
+    } finally {
+      // v1.0 (#49): dispose() runs for every initialised guard, even
+      // on early throw or init crash. Errors from dispose() never
+      // propagate to the verdict — they are logged and swallowed.
+      for (const guard of initialized) {
+        if (!guard.dispose) continue;
+        try {
+          await guard.dispose();
+        } catch (err) {
+          console.warn(
+            `⚠ Guard '${guard.id}' dispose failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        }
       }
 
+      // Cleanup provider resources (DB connections, etc.). Wrapped in
+      // try/catch like the guard dispose loop above — a custom
+      // TicketStateProvider may implement dispose() per
+      // src/federation/types.ts, and a throw here would abort the
+      // finally block and prevent the verdict from being computed.
       try {
-        const result = await guard.check(ctx);
-        results.push(result);
+        await provider?.dispose?.();
       } catch (err) {
-        // Guard crashed — wrap in a typed GuardCrashError, record a
-        // hard BLOCK finding, and continue. The pipeline never
-        // re-throws; the typed cause is reachable via the wrapped
-        // error's `.cause` for telemetry consumers.
-        const crash = new GuardCrashError(
-          `Guard crashed: ${err instanceof Error ? err.message : String(err)}`,
-          guard.id,
-          err,
+        console.warn(
+          `⚠ Ticket provider dispose failed: ${err instanceof Error ? err.message : String(err)}`,
         );
-        results.push({
-          guardId: guard.id,
-          passed: false,
-          findings: [
-            {
-              guardId: guard.id,
-              severity: Severity.BLOCK,
-              message: crash.message,
-            },
-          ],
-          durationMs: 0,
-        });
       }
     }
-
-    // Cleanup provider resources (DB connections, etc.)
-    await provider?.dispose?.();
 
     const durationMs = performance.now() - start;
     const failedGuards = results.filter((r) => !r.passed).length;
