@@ -517,6 +517,11 @@ These tools govern AI **while it reasons**. defense-in-depth governs AI **when i
 
 > All types across the roadmap (Layers 0–3 + Federation + Telemetry Sync) are ALREADY published in `src/core/types.ts` — compiled, documented, importable. Implementation follows incrementally per the gating contract in [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). See [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md) for the full vision and types ledger.
 
+### Stability contract — v1.0 lane
+
+- [`docs/SEMVER.md`](docs/SEMVER.md) — what counts as Major / Minor / Patch on the four public surfaces (library entry point, Guard/Provider contracts, `defense.config.yml`, CLI), plus the deprecation timeline.
+- [`docs/migration/v0-to-v1.md`](docs/migration/v0-to-v1.md) — upgrade guide for anyone on `npm install defense-in-depth` without a version pin (currently `latest = v0.1.0`). Covers every feature shipped in v0.2 → v0.7-rc.1 and the recommended upgrade steps.
+
 ---
 
 ## 12. Contributing
