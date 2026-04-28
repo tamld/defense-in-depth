@@ -10,7 +10,7 @@
  *   defense-in-depth verify --dry-run-dspy        # simulate DSPy unavailable
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { DefendEngine } from "../core/engine.js";
 import { loadConfig } from "../core/config-loader.js";
 import { allBuiltinGuards } from "../guards/index.js";
@@ -141,10 +141,11 @@ export async function verify(
 
 function getStagedFiles(root: string): string[] {
   try {
-    const output = execSync("git diff --cached --name-only --diff-filter=ACMR", {
-      encoding: "utf-8",
-      cwd: root,
-    });
+    const output = execFileSync(
+      "git",
+      ["diff", "--cached", "--name-only", "--diff-filter=ACMR"],
+      { encoding: "utf-8", cwd: root },
+    );
     return output.split("\n").map((l) => l.trim()).filter(Boolean);
   } catch {
     return [];
@@ -153,10 +154,11 @@ function getStagedFiles(root: string): string[] {
 
 function getBranch(root: string): string | undefined {
   try {
-    return execSync("git rev-parse --abbrev-ref HEAD", {
-      encoding: "utf-8",
-      cwd: root,
-    }).trim();
+    return execFileSync(
+      "git",
+      ["rev-parse", "--abbrev-ref", "HEAD"],
+      { encoding: "utf-8", cwd: root },
+    ).trim();
   } catch {
     return undefined;
   }
@@ -164,10 +166,11 @@ function getBranch(root: string): string | undefined {
 
 function getLastCommitMessage(root: string): string | undefined {
   try {
-    return execSync("git log -1 --format=%s", {
-      encoding: "utf-8",
-      cwd: root,
-    }).trim();
+    return execFileSync(
+      "git",
+      ["log", "-1", "--format=%s"],
+      { encoding: "utf-8", cwd: root },
+    ).trim();
   } catch {
     return undefined;
   }

@@ -25,7 +25,7 @@
  * I/O lives in `scanOutcomes` and the writers.
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -592,8 +592,15 @@ function readGitDiffs(
   const format = ["%H", "%ct"].join(fieldSep);
   let raw: string;
   try {
-    raw = execSync(
-      `git log --max-count=${max} --format=${recordSep}${format} -p ${range}`,
+    raw = execFileSync(
+      "git",
+      [
+        "log",
+        `--max-count=${max}`,
+        `--format=${recordSep}${format}`,
+        "-p",
+        range,
+      ],
       {
         cwd: projectRoot,
         encoding: "utf-8",
