@@ -20,7 +20,7 @@
  * `src/core/f1.ts` stays free of `node:fs` and `node:child_process` imports.
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -434,8 +434,15 @@ function readGitLog(
   const format = ["%H", "%ct", "%P", "%s", "%b"].join(fieldSep);
   let raw: string;
   try {
-    raw = execSync(
-      `git log --max-count=${max} --name-only --format=${recordSep}${format}${fieldSep} ${range}`,
+    raw = execFileSync(
+      "git",
+      [
+        "log",
+        `--max-count=${max}`,
+        "--name-only",
+        `--format=${recordSep}${format}${fieldSep}`,
+        range,
+      ],
       { encoding: "utf-8", cwd: projectRoot, stdio: ["ignore", "pipe", "pipe"] },
     );
   } catch {
