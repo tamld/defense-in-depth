@@ -10,9 +10,22 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./guards": {
+      "types": "./dist/guards/index.d.ts",
+      "import": "./dist/guards/index.js"
+    },
+    "./federation": {
+      "types": "./dist/federation/index.d.ts",
+      "import": "./dist/federation/index.js"
+    },
+    "./types": {
+      "types": "./dist/core/types.d.ts",
+      "import": "./dist/core/types.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist/",
