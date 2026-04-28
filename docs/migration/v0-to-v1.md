@@ -341,7 +341,8 @@ interface Guard {
 
   // ─── New optional fields (v1.0 — issue #49) ───
 
-  /** Runs once before `check()`. Crashes record a BLOCK and skip check. */
+  /** Runs once before THIS guard's `check()`. Per-guard, not pipeline-wide.
+   *  Crashes record a BLOCK and skip check. */
   init?(ctx: GuardContext): Promise<void>;
 
   /** Runs once after the pipeline (in finally). Errors are warned and swallowed. */

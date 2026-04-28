@@ -133,12 +133,16 @@ export interface Guard {
   // ─── Optional lifecycle (v1.0 — issue #49) ───
 
   /**
-   * Called once by the engine before any `check()` runs, in priority
-   * order. Use for setup that must complete before the pipeline starts
-   * (warm caches, build per-run indices). If `init` throws, the guard
-   * is treated as crashed: the engine records a typed `GuardCrashError`
-   * BLOCK finding with a `"Guard init crashed: …"` prefix and **skips
-   * the `check()` call** for that guard. `dispose()` is still invoked.
+   * Called once by the engine before this guard's `check()` runs, in
+   * priority order. Use for per-guard setup (warm caches, build
+   * per-run indices). Note: higher-priority guards will have already
+   * completed both `init()` and `check()` by the time a lower-priority
+   * guard's `init()` is invoked — the pipeline interleaves init→check
+   * per guard, it does not pre-init every guard before the first check.
+   * If `init` throws, the guard is treated as crashed: the engine
+   * records a typed `GuardCrashError` BLOCK finding with a
+   * `"Guard init crashed: …"` prefix and **skips the `check()` call**
+   * for that guard. `dispose()` is still invoked.
    */
   init?(ctx: GuardContext): Promise<void>;
 
