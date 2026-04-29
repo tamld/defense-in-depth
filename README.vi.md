@@ -31,25 +31,25 @@
 </div>
 
 > [!NOTE]
-> **defense-in-depth là một bộ scaffold có quan điểm, không phải giải pháp turnkey.**
-> Pipeline guard (9 guard tích hợp sẵn + interface `Guard`) là **lõi**.
-> Hệ sinh thái `.agents/` (19 rules, COGNITIVE_TREE, skill templates) là **điểm khởi đầu**:
-> bạn fork về, xoá thứ không hợp, thay bằng quy ước của đội mình.
-> `npx defense-in-depth init` cài hooks; `init --scaffold` cài thêm bộ governance kit tuỳ chọn.
+> **defense-in-depth là một bộ khung (scaffold) mang tính định hướng, không phải là một giải pháp "mì ăn liền" (turnkey).**
+> Hệ thống Guard pipeline (gồm 9 guard có sẵn + interface `Guard`) chính là **trái tim** của công cụ.
+> Hệ sinh thái `.agents/` (bao gồm 19 quy tắc, COGNITIVE_TREE và các template kỹ năng) là **điểm xuất phát**:
+> bạn có thể sao chép (fork) về, loại bỏ những thứ không phù hợp và thay thế bằng quy ước riêng của đội mình.
+> `npx defense-in-depth init` để cài đặt hooks; dùng thêm `init --scaffold` để cài sẵn bộ công cụ quản trị (governance kit) tùy chọn.
 
 > [!IMPORTANT]
-> **Hook phía client có thể bị bypass.** `git commit --no-verify` qua mặt mọi Git hook.
-> Để claim HITL/governance có hiệu lực thật, cần ghép local hook với [GitHub Actions server-side](.github/actions/verify/action.yml) (chạy đúng pipeline guard trên PR diff) **và** branch-protection rule trên branch mặc định.
-> Hook local là vòng phản hồi nhanh; phía server là vòng cưỡng chế.
+> **Hook phía client (local) có thể bị vượt mặt.** Lệnh `git commit --no-verify` có thể lách qua mọi Git hook.
+> Để quy tắc HITL/quản trị thực sự mang lại hiệu quả bảo vệ, bạn cần kết hợp local hook với [GitHub Actions (CI/CD)](.github/actions/verify/action.yml) (để chạy pipeline guard trên các PR diff) **cùng với** thiết lập bắt buộc (branch-protection) trên nhánh mặc định.
+> Hook ở local giúp phản hồi nhanh; còn thiết lập trên hệ thống CI/CD sẽ mang tính chất cưỡng chế (bắt buộc tuân thủ).
 
 > [!NOTE]
-> **Trạng thái hiện tại (`v0.7.0-rc.1`, tháng 4 năm 2026)** — release candidate, chưa promote lên `npm latest`.
+> **Trạng thái hiện tại (`v1.0.0-rc.1`, tháng 4 năm 2026)** — release candidate, chưa promote lên `npm latest`.
 >
-> **Đã ship**: 9 guard tích hợp sẵn (v0.1–v0.6), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1), API stabilisation pass (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks — landing sau rc.1 dưới [umbrella #42](https://github.com/tamld/defense-in-depth/issues/42)).
+> **Đã phát hành**: 9 guard có sẵn (v0.1–v0.6), Tầng Memory (v0.4), Đánh giá ngữ nghĩa bằng DSPy (v0.5, tùy chọn), Federation guards (v0.6), Bảo mật Test/Op (v0.6.2), Vòng lặp Path A memory MVP + progressive discovery hints (v0.7-rc.1), Đóng băng API (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks).
 >
-> **Đang triển khai (Track A — Adoption)**: A1 đồng bộ docs ✅ ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) · A2 mở rộng độ phủ guard 🔄 ([#41](https://github.com/tamld/defense-in-depth/issues/41)) · A3 đóng băng API cho v1.0 🔄 (P0 done, P1 [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) còn mở) · A4 push adoption 30 ngày 📋. Tất cả track theo [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42).
+> **Đang triển khai (Giai đoạn A — Thúc đẩy ứng dụng)**: A1 đồng bộ docs ✅ ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) · A2 mở rộng độ phủ guard ✅ ([#41](https://github.com/tamld/defense-in-depth/issues/41)) · A3 đóng băng API cho v1.0 ✅ (P0 done, P1 [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) còn mở) · A4 push adoption 30 ngày 📋. Tất cả theo dõi ở [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42).
 >
-> **Đã thiết kế nhưng còn gating (Track B — Meta Growth, v1.1.x)**: F1 aggregator, Án Lệ injection contract, dedup, forgetting, quality gate. **Hard-gated** sau khi Track A4 đóng (≥10 user ngoài + ≥100 sự kiện thu thập) theo [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md).
+> **Đã thiết kế nhưng đang chờ điều kiện mở khóa (Giai đoạn B — Meta Growth, v1.1.x)**: F1 aggregator, Án Lệ injection contract, dedup, forgetting, quality gate. **Bị khóa cứng** cho đến khi Giai đoạn A4 đóng (≥10 người dùng ngoài + ≥100 sự kiện thu thập) theo [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md).
 >
 > **Đọc tiếp** — Bắt đầu nhanh: [`docs/quickstart.md`](docs/quickstart.md). Hợp đồng ổn định: [`docs/SEMVER.md`](docs/SEMVER.md) · [`docs/migration/v0-to-v1.md`](docs/migration/v0-to-v1.md). Lộ trình & gating: [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). Định hướng chiến lược: [`STRATEGY.md`](STRATEGY.md). Tầm nhìn (4 layer + types ledger): [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md).
 
@@ -82,10 +82,10 @@ AI Agent (Cursor, Copilot, Claude Code, Windsurf, Codex) là **công cụ mạnh
 | 🔍 Quét pattern | 🤝 **Giao tiếp với stakeholder** |
 
 **defense-in-depth** là tầng trung gian giúp:
-1. **Giảm "ảo giác" của AI** — chặn artifact rỗng và hành vi bypass
-2. **Tăng độ chính xác** — bắt buộc gắn bằng chứng cho mọi tuyên bố
-3. **Tối ưu tự động hoá** — xử lý phần kiểm tra cơ học để con người tập trung vào phần ngữ nghĩa
-4. **Bảo toàn quyền quyết định của con người** — HITL là quy tắc tối thượng
+1. **Giảm thiểu hiện tượng "ảo giác" của AI** — ngăn chặn việc tạo ra các tài liệu rỗng hoặc hành vi lách luật
+2. **Tăng độ chính xác** — bắt buộc gắn bằng chứng cho mọi thông tin và quyết định
+3. **Tối ưu hóa quy trình tự động** — đảm nhận các bước kiểm tra rập khuôn để con người tập trung vào phân tích ngữ nghĩa logic
+4. **Bảo toàn quyền quyết định của con người** — HITL là quy tắc tối thượng không thể thay thế
 
 ### Quy tắc tối thượng
 
@@ -106,12 +106,12 @@ defense-in-depth chọn hướng tiếp cận khác:
 >
 > **Chỉ kiểm tra kết quả đầu ra.** Khi code được commit — "bài thi được nộp" — nó phải đạt chuẩn.
 
-Đây là **quản trị tất định**: dù dùng GitHub, GitLab, Bitbucket hay bất kỳ hệ thống Git nào, defense-in-depth luôn đứng vững như một lớp *trước khi* output Agent chạm tới tầng dữ liệu.
+Đây là **phương pháp quản trị mang tính tất định (deterministic)**: cho dù bạn dùng GitHub, GitLab, Bitbucket hay bất kỳ nền tảng Git nào, defense-in-depth luôn hoạt động như một chốt chặn vững chắc *trước khi* output của Agent được ghi vào hệ thống.
 
 | Cách tiếp cận | Thời điểm | Phụ thuộc | Cần cập nhật khi mô hình thay đổi? |
 |:---|:---|:---|:---:|
-| Guardrail runtime | Trong lúc suy luận | Theo nhà cung cấp | Phải cập nhật |
-| **defense-in-depth** | Tại thời điểm commit | **Mọi hệ thống Git** | **Không cần** |
+| Guardrail runtime | Trong lúc AI đang suy luận | Phụ thuộc vào nhà cung cấp | Phải cập nhật liên tục |
+| **defense-in-depth** | Ngay tại thời điểm commit | **Tương thích mọi hệ thống Git** | **Không cần cập nhật** |
 
 *Guardrail runtime bảo vệ khi AI suy nghĩ. defense-in-depth bảo vệ khi AI nộp bài. Hai tầng khác nhau, bổ sung cho nhau.*
 
@@ -146,9 +146,9 @@ flowchart TD
 1. [Vấn đề](#1-vấn-đề)
 2. [Cách hoạt động](#2-cách-hoạt-động)
 3. [Bắt đầu nhanh](#3-bắt-đầu-nhanh)
-4. [Guard tích hợp sẵn](#4-guard-tích-hợp-sẵn)
+4. [Các Guard có sẵn](#4-các-guard-có-sẵn)
 5. [Cấu hình](#5-cấu-hình)
-6. [Viết Guard tuỳ chỉnh](#6-viết-guard-tuỳ-chỉnh)
+6. [Viết Guard tùy chỉnh](#6-viết-guard-tùy-chỉnh)
 7. [Lệnh CLI](#7-lệnh-cli)
 8. [Cấu trúc dự án](#8-cấu-trúc-dự-án)
 9. [Hệ sinh thái .agents/](#9-hệ-sinh-thái-agents)
@@ -161,16 +161,16 @@ flowchart TD
 
 ## 1. Vấn đề
 
-AI Agent tối ưu cho **sự hợp lý**, không phải **sự đúng đắn**. Không có hàng rào, chúng tạo ra:
+Các AI Agent thường hướng tới **sự hợp lý (nghe có vẻ đúng)**, chứ không phải **sự đúng đắn thực sự (ground truth)**. Nếu thiếu đi các hàng rào bảo vệ, chúng có thể gây ra:
 
 | Lỗi hành vi | Hiện tượng | Hậu quả |
 |:---|:---|:---|
-| 🎭 **Artifact rỗng** | File chỉ chứa các marker chưa hoàn thiện, template trống | Lọt qua gate nhưng không có nội dung thực |
-| 🦠 **Xâm phạm SSoT** | Sửa file cấu hình/quản trị trong lúc viết tính năng | Hỏng trạng thái, lệch dữ liệu |
-| 🤡 **Commit bừa** | Commit message tự do, branch đặt tên ngẫu nhiên | Lịch sử khó đọc, không kiểm soát được |
-| 📝 **Bỏ qua thiết kế** | Code trước, lập kế hoạch sau | Lệch kiến trúc, gây regression |
+| 🎭 **Tài liệu sáo rỗng** | File chỉ chứa các đánh dấu (marker) chưa hoàn thiện, template rỗng | Vượt qua được khâu kiểm duyệt nhưng không có nội dung thực |
+| 🦠 **Xâm phạm chuẩn SSoT** | Sửa file cấu hình/quản trị trong lúc viết tính năng code | Làm hỏng trạng thái, gây sai lệch dữ liệu |
+| 🤡 **Commit bừa bãi** | Commit message viết tùy tiện, đặt tên branch ngẫu nhiên | Lịch sử Git rác, khó đọc và khó kiểm soát |
+| 📝 **Bỏ qua thiết kế** | Viết code trước, lập kế hoạch sau | Gây sai lệch kiến trúc, dẫn đến lỗi hồi quy (regression) |
 
-Đây không phải lỗi ngẫu nhiên. Đây là **lỗi hệ thống** — hệ quả tất yếu khi áp dụng sinh văn bản xác suất vào kỹ thuật cần tính tất định.
+Đây không phải là các lỗi ngẫu nhiên. Đây là **lỗi mang tính hệ thống** — hệ quả tất yếu khi ứng dụng mô hình sinh văn bản dựa trên xác suất vào lĩnh vực kỹ thuật phần mềm vốn đòi hỏi tính tất định cực cao.
 
 ---
 
@@ -240,7 +240,7 @@ defense-in-depth init --scaffold
 # .agents/contracts/       — Hợp đồng interface
 ```
 
-### Cưỡng chế phía server (khuyến nghị nếu muốn HITL có hiệu lực thật)
+### Cưỡng chế trên hệ thống CI/CD (khuyến nghị nếu muốn HITL có hiệu lực thật)
 
 Hook local có thể bị bypass bằng `git commit --no-verify`. Để pipeline guard chạy trên mọi PR — vượt khỏi tầm với của Agent — dùng Composite Action chính thức:
 
@@ -271,21 +271,21 @@ Ghép thêm branch-protection rule trên `main` yêu cầu check `verify` phải
 
 ---
 
-## 4. Guard tích hợp sẵn
+## 4. Các Guard có sẵn
 
 | Guard | Mặc định | Mức độ | Hook | Bắt được gì |
 |:---|:---:|:---:|:---:|:---|
-| **Hollow Artifact** | ✅ Bật | BLOCK | pre-commit | File chỉ chứa các marker chưa hoàn thiện hoặc template rỗng |
-| **SSoT Pollution** | ✅ Bật | BLOCK | pre-commit | File quản trị / state (`.agents/**`, `flow_state.yml`, `backlog.yml`) bị sửa trong feature branch |
-| **Root Pollution** | ✅ Bật | BLOCK | pre-commit | File hoặc thư mục lạ tạo ngay ở thư mục gốc |
-| **Commit Format** | ✅ Bật | WARN | commit-msg | Commit message không tuân theo Conventional Commits |
-| **Ticket Identity** | ❌ Tắt | WARN | pre-commit | Commit tham chiếu ticket xung đột (TKID Lite, v0.3) |
-| **Branch Naming** | ❌ Tắt | WARN | pre-push | Tên branch không khớp `feat\|fix\|chore\|docs/*` |
-| **Phase Gate** | ❌ Tắt | BLOCK | pre-commit | Code commit trước khi có file `implementation_plan.md` |
-| **HITL Review** | ❌ Tắt | BLOCK | pre-commit | Bắt buộc marker review của con người trên đường dẫn được bảo vệ (v0.6) |
-| **Federation** | ❌ Tắt | BLOCK | pre-commit | Validate trạng thái ticket parent ↔ child giữa các repo federate (v0.6, có thể chỉnh `block`/`warn`) |
+| **Hollow Artifact** | ✅ Bật | BLOCK | pre-commit | File chỉ chứa các nội dung giữ chỗ (placeholder) hoặc template rỗng |
+| **SSoT Pollution** | ✅ Bật | BLOCK | pre-commit | File quản trị / state (`.agents/**`, `flow_state.yml`, `backlog.yml`) bị sửa lén trong feature branch |
+| **Root Pollution** | ✅ Bật | BLOCK | pre-commit | Khởi tạo file hoặc thư mục lạ ngay tại thư mục gốc |
+| **Commit Format** | ✅ Bật | WARN | commit-msg | Nội dung commit không tuân thủ chuẩn Conventional Commits |
+| **Ticket Identity** | ❌ Tắt | WARN | pre-commit | Commit tham chiếu mã ticket bị xung đột (TKID Lite, v0.3) |
+| **Branch Naming** | ❌ Tắt | WARN | pre-push | Tên branch không khớp cấu trúc `feat\|fix\|chore\|docs/*` |
+| **Phase Gate** | ❌ Tắt | BLOCK | pre-commit | Viết code trước khi có file `implementation_plan.md` |
+| **HITL Review** | ❌ Tắt | BLOCK | pre-commit | Bắt buộc phải có dấu hiệu duyệt của con người trên các đường dẫn được bảo vệ (v0.6) |
+| **Federation** | ❌ Tắt | BLOCK | pre-commit | Xác minh tính hợp lệ giữa ticket cha ↔ con xuyên suốt các repo (v0.6, có thể chỉnh `block`/`warn`) |
 
-> **Về DSPy:** Guard `hollow-artifact` có thể dùng DSPy như tầng ngữ nghĩa tuỳ chọn (opt-in qua `guards.hollowArtifact.useDspy: true`). Khi bật, DSPy chỉ là tín hiệu bổ sung (WARN-only) và degrade an toàn — Tier 0 deterministic vẫn luôn giữ.
+> **Về DSPy:** Guard `hollow-artifact` có thể tích hợp DSPy như một lớp kiểm tra ngữ nghĩa tùy chọn (bật qua `guards.hollowArtifact.useDspy: true`). Khi được kích hoạt, DSPy đóng vai trò là một kênh tín hiệu bổ sung (chỉ cảnh báo ở mức WARN) và có cơ chế dự phòng an toàn (graceful degradation) — đảm bảo tính tất định của Tier 0 luôn được duy trì vững chắc.
 
 ### Mức độ Severity
 
@@ -381,16 +381,16 @@ export interface TicketStateProvider {
 | `defense-in-depth init --scaffold` | Tạo thêm hệ sinh thái `.agents/` |
 | `defense-in-depth verify` | Chạy toàn bộ guard thủ công trên file đang stage |
 | `defense-in-depth verify --files a.md b.ts` | Kiểm tra các file chỉ định |
-| `defense-in-depth verify --dry-run-dspy` | Force-disable DSPy cho lần chạy này (kiểm tra regression) |
-| `defense-in-depth doctor` | Health check (config, hooks, guards, hint state) |
-| `defense-in-depth doctor --hints` | Hiển thị mọi hint Progressive Discovery đủ điều kiện |
-| `defense-in-depth doctor --hints dismiss <id>` / `--hints reset` | Tắt vĩnh viễn / xoá state hint |
-| `defense-in-depth lesson record` / `search` / `outcome` / `scan-outcomes` | Quản lý Án Lệ (v0.4) + recall outcomes (v0.7) trong `lessons.jsonl` và `.agents/records/lesson-*.jsonl` |
-| `defense-in-depth growth record` | Ghi growth metric vào `growth_metrics.jsonl` |
-| `defense-in-depth feedback <tp\|fp\|fn\|tn>` / `list` / `f1` / `scan-history` | Gắn nhãn TP/FP/FN/TN cho finding + tính F1 cho từng guard (v0.7) |
-| `defense-in-depth eval <path>` | Đánh giá ngữ nghĩa artifact bằng DSPy (v0.5, opt-in) |
+| `defense-in-depth verify --dry-run-dspy` | Tạm vô hiệu hóa DSPy cho lần chạy này (dùng để kiểm tra lỗi hồi quy) |
+| `defense-in-depth doctor` | Kiểm tra sức khỏe hệ thống (cấu hình, hook, guard, trạng thái gợi ý) |
+| `defense-in-depth doctor --hints` | Hiển thị mọi gợi ý tăng tiến (Progressive Discovery hints) đủ điều kiện |
+| `defense-in-depth doctor --hints dismiss <id>` / `--hints reset` | Tắt vĩnh viễn / đặt lại trạng thái hiển thị của các gợi ý |
+| `defense-in-depth lesson record` / `search` / `outcome` / `scan-outcomes` | Quản lý Án Lệ (v0.4) + tra cứu kết quả bài học (v0.7) trong `lessons.jsonl` và `.agents/records/lesson-*.jsonl` |
+| `defense-in-depth growth record` | Ghi nhận chỉ số tăng trưởng vào `growth_metrics.jsonl` |
+| `defense-in-depth feedback <tp\|fp\|fn\|tn>` / `list` / `f1` / `scan-history` | Phân loại độ chuẩn xác (Đúng/Sai/Sót) cho cảnh báo + tính điểm hiệu quả thực tế (F1 Score) của từng guard |
+| `defense-in-depth eval <path>` | Đánh giá chất lượng tài liệu bằng AI thông qua DSPy (v0.5, tính năng tùy chọn) |
 
-> Mã thoát (ổn định, là một phần của public surface theo [`docs/SEMVER.md`](docs/SEMVER.md)): `0` = pass, `1` = BLOCK, `2` = config error. WARN **không** đổi mã thoát. Lỗi DSPy / provider degrade về WARN, không bao giờ crash.
+> Mã thoát (exit code ổn định, là một phần của API public theo [`docs/SEMVER.md`](docs/SEMVER.md)): `0` = pass, `1` = BLOCK, `2` = lỗi cấu hình. Các cảnh báo mức WARN **không** làm thay đổi mã thoát. Lỗi từ các dịch vụ bên ngoài (như DSPy hoặc API) sẽ tự động được chuyển thành cảnh báo (WARN) thay vì chặn lại, cam kết không bao giờ gây crash hệ thống.
 
 ---
 
@@ -468,7 +468,7 @@ defense-in-depth/
 │   └── vision/                # meta-architecture, meta-growth-roadmap
 ├── .github/                   # 🔄 CI/CD + template
 │   ├── workflows/             # ci.yml, release.yml, git-shield.yml
-│   ├── actions/verify/        # Composite Action server-side
+│   ├── actions/verify/        # Composite Action cho môi trường CI/CD
 │   ├── ISSUE_TEMPLATE/
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── templates/                 # 📄 Template scaffold ship sẵn
@@ -523,17 +523,17 @@ Các công cụ trên quản trị AI **trong lúc suy luận**. defense-in-dept
 
 | Tính năng | husky + lint-staged | commitlint | 🛡️ **defense-in-depth** |
 |:---|:---:|:---:|:---:|
-| Git hooks | ✅ | — | ✅ |
-| Format commit | — | ✅ | ✅ Tích hợp sẵn |
-| **Kiểm tra nội dung ngữ nghĩa** | ❌ | ❌ | ✅ |
-| **Bảo vệ SSoT** | ❌ | ❌ | ✅ |
-| **Phase gates** (plan trước, code sau) | ❌ | ❌ | ✅ |
+| Hỗ trợ Git hooks | ✅ | — | ✅ |
+| Định dạng chuẩn commit | — | ✅ | ✅ Tích hợp sẵn |
+| **Kiểm tra theo ngữ nghĩa** | ❌ | ❌ | ✅ |
+| **Bảo vệ tiêu chuẩn SSoT** | ❌ | ❌ | ✅ |
+| **Kiểm soát giai đoạn (Phase gates)** (Lập kế hoạch trước, code sau) | ❌ | ❌ | ✅ |
 | **Hệ thống guard mở rộng** | ❌ | ❌ | ✅ |
-| **Hệ sinh thái governance Agent** | ❌ | ❌ | ✅ |
-| **Evidence tagging** | ❌ | ❌ | ✅ |
-| Đối tượng phục vụ | Developer | Developer | **AI Agent + Developer** |
+| **Hệ sinh thái quản trị Agent** | ❌ | ❌ | ✅ |
+| **Đánh dấu gắn liền bằng chứng (Evidence tagging)** | ❌ | ❌ | ✅ |
+| Đối tượng phục vụ | Developer | Developer | **Cả AI Agent + Developer** |
 
-> *Guardrail runtime bảo vệ khi AI suy nghĩ. defense-in-depth bảo vệ khi AI nộp bài. Hai tầng khác nhau, bổ sung cho nhau.*
+> *Guardrail tại runtime bảo vệ dự án trong lúc AI đang suy nghĩ. Còn defense-in-depth bảo vệ dự án ngay khi AI "nộp bài" (commit code). Đây là hai tầng phòng thủ khác biệt và bổ trợ lẫn nhau.*
 
 ---
 
@@ -547,7 +547,7 @@ Các công cụ trên quản trị AI **trong lúc suy luận**. defense-in-dept
 | **v0.4** | Memory Layer (`lessons.jsonl`) + growth metrics | `Lesson`, `GrowthMetric` | ✅ Xong |
 | **v0.5** | Tầng DSPy semantic tuỳ chọn (opt-in, degrade an toàn) + đánh giá chất lượng ngữ nghĩa | `EvaluationScore` | ✅ Xong |
 | **v0.6** | Federation: guard parent ↔ child + `HitlReview` | `FederationGuardConfig`, `HttpTicketProvider`, `HitlReviewConfig` | ✅ Xong |
-| **v0.6.2** | Test & Operational Hardening (coverage gate, E2E test, server-side composite Action) | — | ✅ Xong |
+| **v0.6.2** | Test & Operational Hardening (coverage gate, E2E test, CI/CD composite Action) | — | ✅ Xong |
 | **v0.7-rc.1** | Path A memory loop MVP + Progressive Discovery hints | `Hint`, `HintState`, `LessonOutcome`, `RecallMetric`, `RecallEvent`, `FeedbackEvent`, `GuardF1Metric` | ✅ Tag 2026-04-27 (PR [#27](https://github.com/tamld/defense-in-depth/pull/27), [#28](https://github.com/tamld/defense-in-depth/pull/28), [#31](https://github.com/tamld/defense-in-depth/pull/31)) |
 | **Track A1** — đồng bộ docs (trạng thái v0.7 trên README + STRATEGY + meta-architecture + bản đồ hệ sinh thái) | Phát hành kỹ thuật | — | ✅ Xong ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) |
 | **Track A2** — mở rộng độ phủ guard (`secret-detection`, `dependency-audit`, `file-size-limit`) | Guard mới | Config guard mới | ✅ Xong ([#41](https://github.com/tamld/defense-in-depth/issues/41), `git-shield.yml` CI fail-safe đã land tại [#46](https://github.com/tamld/defense-in-depth/pull/46)) |
@@ -571,6 +571,7 @@ Các công cụ trên quản trị AI **trong lúc suy luận**. defense-in-dept
 Xem [CONTRIBUTING.md](CONTRIBUTING.md) cho hướng dẫn đầy đủ.
 
 **5 quy tắc bất di bất dịch:**
+
 1. TypeScript strict — không dùng `any`
 2. Conventional commits — `feat(guards): add new guard`
 3. Mỗi guard = một file = một test
@@ -591,13 +592,14 @@ Bạn đang bước vào một **codebase được quản trị** với các fra
 | **Claude Code / Antigravity** | [`CLAUDE.md`](CLAUDE.md) | Bootstrap chain, memory priming, ngữ cảnh AAOS lineage |
 | **Cursor** | [`.cursorrules`](.cursorrules) | Quy tắc dạng comment theo convention của Cursor |
 
-> Các file trên **dùng ngay được**. Drop vào dự án và Agent có ngữ cảnh governance ngay lập tức. Không cần đi tìm.
+Các file trên **dùng ngay được**. Drop vào dự án và Agent có ngữ cảnh governance ngay lập tức. Không cần đi tìm.
 
 > [!CAUTION]
-> **3 ĐẠO LUẬT TUYỆT ĐỐI**
-> 1. **Zero-Theater:** KHÔNG tạo doc rỗng. Marker chưa hoàn thiện, template trống = BLOCK ngay.
-> 2. **Bằng chứng vượt trên hợp lý:** Gắn nhãn các tuyên bố chưa kiểm chứng là `[HYPO]`. Chỉ bằng chứng `[CODE]` và `[RUNTIME]` mới qua được peer review.
-> 3. **Bootstrap trước:** Theo chain — `AGENTS.md` → `.agents/AGENTS.md` → `.agents/rules/rule-consistency.md` → rồi mới code.
+> **3 ĐẠO LUẬT TUYỆT ĐỐI BẮT BUỘC**
+>
+> 1. **Zero-Theater (Nói không với làm màu):** KHÔNG tạo tài liệu sáo rỗng. Các đánh dấu chưa hoàn thiện hoặc template trống sẽ bị BLOCK ngay lập tức.
+> 2. **Bằng chứng vượt trên hợp lý:** Phải gắn nhãn cho mọi tuyên bố chưa được kiểm chứng bằng `[HYPO]`. Chỉ những bằng chứng cụ thể là `[CODE]` và `[RUNTIME]` mới lọt qua được vòng review đồng cấp.
+> 3. **Phải nạp quy tắc trước (Bootstrap):** Tuân thủ tuyệt đối quy trình chuỗi — đọc `AGENTS.md` → `.agents/AGENTS.md` → `.agents/rules/rule-consistency.md` → sau đó mới được bắt tay vào code.
 
 **Lazy-Load Matrix:**
 

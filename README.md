@@ -44,17 +44,17 @@ unstructured commits.*<br/>
 > [!IMPORTANT]
 > **Client-side hooks are bypassable.** `git commit --no-verify` defeats any
 > Git hook. For real HITL/governance, pair the local hooks with the
-> server-side [GitHub Action](.github/actions/verify/action.yml) (runs the
+> CI/CD [GitHub Action](.github/actions/verify/action.yml) (runs the
 > same guard pipeline on PR diffs) **and** branch-protection rules on your
-> default branch. The local hooks are the fast feedback loop; the server
-> side is the enforcement loop.
+> default branch. The local hooks are the fast feedback loop; the CI
+> pipeline is the enforcement loop.
 
 > [!NOTE]
-> **Current status (`v0.7.0-rc.1`, April 2026)** — release candidate, not yet promoted to `npm latest`.
+> **Current status (`v1.0.0-rc.1`, April 2026)** — release candidate, not yet promoted to `npm latest`.
 >
-> **Shipped**: 9 built-in guards (v0.1–v0.6), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1), API stabilisation pass (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks — landed post-rc.1 against [umbrella #42](https://github.com/tamld/defense-in-depth/issues/42)).
+> **Shipped**: 9 built-in guards (v0.1–v0.6), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1), API stabilisation pass (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks).
 >
-> **In flight (Track A — Adoption)**: A1 docs reconcile ✅ ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) · A2 guard breadth bump 🔄 ([#41](https://github.com/tamld/defense-in-depth/issues/41)) · A3 v1.0 release lifecycle 🔄 (P0 done, P1 [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) remaining) · A4 30-day adoption push 📋. All tracked under [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42).
+> **In flight (Track A — Adoption)**: A1 docs reconcile ✅ ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) · A2 guard breadth bump ✅ ([#41](https://github.com/tamld/defense-in-depth/issues/41)) · A3 v1.0 release lifecycle ✅ (P0 done, P1 [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) remaining) · A4 30-day adoption push 📋. All tracked under [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42).
 >
 > **Designed but gated (Track B — Meta Growth, v1.1.x)**: F1 aggregator, Án Lệ injection contract, dedup, forgetting, quality gate. **Hard-gated** behind Track A4 exit (≥10 external users + ≥100 captured events) per [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md).
 >
