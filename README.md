@@ -52,13 +52,13 @@ unstructured commits.*<br/>
 > [!NOTE]
 > **Current status (`v0.7.0-rc.1`, April 2026)** — release candidate, not yet promoted to `npm latest`.
 >
-> **Shipped**: 8 built-in guards (v0.1–v0.3), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1).
+> **Shipped**: 9 built-in guards (v0.1–v0.6), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1), API stabilisation pass (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks — landed post-rc.1 against [umbrella #42](https://github.com/tamld/defense-in-depth/issues/42)).
 >
-> **In flight (Track A — Adoption)**: docs reconcile, guard breadth bump, API freeze → v1.0 GA promotion. Tracked under [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42) with the canonical execution order pinned in the comments.
+> **In flight (Track A — Adoption)**: A1 docs reconcile ✅ ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) · A2 guard breadth bump 🔄 ([#41](https://github.com/tamld/defense-in-depth/issues/41)) · A3 v1.0 release lifecycle 🔄 (P0 done, P1 [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) remaining) · A4 30-day adoption push 📋. All tracked under [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42).
 >
 > **Designed but gated (Track B — Meta Growth, v1.1.x)**: F1 aggregator, Án Lệ injection contract, dedup, forgetting, quality gate. **Hard-gated** behind Track A4 exit (≥10 external users + ≥100 captured events) per [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md).
 >
-> **Right next read** — Quick start: [`docs/quickstart.md`](docs/quickstart.md). Roadmap & gating: [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). Strategic direction: [`STRATEGY.md`](STRATEGY.md). Vision (4 layers + types ledger): [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md).
+> **Right next read** — Quick start: [`docs/quickstart.md`](docs/quickstart.md). Stability contract: [`docs/SEMVER.md`](docs/SEMVER.md) · [`docs/migration/v0-to-v1.md`](docs/migration/v0-to-v1.md). Roadmap & gating: [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). Strategic direction: [`STRATEGY.md`](STRATEGY.md). Vision (4 layers + types ledger): [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md).
 
 > [!WARNING]
 > **🤖 IF YOU ARE AN AI AGENT READING THIS:**
@@ -268,10 +268,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: tamld/defense-in-depth/.github/actions/verify@v0.6.0
+      - uses: tamld/defense-in-depth/.github/actions/verify@v0.7.0-rc.1
         # Optional inputs:
         # with:
-        #   defense-version: '0.6.0'
+        #   defense-version: '0.7.0-rc.1'
         #   node-version: '22'
         #   base-ref: 'origin/main'
 ```
@@ -283,17 +283,19 @@ Combine this with branch-protection rules on `main` that require the
 
 ## 4. Built-in Guards
 
-| Guard | Default | Severity | What It Catches |
-|:---|:---:|:---:|:---|
-| **Hollow Artifact** | ✅ ON | BLOCK | Files with only `TODO`, `TBD`, empty templates |
-| **SSoT Pollution** | ✅ ON | BLOCK | Config/state files modified in feature branches |
-| **Root Pollution** | ✅ ON | BLOCK | Unapproved files or folders created in the project root |
-| **Commit Format** | ✅ ON | WARN | Non-conventional commit messages |
-| **Ticket Identity** | ❌ OFF | WARN | Commit references a conflicting ticket |
-| **Branch Naming** | ❌ OFF | WARN | Branch names not matching pattern |
-| **Phase Gate** | ❌ OFF | BLOCK | Code committed without a plan file |
+| Guard | Default | Severity | Hook | What It Catches |
+|:---|:---:|:---:|:---:|:---|
+| **Hollow Artifact** | ✅ ON | BLOCK | pre-commit | Files with only `TODO`, `TBD`, empty templates |
+| **SSoT Pollution** | ✅ ON | BLOCK | pre-commit | Governance / state files (`.agents/**`, `flow_state.yml`, `backlog.yml`) modified in feature branches |
+| **Root Pollution** | ✅ ON | BLOCK | pre-commit | Unapproved files or folders created in the project root |
+| **Commit Format** | ✅ ON | WARN | commit-msg | Non-conventional commit messages |
+| **Ticket Identity** | ❌ OFF | WARN | pre-commit | Commit references a conflicting ticket (TKID Lite, v0.3) |
+| **Branch Naming** | ❌ OFF | WARN | pre-push | Branch names not matching `feat\|fix\|chore\|docs/*` |
+| **Phase Gate** | ❌ OFF | BLOCK | pre-commit | Code committed without an `implementation_plan.md` plan file |
+| **HITL Review** | ❌ OFF | BLOCK | pre-commit | Enforces human-in-the-loop review markers on protected paths (v0.6) |
+| **Federation** | ❌ OFF | BLOCK | pre-commit | Parent ↔ child ticket-state validation across federated repos (v0.6, configurable `block`/`warn`) |
 
-> **Note on DSPy:** The Hollow Artifact guard can use DSPy as an optional semantic layer (opt-in via config). When enabled, DSPy acts as an additive signal only (WARN-only) ensuring graceful degradation.
+> **Note on DSPy:** The Hollow Artifact guard can use DSPy as an optional semantic layer (opt-in via `guards.hollowArtifact.useDspy: true`). When enabled, DSPy acts as an additive signal only (WARN-only) and degrades gracefully — Tier 0 deterministic checks always hold.
 
 ### Severity Levels
 
@@ -362,13 +364,11 @@ export const fileSizeGuard: Guard = {
 };
 ```
 
-> See [`docs/agents/guard-interface.md`](docs/agents/guard-interface.md) for the full contract.
+> See [`docs/agents/guard-interface.md`](docs/agents/guard-interface.md) for the full contract and [`docs/dev-guide/architecture.md`](docs/dev-guide/architecture.md) for the engine internals.
 
----
+### Ticket Federation Providers
 
-## 7. Ticket Federation Providers
-
-To integrate context cleanly from third-party ecosystems (like Jira, Linear, or your own local `TICKET.md`), `defense-in-depth` relies on **TicketStateProviders**. Providers inject metadata asynchronously *before* guards run purely.
+To integrate context cleanly from third-party ecosystems (Jira, Linear, your own local `TICKET.md`), `defense-in-depth` relies on **TicketStateProviders**. Providers inject metadata asynchronously *before* guards run purely.
 
 ```typescript
 export interface TicketStateProvider {
@@ -377,7 +377,7 @@ export interface TicketStateProvider {
 }
 ```
 
-> See [`docs/dev-guide/writing-providers.md`](docs/dev-guide/writing-providers.md) for more info on plugging your own system into the governance model.
+> Built-in providers: [`FileTicketProvider`](src/federation/file-provider.ts), [`HttpTicketProvider`](src/federation/http-provider.ts). See [`docs/dev-guide/writing-providers.md`](docs/dev-guide/writing-providers.md) and [`docs/agents/provider-interface.md`](docs/agents/provider-interface.md) for the full contract.
 
 ---
 
@@ -387,11 +387,18 @@ export interface TicketStateProvider {
 |:---|:---|
 | `defense-in-depth init` | Install hooks + create config |
 | `defense-in-depth init --scaffold` | Also create `.agents/` ecosystem |
-| `defense-in-depth verify` | Run all guards manually |
+| `defense-in-depth verify` | Run all guards manually against staged files |
 | `defense-in-depth verify --files a.md b.ts` | Check specific files |
-| `defense-in-depth doctor` | Health check (config, hooks, guards) |
-| `defense-in-depth lesson record` / `search` | Record new lessons or search existing ones in `lessons.jsonl` |
-| `defense-in-depth growth record` | Record a new growth metric to `growth_metrics.jsonl` |
+| `defense-in-depth verify --dry-run-dspy` | Force-disable DSPy for this run (regression check) |
+| `defense-in-depth doctor` | Health check (config, hooks, guards, hints state) |
+| `defense-in-depth doctor --hints` | Show all eligible Progressive Discovery hints |
+| `defense-in-depth doctor --hints dismiss <id>` / `--hints reset` | Dismiss or wipe hint state |
+| `defense-in-depth lesson record` / `search` / `outcome` / `scan-outcomes` | Manage Án Lệ memory (v0.4) + recall outcomes (v0.7) in `lessons.jsonl` and `.agents/records/lesson-*.jsonl` |
+| `defense-in-depth growth record` | Record a growth metric to `growth_metrics.jsonl` |
+| `defense-in-depth feedback <tp\|fp\|fn\|tn>` / `list` / `f1` / `scan-history` | Label guard findings + compute per-guard F1 (v0.7) |
+| `defense-in-depth eval <path>` | DSPy semantic evaluation of an artifact (v0.5, opt-in) |
+
+> Exit codes (stable, part of the public surface per [`docs/SEMVER.md`](docs/SEMVER.md)): `0` = pass, `1` = BLOCK, `2` = config error. WARN does **not** change the exit code. DSPy/provider failures degrade to WARN, never crash.
 
 ---
 
@@ -400,47 +407,86 @@ export interface TicketStateProvider {
 ```text
 defense-in-depth/
 ├── src/
-│   ├── core/                # 🔒 Mandatory pillars
-│   │   ├── types.ts         # Guard + meta-layer interfaces (4 layers)
-│   │   ├── engine.ts        # Pipeline runner
-│   │   └── config-loader.ts # YAML config with deep merge
-│   ├── guards/              # 🛡️ Pluggable guard modules
+│   ├── core/                  # 🔒 Mandatory pillars
+│   │   ├── types.ts           # Guard + meta-layer interfaces (4 layers)
+│   │   ├── engine.ts          # Pipeline runner (options-object API)
+│   │   ├── config-loader.ts   # YAML config with deep merge defaults
+│   │   ├── errors.ts          # Typed DiDError hierarchy (v1.0 API freeze)
+│   │   ├── jsonl-store.ts     # Shared append-only JSONL writer + runtime validation
+│   │   ├── memory.ts          # lessons.jsonl read/write + recall events
+│   │   ├── lesson-outcome.ts  # LessonOutcome capture + scanner (v0.7)
+│   │   ├── feedback.ts        # FeedbackEvent writer (v0.7)
+│   │   ├── f1.ts              # Per-guard F1 computation (v0.7)
+│   │   ├── hint-engine.ts     # Progressive Discovery hint evaluator (v0.7)
+│   │   ├── hint-state.ts      # Atomic JSON state for hints-shown
+│   │   └── dspy-client.ts     # Optional DSPy HTTP client (v0.5)
+│   ├── guards/                # 🛡️ 9 built-in guards
 │   │   ├── hollow-artifact.ts
 │   │   ├── ssot-pollution.ts
+│   │   ├── root-pollution.ts
 │   │   ├── commit-format.ts
 │   │   ├── branch-naming.ts
 │   │   ├── phase-gate.ts
+│   │   ├── ticket-identity.ts # v0.3 — TKID Lite
+│   │   ├── hitl-review.ts     # v0.6 — HITL marker enforcement
+│   │   ├── federation.ts      # v0.6 — Parent ↔ child ticket validation
+│   │   └── index.ts           # Barrel export + allBuiltinGuards
+│   ├── federation/            # 🌐 Cross-project ticket providers (v0.6)
+│   │   ├── file-provider.ts
+│   │   ├── http-provider.ts
+│   │   ├── types.ts
 │   │   └── index.ts
-│   ├── hooks/               # 🪝 Git hook generators
-│   └── cli/                 # ⌨️ CLI commands
-├── .agents/                 # 🧠 Governance ecosystem
-│   ├── AGENTS.md            # Bootstrap + ecosystem map
-│   ├── rules/               # Immutable project rules
-│   ├── workflows/           # Operational procedures
-│   ├── skills/              # Agent capability templates
-│   ├── config/              # Machine-readable configs
-│   ├── contracts/           # Interface contracts
-│   └── philosophy/          # Cognitive mindset roots
-├── docs/                    # 📖 Full documentation
-│   ├── quickstart.md        # 60-second onboarding
-│   ├── guide-writing-guards.md # Guard authoring guide
-│   ├── federation.md        # AAOS ↔ defense-in-depth protocol
-│   └── vision/              # Meta architecture vision
-├── .github/                 # 🔄 CI/CD + templates
-│   ├── workflows/ci.yml     # 3 OS × 4 Node matrix
-│   ├── ISSUE_TEMPLATE/      # Bug + feature templates
+│   ├── hooks/                 # 🪝 Git hook generators
+│   │   ├── pre-commit.ts
+│   │   └── pre-push.ts
+│   ├── cli/                   # ⌨️ CLI commands
+│   │   ├── index.ts           # Entry + router
+│   │   ├── init.ts            # Install hooks + scaffold config
+│   │   ├── verify.ts          # Run guards manually
+│   │   ├── doctor.ts          # Health check + hint surface
+│   │   ├── lesson.ts          # Memory layer (record / search / outcome)
+│   │   ├── growth.ts          # Growth metrics
+│   │   ├── feedback.ts        # F1 input pipeline (v0.7)
+│   │   ├── eval.ts            # DSPy semantic evaluation (v0.5, opt-in)
+│   │   └── hints-emit.ts      # Internal hint emission helper
+│   └── index.ts               # Public API barrel (see docs/SEMVER.md)
+├── tests/
+│   ├── contract/              # Public-API + CLI exit-code contract tests (#35)
+│   │   ├── public-api-contract.test.js
+│   │   ├── cli-exit-codes.test.js
+│   │   └── no-execsync-regression.test.js
+│   └── …                      # Per-guard / per-CLI suites (366+ green)
+├── .agents/                   # 🧠 Governance ecosystem
+│   ├── AGENTS.md              # Bootstrap + ecosystem map
+│   ├── rules/                 # Immutable project rules
+│   ├── workflows/             # Operational procedures
+│   ├── skills/                # Agent capability templates
+│   ├── contracts/             # Interface contracts (Guard, Provider, Jules…)
+│   ├── philosophy/            # Cognitive mindset roots (COGNITIVE_TREE)
+│   └── records/               # Append-only telemetry (.jsonl)
+├── docs/                      # 📖 Full documentation
+│   ├── quickstart.md          # 60-second onboarding
+│   ├── SEMVER.md              # Stability contract (v1.0 lane)
+│   ├── migration/v0-to-v1.md  # Upgrade guide for npm `latest = 0.1.0` users
+│   ├── user-guide/            # Configuration, CLI, hints
+│   ├── dev-guide/             # Architecture, writing guards/providers
+│   ├── agents/                # Machine-readable interface specs
+│   ├── federation.md          # AAOS ↔ defense-in-depth protocol
+│   └── vision/                # meta-architecture, meta-growth-roadmap
+├── .github/                   # 🔄 CI/CD + templates
+│   ├── workflows/             # ci.yml, release.yml, git-shield.yml
+│   ├── actions/verify/        # Server-side composite action
+│   ├── ISSUE_TEMPLATE/
 │   └── PULL_REQUEST_TEMPLATE.md
-├── templates/               # 📄 Shipped templates
-├── AGENTS.md                # 🤖 Root: project identity + laws
-├── GEMINI.md                # 🧠 Prebuilt config for Gemini CLI
-├── CLAUDE.md                # 🧠 Prebuilt config for Claude Code
-├── .cursorrules             # 🧠 Prebuilt config for Cursor AI
-├── STRATEGY.md              # 🗺️ Strategic direction + roadmap
-├── CONTRIBUTING.md          # 👥 How to contribute
-├── CODE_OF_CONDUCT.md       # 🤝 Community standards
-├── SECURITY.md              # 🔒 Vulnerability reporting
-├── CHANGELOG.md             # 📝 Version history
-└── LICENSE                  # ⚖️ MIT
+├── templates/                 # 📄 Shipped scaffolding templates
+├── AGENTS.md                  # 🤖 Root: project identity + laws
+├── GEMINI.md / CLAUDE.md / .cursorrules # 🧠 Prebuilt agent configs
+├── STRATEGY.md                # 🗺️ Strategic direction + roadmap
+├── CONTRIBUTING.md            # 👥 How to contribute
+├── CODE_OF_CONDUCT.md         # 🤝 Community standards
+├── SECURITY.md                # 🔒 Threat model + vulnerability reporting
+├── CHANGELOG.md               # 📝 Version history
+└── LICENSE                    # ⚖️ MIT
 ```
 
 ---
@@ -507,15 +553,18 @@ These tools govern AI **while it reasons**. defense-in-depth governs AI **when i
 | **v0.3** | TKID Lite (file-based tickets) + trust-but-verify | `TicketRef` | ✅ Done |
 | **v0.4** | Memory Layer (`lessons.jsonl`) + growth metrics | `Lesson`, `GrowthMetric` | ✅ Done |
 | **v0.5** | Optional DSPy semantic layer (opt-in, graceful degradation) + semantic quality evaluation | `EvaluationScore` | ✅ Done |
-| **v0.6** | Federation: Parent↔child governance guards | `FederationGuardConfig`, `HttpTicketProvider` | ✅ Done |
-| **v0.6.2** | Test & Operational Hardening (Coverage gates, End-to-End tests) | | ✅ Done |
-| **v0.7-rc.1** | Path A memory loop MVP + Progressive Discovery hints | `Hint`, `HintState`, `LessonOutcome`, `RecallMetric`, `RecallEvent`, `FeedbackEvent`, `GuardF1Metric` | 🚚 rc.1 (PRs [#27](https://github.com/tamld/defense-in-depth/pull/27), [#28](https://github.com/tamld/defense-in-depth/pull/28), [#31](https://github.com/tamld/defense-in-depth/pull/31)) |
-| **Track A1–A4** | Docs reconcile, guard breadth bump, API freeze, `npm latest` promo (30-day bake → v1.0 GA) | (no new types — release engineering) | 🔄 In flight (umbrella [#42](https://github.com/tamld/defense-in-depth/issues/42)) |
-| **v1.0** | Stable API + `npm latest` GA | All types frozen | 📋 Planned (Track A4 exit) |
-| **v1.1.x** | Meta Growth: F1 aggregator + Án Lệ injection + dedup + forgetting + quality gate. **Gated** on Track A4 exit (≥10 external users + ≥100 captured events). | `MetaGrowthSnapshot` | 📋 Designed (Track B) |
-| **v0.9** | Telemetry Sync: Bidirectional Internal ↔ OSS data flow (numbering revisited after v1.1.x) | `FederationPayload` | 📋 Designed |
+| **v0.6** | Federation: parent ↔ child governance guards + `HitlReview` | `FederationGuardConfig`, `HttpTicketProvider`, `HitlReviewConfig` | ✅ Done |
+| **v0.6.2** | Test & Operational Hardening (Coverage gates, End-to-End tests, server-side composite Action) | — | ✅ Done |
+| **v0.7-rc.1** | Path A memory loop MVP + Progressive Discovery hints | `Hint`, `HintState`, `LessonOutcome`, `RecallMetric`, `RecallEvent`, `FeedbackEvent`, `GuardF1Metric` | ✅ Tagged 2026-04-27 (PRs [#27](https://github.com/tamld/defense-in-depth/pull/27), [#28](https://github.com/tamld/defense-in-depth/pull/28), [#31](https://github.com/tamld/defense-in-depth/pull/31)) |
+| **Track A1** — docs reconcile (v0.7 status across README + STRATEGY + meta-architecture + ecosystem map) | Release engineering | — | ✅ Done ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) |
+| **Track A2** — guard breadth bump (`secret-detection`, `dependency-audit`, `file-size-limit`) | New guards | New per-guard configs | 🔄 In flight ([#41](https://github.com/tamld/defense-in-depth/issues/41), `git-shield.yml` CI fail-safe landed in [#46](https://github.com/tamld/defense-in-depth/pull/46)) |
+| **Track A3** — API freeze for v1.0 (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks, JSON Schema config, custom-guard guide) | API surface | `EngineRunOptions`, `DiDError` hierarchy | 🔄 In flight — P0 ✅ ([#33](https://github.com/tamld/defense-in-depth/issues/33), [#34](https://github.com/tamld/defense-in-depth/issues/34)); P1 partial — [#35](https://github.com/tamld/defense-in-depth/issues/35)/[#36](https://github.com/tamld/defense-in-depth/issues/36)/[#37](https://github.com/tamld/defense-in-depth/issues/37)/[#43](https://github.com/tamld/defense-in-depth/issues/43)/[#44](https://github.com/tamld/defense-in-depth/issues/44)/[#49](https://github.com/tamld/defense-in-depth/issues/49)/[#50](https://github.com/tamld/defense-in-depth/issues/50)/[#59](https://github.com/tamld/defense-in-depth/issues/59) ✅; [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) remaining |
+| **Track A4** — 30-day bake on `next` → `npm latest` promo + adoption push | Release lifecycle | — | 📋 Pending Track A3 exit (umbrella [#42](https://github.com/tamld/defense-in-depth/issues/42)) |
+| **v1.0** | Stable API + `npm latest` GA | All types frozen per [`docs/SEMVER.md`](docs/SEMVER.md) | 📋 Planned (Track A4 exit) |
+| **v1.1.x — Track B (Meta Growth)** | F1 aggregator + Án Lệ injection + dedup + forgetting + quality gate. **Hard-gated** on Track A4 exit (≥10 external users + ≥100 captured events). | `MetaGrowthSnapshot` | 📋 Designed |
+| **v1.2+ — Telemetry Sync** *(was “v0.9” in earlier drafts; renumbered post-v1.0 per [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md))* | Bidirectional Internal ↔ OSS data flow | `FederationPayload` | 📋 Designed |
 
-> All types across the roadmap (Layers 0–3 + Federation + Telemetry Sync) are ALREADY published in `src/core/types.ts` — compiled, documented, importable. Implementation follows incrementally per the gating contract in [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). See [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md) for the full vision and types ledger.
+> All types across the roadmap (Layers 0–3 + Federation + Telemetry Sync) are ALREADY published in [`src/core/types.ts`](src/core/types.ts) — compiled, documented, importable. Implementation follows incrementally per the gating contract in [`docs/vision/meta-growth-roadmap.md`](docs/vision/meta-growth-roadmap.md). See [`docs/vision/meta-architecture.md`](docs/vision/meta-architecture.md) for the full vision and types ledger.
 
 ### Stability contract — v1.0 lane
 
