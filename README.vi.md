@@ -9,11 +9,11 @@
 *AI lo phần thu thập tài liệu và thực thi. Con người lo phần nghiệp vụ và quyết định kiến trúc.*
 <br/>
 
-[![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](#)
+[![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](https://github.com/tamld/defense-in-depth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/tamld/defense-in-depth/blob/main/LICENSE)
-[![Platform: Cross-Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-orange.svg)](#)
-[![Node: ≥18](https://img.shields.io/badge/Node-%E2%89%A518-green.svg)](#)
-[![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-007ACC.svg?logo=typescript&logoColor=white)](#)
+[![Platform: Cross-Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-orange.svg)](https://github.com/tamld/defense-in-depth)
+[![Node: ≥18](https://img.shields.io/badge/Node-%E2%89%A518-green.svg)](https://github.com/tamld/defense-in-depth)
+[![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-007ACC.svg?logo=typescript&logoColor=white)](https://github.com/tamld/defense-in-depth)
 [![GitHub Stars](https://img.shields.io/github/stars/tamld/defense-in-depth?style=flat&logo=github&color=yellow)](https://github.com/tamld/defense-in-depth/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/tamld/defense-in-depth?style=flat&logo=github&color=blue)](https://github.com/tamld/defense-in-depth/network/members)
 [![GitHub Issues](https://img.shields.io/github/issues/tamld/defense-in-depth?style=flat&logo=github&color=red)](https://github.com/tamld/defense-in-depth/issues)
@@ -25,8 +25,7 @@
 [English](README.md) · **Tiếng Việt**
 
 ---
-*AI Agent tạo ra code nhanh gấp 10 lần. Nhưng cũng tạo ra cùng một bộ lỗi đặc trưng — placeholder, template rỗng, sửa lung tung file quản trị, commit message lộn xộn.*<br/>
-**defense-in-depth chặn các lỗi đó ngay tại thời điểm commit.**
+### defense-in-depth chặn các lỗi đó ngay tại thời điểm commit.
 ---
 
 </div>
@@ -40,9 +39,7 @@
 
 > [!IMPORTANT]
 > **Hook phía client có thể bị bypass.** `git commit --no-verify` qua mặt mọi Git hook.
-> Để claim HITL/governance có hiệu lực thật, cần ghép local hook với
-> [GitHub Action server-side](.github/actions/verify/action.yml) (chạy đúng pipeline guard
-> trên PR diff) **và** branch-protection rule trên branch mặc định.
+> Để claim HITL/governance có hiệu lực thật, cần ghép local hook với [GitHub Actions server-side](.github/actions/verify/action.yml) (chạy đúng pipeline guard trên PR diff) **và** branch-protection rule trên branch mặc định.
 > Hook local là vòng phản hồi nhanh; phía server là vòng cưỡng chế.
 
 > [!NOTE]
@@ -93,16 +90,16 @@ AI Agent (Cursor, Copilot, Claude Code, Windsurf, Codex) là **công cụ mạnh
 ### Quy tắc tối thượng
 
 > **Con người-trong-vòng-lặp (HITL) là không thể thương lượng.**
->
+> 
 > defense-in-depth tự động hoá phần *cơ học* của code review (format, cấu trúc, vệ sinh).
 > Nó giải phóng con người để tập trung vào phần *ngữ nghĩa* (giải pháp này có đúng không? có phục vụ nghiệp vụ không?).
->
+> 
 > Hệ thống **không bao giờ** thay thế phán đoán của con người. Nó giảm noise để phán đoán của con người sắc bén hơn.
 
 ### Vì sao ở tầng Git? (Quản trị tất định vs. Guardrail động)
 
 Hệ sinh thái AI safety có nhiều guardrail runtime mạnh — **Guardrails AI**, **NeMo Guardrails**, **LlamaFirewall**, **Microsoft Agent Governance Toolkit** — can thiệp vào hành vi Agent *ngay khi mô hình đang suy luận*. Chúng rất mạnh, nhưng là **điều chỉnh động**: mỗi lần nhà cung cấp cập nhật model hoặc nền tảng đổi version, guardrail phải chạy theo để thích ứng.
-
+ 
 defense-in-depth chọn hướng tiếp cận khác:
 
 > **Tôn trọng toàn bộ sức mạnh AI Agent.** Cho phép chúng tự do suy nghĩ, vận hành, sáng tạo — mỗi nền tảng theo cách riêng. Không can thiệp vào quá trình đó.
@@ -181,7 +178,7 @@ AI Agent tối ưu cho **sự hợp lý**, không phải **sự đúng đắn**.
 
 defense-in-depth là một **pipeline guard mở rộng** chạy ở Git hooks:
 
-```
+```text
 ┌──────────────────────────────────────────────────┐
 │                 Git Pipeline                       │
 │                                                    │
