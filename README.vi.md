@@ -457,6 +457,7 @@ defense-in-depth/
 │   ├── workflows/             # Quy trình thao tác
 │   ├── skills/                # Skill template cho Agent
 │   ├── contracts/             # Hợp đồng interface (Guard, Provider, Jules…)
+│   ├── config/                # Cấu hình đọc-được-bằng-máy
 │   ├── philosophy/            # Gốc tư duy (COGNITIVE_TREE)
 │   └── records/               # Telemetry append-only (.jsonl)
 ├── docs/                      # 📖 Tài liệu đầy đủ

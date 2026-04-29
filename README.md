@@ -462,6 +462,7 @@ defense-in-depth/
 │   ├── workflows/             # Operational procedures
 │   ├── skills/                # Agent capability templates
 │   ├── contracts/             # Interface contracts (Guard, Provider, Jules…)
+│   ├── config/                # Machine-readable configs
 │   ├── philosophy/            # Cognitive mindset roots (COGNITIVE_TREE)
 │   └── records/               # Append-only telemetry (.jsonl)
 ├── docs/                      # 📖 Full documentation
