@@ -1,0 +1,125 @@
+version: 2
+slug: upgrade-roadmap
+active_task: T001
+goal:
+  status: active
+  objective: "Execute the approved 4-wave upgrade roadmap autonomously inside tamld/defense-in-depth only."
+  intake:
+    completion_proof: "Ruleset-gated PRs merged for each wave; npm run coverage exits 0 at {95,95,95}; npm pack --dry-run succeeds; dependabot.yml parses; zero untracked gaps; final Judge receipt maps every wave receipt to charter criteria in docs/goals/upgrade-roadmap/goal.md."
+  oracle:
+    signal: "Each wave = one merged PR whose required checks (Lint & Type Check, Coverage Gate) are green on GitHub; local verify commands exit 0."
+    final_proof: "T999 Judge receipt citing merged PR URLs, coverage gate output ≥95 across line/branch/funcs, and clean git status."
+agents:
+  scout: unknown
+  worker: unknown
+  judge: unknown
+tasks:
+  - id: T001
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Wave 1 dogfood PR: add PR-diff `npx defense-in-depth verify --files` step to ci.yml test job; open real PR through ruleset 14874847; merge after required checks green."
+    allowed_files:
+      - .github/workflows/ci.yml
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - node -e "require('yaml').parse(require('fs').readFileSync('.github/workflows/ci.yml','utf8'))"
+      - npx tsc --noEmit
+    stop_if:
+      - "Push or PR creation blocked by auth (workflow scope)."
+      - "verify --files CLI flag does not exist in dist/cli — verify README claim first."
+    receipt: null
+
+  - id: T002
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Coverage W1: behavioral tests for CLI handlers lesson.js + eval.js + init.js (worst deficits; SRS FR-1.1–FR-1.3), one commit, gate stays green."
+    allowed_files:
+      - tests/
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm test
+      - npm run coverage
+    stop_if:
+      - "Branch unreachable through public behavior → log dead-code finding per ADR-0004, do not fabricate."
+    receipt: null
+
+  - id: T003
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Coverage W2+W3: core memory/feedback layer (lesson-outcome.js branch 41.27%, core/feedback.js) + federation/guard edges per SRS FR-2/FR-3."
+    allowed_files:
+      - tests/
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm test
+      - npm run coverage
+    stop_if:
+      - "Same dead-code policy as T002."
+    receipt: null
+
+  - id: T004
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Coverage W4 FINAL COMMIT ONLY: bump THRESHOLDS in scripts/check-coverage.mjs to {95,95,95} after measured coverage already exceeds them; PR + merge."
+    allowed_files:
+      - scripts/check-coverage.mjs
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm run coverage
+    stop_if:
+      - "Any metric below 95 measured → return to T003 scope instead of bumping."
+    receipt: null
+
+  - id: T005
+    type: pm
+    assignee: PM
+    status: queued
+    objective: "Wave 3 release path: fix F1 deprecation warnings in action pins; document version decision options (v0.7.0 stable vs v1.0.0-rc.1); npm pack dry-run. Version SELECTION itself = sponsor policy decision → expect blocked receipt at that exact point."
+    allowed_files:
+      - .github/workflows/ci.yml
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm pack --dry-run
+    stop_if:
+      - "Sponsor has not chosen version number → record blocked receipt with the question, continue other tasks."
+    receipt: null
+
+  - id: T006
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Wave 4 hardening: add .github/dependabot.yml (npm+actions ecosystem), enable secret scanning via repo settings API if permitted, write red-CI alerting proposal note."
+    allowed_files:
+      - .github/dependabot.yml
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - node -e "require('yaml').parse(require('fs').readFileSync('.github/dependabot.yml','utf8'))"
+    stop_if:
+      - "Settings API returns 403 for secret scanning toggle → note it as manual follow-up, not a failure."
+    receipt: null
+
+  - id: T999
+    type: judge
+    assignee: Judge
+    status: queued
+    objective: "Final audit: map all receipts to charter success criteria W1–W4; verify zero untracked gaps; full_outcome_complete decision."
+    inputs:
+      - "All done task receipts"
+      - "Last verification runs"
+      - "Current dirty diff"
+    expected_output:
+      - "complete | not_complete"
+      - "full_outcome_complete: true | false"
+      - "missing evidence"
+      - "next task if not complete"
+    receipt: null
