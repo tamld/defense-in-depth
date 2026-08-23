@@ -70,7 +70,9 @@ test('init CLI branches', async (t) => {
 
       const hookPath = path.join(root, '.git', 'hooks', 'pre-commit');
       const hookStat = await stat(hookPath);
-      assert.ok(hookStat.mode & 0o111, 'hook should be executable');
+      if (process.platform !== 'win32') {
+        assert.ok(hookStat.mode & 0o111, 'hook should be executable');
+      }
 
       const hookBody = await readFile(hookPath, 'utf8');
       assert.ok(hookBody.includes('defense-in-depth'), 'hook must invoke defense-in-depth');
