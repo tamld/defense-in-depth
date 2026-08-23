@@ -1,0 +1,16 @@
+{
+  "task": "T002",
+  "result": "done",
+  "summary": "CLI handler branch coverage (SRS FR-1.1..FR-1.3): wrote tests/lesson-cli.test.js (16 subtests: record validation incl. confidence/evidence gates, search modes, outcome fallback+idempotency via schema-valid seeded recalls, scan-outcomes, recalls list), tests/eval-cli.test.js (6 subtests: usage/security/file-not-found exits, clean PASSED + DSPy-unavailable banner via stderr.write capture, TODO artifact FAILED exitCode=1), tests/init-cli.test.js (5 subtests: no-git exit, fresh install hooks+config, re-run update/skip branches, foreign-hook append preservation). Worker died pre-work (API error #4); PM executed directly per goal-execution.md fallback. One CI iteration: win32 lacks POSIX exec bits -> platform-guarded assertion only. PR #73 left OPEN for sponsor merge decision per HITL.",
+  "changed_files": ["tests/lesson-cli.test.js", "tests/eval-cli.test.js", "tests/init-cli.test.js"],
+  "commands": [
+    {"cmd": "npx tsc --noEmit", "status": "pass", "evidence": "exit 0"},
+    {"cmd": "npm test", "status": "pass", "evidence": "541/541 pass, 0 fail, 0 skipped"},
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "exit 0; branch 81.37->84.20 (+2.83pp), funcs 93.28->94.54 (+1.26pp)"},
+    {"cmd": "gh pr create", "status": "pass", "evidence": "https://github.com/tamld/defense-in-depth/pull/73"},
+    {"cmd": "gh pr checks 73 --watch", "status": "pass", "evidence": "24 checks pass incl. 12 matrix jobs + Lint & Type Check + Coverage Gate + Gitleaks"},
+    {"cmd": "fix commit 47963d9", "status": "pass", "evidence": "win32 exec-bit assertion platform-guarded"}
+  ],
+  "executor": "PM-fallback (Sisyphus) after goal-worker infra death",
+  "timestamp": "2026-08-24T00:00:00Z"
+}
