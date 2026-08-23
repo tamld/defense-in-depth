@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.base.sha }}"
-          FILES="$(git diff --name-only "${{ github.event.pull_request.base.sha }}"...HEAD | tr '\n' ' ')"
+          FILES="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | tr '\n' ' ')"
           if [ -z "$FILES" ]; then
             echo "No changed files detected; skipping verify."
             exit 0
