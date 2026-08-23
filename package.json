@@ -65,7 +65,7 @@
     "type": "git",
     "url": "https://github.com/tamld/defense-in-depth.git"
   },
-  "packageManager": "pnpm@11.0.9",
+  "packageManager": "pnpm@10.34.5",
   "engines": {
     "node": ">=18.0.0"
   },
