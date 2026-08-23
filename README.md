@@ -50,7 +50,7 @@ unstructured commits.*<br/>
 > pipeline is the enforcement loop.
 
 > [!NOTE]
-> **Current status (`v1.0.0-rc.1`, April 2026)** — release candidate, not yet promoted to `npm latest`.
+> **Current status (`v0.7.0-rc.1`, April 2026)** — release candidate, not yet promoted to `npm latest`.
 >
 > **Shipped**: 9 built-in guards (v0.1–v0.6), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1), API stabilisation pass (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks).
 >
