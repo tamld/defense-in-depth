@@ -46,9 +46,23 @@ jobs:
       - name: Self-verify CLI smoke test
         # CI checkout has no staged files → verify exits 0 with a friendly
         # message. This step asserts the built CLI launches without crashing.
-        # When meaningful diff-based dogfooding lands, replace this with a
-        # `--files` invocation against the PR diff.
         run: npx defense-in-depth verify
+
+      - name: Dogfood verify --files on PR diff
+        # Mechanism > Prompting: run our own guards against the PR's changed
+        # files using the freshly built local CLI. Push events have no PR
+        # context and keep only the smoke test above.
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.base.sha }}"
+          FILES="$(git diff --name-only "${{ github.event.pull_request.base.sha }}"...HEAD | tr '\n' ' ')"
+          if [ -z "$FILES" ]; then
+            echo "No changed files detected; skipping verify."
+            exit 0
+          fi
+          echo "Verifying changed files: $FILES"
+          node ./dist/cli/index.js verify --files $FILES
 
   lint:
     name: Lint & Type Check
