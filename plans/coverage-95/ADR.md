@@ -79,3 +79,12 @@ Each commit independently green (tsc + test + coverage). PR opened only at W4 co
 ## Findings Log
 
 *(appended during execution per ADR-0004 — empty at planning time)*
+
+## Findings Log
+
+### F-001 [RUNTIME] recall storage failure crashes search (found 2026-08-23, T003)
+- **Where**: `src/core/memory.ts` `captureRecalls` (L286+) + jsonl-store append path [CODE]
+- **Claim vs reality**: docstring promises "fire-and-forget... never propagates to the search caller"; probe shows breaking `.agents/records` storage (file where dir expected) escapes the try/catch as **uncaughtException** (ENOENT on open) and kills the process.
+- **Repro**: seed valid lesson → replace `.agents/records` with a file → `searchLessons('q', root)` → process crash before stderr warn fires.
+- **Disposition**: out of T003 scope (source freeze, ADR-0004). Proposed fix (separate PR): wrap store.append internals or make captureRecalls await-safe; add regression test then.
+- **Test marker**: `tests/core-layer.test.js` subtest 'recall storage crash is a known finding' documents it without fabricating green coverage.
