@@ -1,0 +1,15 @@
+{
+  "task": "T003",
+  "result": "done",
+  "summary": "Core-layer defensive branches (SRS FR-2.x): tests/core-layer.test.js 22 subtests green — hint-state hostile-state emptyState matrix (missing/corrupt/wrong-version/array-shown/hostile-entries), memory ENOENT-empty + corrupt-line-rethrow, recordRecall adapter defaults/determinism/store-dedupe/custom-fields, evaluateRecallAgainstCommits pure matrix incl invalid-regex literal fallback, readOutcomes recallId/lessonId filters, F1 zero-baseline + absent cursor, dspy-stub unknown-mode 500 guard. FINDING F-001 logged in plans/coverage-95/ADR.md: breaking .agents/records storage escapes captureRecalls try/catch as uncaughtException contradicting fire-and-forget docstring [RUNTIME probe]; source-frozen per ADR-0004, fix deferred to dedicated PR. PM-direct execution (subagent infra policy per b25). PR #74 merged squash 34c193c.",
+  "changed_files": ["tests/core-layer.test.js", "plans/coverage-95/ADR.md"],
+  "commands": [
+    {"cmd": "npx tsc --noEmit", "status": "pass", "evidence": "exit 0"},
+    {"cmd": "npm test", "status": "pass", "evidence": "563/563 pass (+22)"},
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "exit 0; branch 84.20->86.10, funcs 94.54->94.96"},
+    {"cmd": "gh pr create + checks watch", "status": "pass", "evidence": "https://github.com/tamld/defense-in-depth/pull/74 all checks pass"},
+    {"cmd": "gh pr merge 74 --squash", "status": "pass", "evidence": "squash 34c193c on main"}
+  ],
+  "executor": "PM-fallback (Sisyphus)",
+  "timestamp": "2026-08-24T02:30:00Z"
+}

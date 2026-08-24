@@ -1,0 +1,11 @@
+{
+  "task": "T004",
+  "result": "blocked",
+  "summary": "Threshold bump {90,80,90} to {95,95,95} is premature: measured branch 86.10% (<95) and funcs 94.96% (<95) after T003. Honest path per ADR-0002 requires CLI residual coverage first (SRS FR-1.4-1.8 never covered). Spawned T007 for doctor/hints-emit/cli-feedback/index/verify; will re-attempt bump when all three metrics >= 95.",
+  "changed_files": [],
+  "commands": [
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "gate green at {90,80,90}: line >=90, branch 86.10, funcs 94.96 — but target is {95,95,95}"}
+  ],
+  "executor": "PM (Sisyphus)",
+  "timestamp": "2026-08-24T01:30:00Z"
+}
