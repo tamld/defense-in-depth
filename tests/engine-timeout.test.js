@@ -109,7 +109,43 @@ test('engine survives hanging and throwing ticket providers', async (t) => {
       assert.equal(observed.ticket?.id, 'TK-THROW');
       assert.ok(warnings.join('\n').includes('Failed to resolve'));
     } finally {
-      globalThis.fetch = origFetch;
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('injected rejecting provider hits engine catch warn', async () => {
+    const root = await makeRoot('did-eng-inject-');
+    try {
+      const base = await loadConfig(root);
+      const failing = {
+        name: 'failing',
+        resolve: async () => {
+          throw new Error('boom');
+        },
+      };
+      // F-004 resolution: the injection hook makes the ENGINE-level catch
+      // honestly reachable (built-in providers self-catch and never throw).
+      const engine = new DefendEngine(root, configWithProvider(base, {}), {
+        ticketProviderFactory: () => failing,
+      });
+      const { guard, observed } = observerCapturingTicket();
+      engine.use(guard);
+
+      const warnings = [];
+      const origWarn = console.warn;
+      console.warn = (...a) => warnings.push(a.join(' '));
+      let verdict;
+      try {
+        verdict = await engine.run({ files: [], branch: 'feat/TK-INJECT' });
+      } finally {
+        console.warn = origWarn;
+      }
+
+      assert.ok(verdict, 'run must complete via basicRef fallback');
+      assert.equal(observed.ticket?.id, 'TK-INJECT');
+      assert.ok(warnings.join('\n').includes('⚠ Ticket provider'), 'engine warn expected');
+      assert.ok(warnings.join('\n').includes('failed for'), 'engine catch message expected');
+    } finally {
       await rm(root, { recursive: true, force: true });
     }
   });

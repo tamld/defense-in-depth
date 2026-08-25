@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## Unreleased
+
+### Changed
+- Ticket provider injection via constructor options (test/embedding hook); enables honest coverage of the engine provider-failure path; resolves F-004 ceiling.
+
 ## [0.7.0] — Stable Promotion - 2026-08-25
 
 > v0.7.0-rc.1 promoted to stable after a governance-hardening cycle: public API freeze verified by contract tests, engine/CLI hardening, and a self-hosted quality-gate overhaul (the project now dogfoods its own verify gate on every PR diff).

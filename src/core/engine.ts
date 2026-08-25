@@ -18,6 +18,7 @@ import type {
   EngineRunOptions,
   DefendConfig,
   TicketRef,
+  TicketIdentityConfig,
 } from "./types.js";
 import { Severity } from "./types.js";
 import { loadConfig } from "./config-loader.js";
@@ -33,9 +34,31 @@ export class DefendEngine {
   private config: DefendConfig;
   private projectRoot: string;
 
-  constructor(projectRoot: string, config?: DefendConfig) {
+  private ticketProviderFactory?:
+    | ((
+        guardConfig: TicketIdentityConfig,
+        projectRoot: string,
+      ) => TicketStateProvider)
+    | undefined;
+
+  /**
+   * @param options Optional injection hook for tests and advanced embedding:
+   * supply a custom ticketProviderFactory to control provider construction
+   * (e.g. a rejecting provider). Zero behavior change when omitted.
+   */
+  constructor(
+    projectRoot: string,
+    config?: DefendConfig,
+    options?: {
+      ticketProviderFactory?: (
+        guardConfig: TicketIdentityConfig,
+        projectRoot: string,
+      ) => TicketStateProvider;
+    },
+  ) {
     this.projectRoot = projectRoot;
     this.config = config ?? loadConfig(projectRoot);
+    this.ticketProviderFactory = options?.ticketProviderFactory;
   }
 
   /** Register a guard into the pipeline */
@@ -267,11 +290,13 @@ export class DefendEngine {
     const guardConfig = this.config.guards.ticketIdentity;
     if (!guardConfig?.enabled) return { ticket: basicRef, provider: undefined };
 
-    const provider = createProvider(
-      guardConfig.provider,
-      guardConfig.providerConfig,
-      this.projectRoot,
-    );
+    const provider = this.ticketProviderFactory
+      ? this.ticketProviderFactory(guardConfig, this.projectRoot)
+      : createProvider(
+          guardConfig.provider,
+          guardConfig.providerConfig,
+          this.projectRoot,
+        );
 
     try {
       const timeoutMs =
