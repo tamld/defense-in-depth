@@ -130,12 +130,33 @@ test('memory reader is ENOENT-tolerant and recall failures never break search', 
     }
   });
 
-  await t.test('recall storage crash is a known finding, not silently asserted here', async () => {
-    // FINDING F-001 [RUNTIME probe 2026-08-23]: breaking .agents/records storage
-    // escapes captureRecalls' try/catch as an uncaughtException (ENOENT on
-    // open), contradicting the fire-and-forget docstring. Logged in
-    // plans/coverage-95/ADR.md per ADR-0004; no fabricated assertion here.
-    assert.ok(true);
+  await t.test('recall storage failure degrades gracefully with stderr warning', async () => {
+    // F-001 RESOLVED [RUNTIME probe 2026-08-24, fresh dist]: the earlier crash
+    // report was a false positive from a stale dist/ — captureRecalls' isolated
+    // try/catch (present since #27) degrades to a stderr warn and search still
+    // returns results.
+    const root = await makeRoot('did-mem-recallfail-');
+    const origErrWrite = process.stderr.write.bind(process.stderr);
+    const chunks = [];
+    try {
+      await recordLesson(VALID_LESSON, root);
+      await mkdir(path.join(root, '.agents'), { recursive: true });
+      await writeFile(path.join(root, '.agents', 'records'), 'blocker', 'utf8');
+      process.stderr.write = (chunk) => {
+        chunks.push(String(chunk));
+        return true;
+      };
+      const results = await searchLessons('lockfile', root);
+      process.stderr.write = origErrWrite;
+      assert.ok(results.length >= 1, 'search still returns results');
+      assert.ok(
+        chunks.join('').includes('[recall] failed'),
+        'stderr warning expected',
+      );
+    } finally {
+      process.stderr.write = origErrWrite;
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });
 
