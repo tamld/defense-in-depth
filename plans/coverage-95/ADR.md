@@ -87,4 +87,19 @@ Each commit independently green (tsc + test + coverage). PR opened only at W4 co
 - **Claim vs reality**: docstring promises "fire-and-forget... never propagates to the search caller"; probe shows breaking `.agents/records` storage (file where dir expected) escapes the try/catch as **uncaughtException** (ENOENT on open) and kills the process.
 - **Repro**: seed valid lesson → replace `.agents/records` with a file → `searchLessons('q', root)` → process crash before stderr warn fires.
 - **Disposition**: out of T003 scope (source freeze, ADR-0004). Proposed fix (separate PR): wrap store.append internals or make captureRecalls await-safe; add regression test then.
-- **Test marker**: `tests/core-layer.test.js` subtest 'recall storage crash is a known finding' documents it without fabricating green coverage.
+- **RESOLVED 2026-08-24 (T011): false positive.** Root cause of the original probe was a stale `dist/` build predating the jsonl-store hardening. Fresh-dist probe (`npx tsc` rebuild then node -e): recordLesson → break `.agents/records` into a file → `searchLessons` returns RESULTS=1 with stderr warning '[recall] failed' — captureRecalls try/catch has been present since #27 and honors the fire-and-forget docstring. git log confirms memory.ts unchanged since 6ae6d36.
+- **Test marker**: `tests/core-layer.test.js` subtest 'recall storage failure degrades gracefully with stderr warning' now asserts the green path.
+
+### F-002 [CODE] dspy-stub raw-body catch branch unreachable through normal use (found 2026-08-23, T003)
+- **Where**: `tests/helpers/dspy-stub.js` L55-56 — the catch that pushes raw body when a client POSTs invalid JSON.
+- **Claim vs reality**: callDspy always sends valid JSON, so the branch cannot be exercised by any real consumer.
+- **Disposition**: dead-code candidate per ADR-0004; kept for now as defensive stub behavior. Removal decision deferred to sponsor review.
+
+### F-003 [RUNTIME] cli/index.ts top-level execution resists multi-arm in-process coverage (found 2026-08-23, T007)
+- **Where**: `src/cli/index.ts` — main() executed at module load; ESM single-evaluation means exactly one arm earns honest in-process credit via import.
+- **Resolution**: FIXED in T011 — argv reading moved inside main() (call-time) + `export { main };` added while keeping the top-level invocation. Tests now drive every arm directly via router.main(). Zero behavior change verified by child-process contract tests.
+
+### F-004 [RUNTIME] engine enrichTicketRef catch unreachable via built-in providers (found 2026-08-24, T010)
+- **Where**: `src/core/engine.ts` L298-305 warn + Promise.race timeout-reject branch.
+- **Claim vs reality**: both FileTicketProvider and HttpTicketProvider self-catch all errors internally (warn their own message, resolve undefined), so the engine-level defensive catch never fires through shipped providers. Probes: non-routable endpoint timeout 50ms and fetch TypeError both degrade at provider level ('⚠ HttpTicketProvider: Failed to resolve ...') with basicRef fallback.
+- **Disposition**: accepted documented ceiling — the branch exists for third-party providers. Future option: provider injection hook for testing.
