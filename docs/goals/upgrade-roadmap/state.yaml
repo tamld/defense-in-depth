@@ -1,6 +1,6 @@
 version: 2
 slug: upgrade-roadmap
-active_task: T007
+active_task: T009
 goal:
   status: active
   objective: "Execute the approved 4-wave upgrade roadmap autonomously inside tamld/defense-in-depth only."
@@ -210,7 +210,7 @@ tasks:
   - id: T007
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "CLI residual coverage wave (SRS FR-1.4-1.8): doctor.js branch 60%, hints-emit.js branch 33.33%, cli/feedback.js funcs 77.78%, cli/index.js funcs 75%, verify.js 76.47% - lift branch/funcs toward 95 so T004 bump proceeds honestly."
     allowed_files:
       - tests/doctor-cli.test.js
@@ -218,6 +218,84 @@ tasks:
       - tests/cli-feedback.test.js
       - tests/cli-router.test.js
       - tests/verify-cli.test.js
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm test
+      - npm run coverage
+    stop_if:
+      - "Branch unreachable through public behavior -> log dead-code finding per ADR-0004, do not fabricate."
+    receipt:
+      task: T007
+      result: done
+      summary: "CLI residual coverage wave (SRS FR-1.4-1.8): 5 new test files (doctor-cli 8, hints-emit 8, cli-feedback 7, cli-router 7, verify-cli 5 subtests). Aggregate moved to line 96.84 / branch 88.55 / funcs 96.22 (line+funcs now >=95; branch +6.45pp remains). FINDING F-003: cli/index.ts top-level main() resists multi-arm in-process coverage due to ESM single-evaluation; remedy = export-main micro-refactor, deferred as sponsor decision. Key contract discoveries documented: --files paths must be relative to projectRoot AND satisfy rootPollution placement (docs/); hitlReview blocks master/main by default; verify requires REAL git repos not bare .git dirs."
+      changed_files:
+        - tests/doctor-cli.test.js
+        - tests/hints-emit.test.js
+        - tests/cli-feedback.test.js
+        - tests/cli-router.test.js
+        - tests/verify-cli.test.js
+      commands:
+        - cmd: "npx tsc --noEmit"
+          status: pass
+          evidence: "exit 0"
+        - cmd: "npm test"
+          status: pass
+          evidence: "599/599 pass, 141 suites, 0 skipped"
+        - cmd: "npm run coverage"
+          status: pass
+          evidence: "exit 0; line 96.84 / branch 88.55 / funcs 96.22"
+        - cmd: "gh pr create + checks watch + merge"
+          status: pass
+          evidence: "PR #75 https://github.com/tamld/defense-in-depth/pull/75, 16 checks pass, merged squash e12c9ed"
+      executor: "PM-fallback (Sisyphus)"
+      timestamp: "2026-08-24T00:00:00Z"
+  - id: T008
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "lesson-outcome DSPy-path + window branches (SRS FR-2.1 residual): scanOutomes L306-328 (since-window skip, NaN-ts skip, lookback-expiry skip, DSPy-degraded warn-once dspyDegraded flag) + L362-396 (fuzzyMatch match/no-match/unavailable via createDspyStub score modes at threshold 0.7 + readGitDiffs parse tails). Lift aggregate branch from 88.55 toward 95."
+    allowed_files:
+      - tests/lesson-outcome-dspy.test.js
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm test
+      - npm run coverage
+    stop_if:
+      - "Branch unreachable through public behavior -> log dead-code finding per ADR-0004, do not fabricate."
+    receipt:
+      task: T008
+      result: done
+      summary: "scanOutcomes window + DSPy-degraded branches covered via tests/lesson-outcome-dspy.test.js (10 subtests, real git roots with controlled commit dates, dspy-stub score modes + closed-port degradation). PM-direct execution per resilience policy. Metrics after wave: line 97.45 / branch 89.14 / funcs 96.65 vs gate {90,80,90}; line+funcs now exceed the 95 target, branch remains binding (+5.86pp). PR #76 all 16 checks green, merged squash 7353e1c."
+      changed_files:
+        - tests/lesson-outcome-dspy.test.js
+      commands:
+        - cmd: "npx tsc --noEmit"
+          status: pass
+          evidence: "exit 0"
+        - cmd: "npm test"
+          status: pass
+          evidence: "609/609 pass, 0 fail"
+        - cmd: "npm run coverage"
+          status: pass
+          evidence: "exit 0; line 97.45 / branch 89.14 / funcs 96.65"
+        - cmd: "gh pr create + checks"
+          status: pass
+          evidence: "PR #76 https://github.com/tamld/defense-in-depth/pull/76, 16/16 checks, WATCH_EXIT=0"
+        - cmd: "gh pr merge 76 --squash"
+          status: pass
+          evidence: "merged as 7353e1c on main"
+      executor: "PM-fallback (Sisyphus) per network-error resilience policy"
+      timestamp: "2026-08-24T12:30:00Z"
+  - id: T009
+    type: worker
+    assignee: Worker
+    status: active
+    objective: 'Final branch-coverage wave toward {95,95,95}: core/feedback.js branches 78.57 (L240-246,351-358,368-373), hints-emit.js branches 59.09 (L54,59-62 emission success path via controlled env + eligible hint fixture), lesson.js small tails (82.83), verify.js L133-140. Lift aggregate branch from 89.14 to >=95.'
+    allowed_files:
+      - tests/core-feedback-edge.test.js
+      - tests/hints-emit.test.js
       - docs/goals/upgrade-roadmap/state.yaml
       - docs/goals/upgrade-roadmap/notes/
     verify:

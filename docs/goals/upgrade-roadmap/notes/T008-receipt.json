@@ -1,0 +1,15 @@
+{
+  "task": "T008",
+  "result": "done",
+  "summary": "scanOutcomes window + DSPy-degraded branches covered via tests/lesson-outcome-dspy.test.js (10 subtests, real git roots with controlled commit dates, dspy-stub score modes + closed-port degradation). PM-direct execution per resilience policy. Metrics after wave: line 97.45 / branch 89.14 / funcs 96.65 vs gate {90,80,90}; line+funcs now exceed the 95 target, branch remains binding (+5.86pp). PR #76 all 16 checks green, merged squash 7353e1c.",
+  "changed_files": ["tests/lesson-outcome-dspy.test.js"],
+  "commands": [
+    {"cmd": "npx tsc --noEmit", "status": "pass", "evidence": "exit 0"},
+    {"cmd": "npm test", "status": "pass", "evidence": "609/609 pass, 0 fail"},
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "exit 0; line 97.45 / branch 89.14 / funcs 96.65"},
+    {"cmd": "gh pr create + checks", "status": "pass", "evidence": "PR #76 https://github.com/tamld/defense-in-depth/pull/76, 16/16 checks, WATCH_EXIT=0"},
+    {"cmd": "gh pr merge 76 --squash", "status": "pass", "evidence": "merged as 7353e1c on main"}
+  ],
+  "executor": "PM-fallback (Sisyphus) per network-error resilience policy",
+  "timestamp": "2026-08-24T12:30:00Z"
+}

@@ -1,0 +1,14 @@
+{
+  "task": "T007",
+  "result": "done",
+  "summary": "CLI residual coverage wave (SRS FR-1.4-1.8): 5 new test files (doctor-cli 8, hints-emit 8, cli-feedback 7, cli-router 7, verify-cli 5 subtests). Aggregate moved to line 96.84 / branch 88.55 / funcs 96.22 (line+funcs now >=95; branch +6.45pp remains). FINDING F-003: cli/index.ts top-level main() resists multi-arm in-process coverage due to ESM single-evaluation; remedy = export-main micro-refactor, deferred as sponsor decision. Key contract discoveries documented: --files paths must be relative to projectRoot AND satisfy rootPollution placement (docs/); hitlReview blocks master/main by default; verify requires REAL git repos not bare .git dirs.",
+  "changed_files": ["tests/doctor-cli.test.js", "tests/hints-emit.test.js", "tests/cli-feedback.test.js", "tests/cli-router.test.js", "tests/verify-cli.test.js"],
+  "commands": [
+    {"cmd": "npx tsc --noEmit", "status": "pass", "evidence": "exit 0"},
+    {"cmd": "npm test", "status": "pass", "evidence": "599/599 pass, 141 suites, 0 skipped"},
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "exit 0; line 96.84 / branch 88.55 / funcs 96.22"},
+    {"cmd": "gh pr create + checks watch + merge", "status": "pass", "evidence": "PR #75 https://github.com/tamld/defense-in-depth/pull/75, 16 checks pass, merged squash e12c9ed"}
+  ],
+  "executor": "PM-fallback (Sisyphus)",
+  "timestamp": "2026-08-24T00:00:00Z"
+}
