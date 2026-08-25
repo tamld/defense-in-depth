@@ -119,3 +119,71 @@ test('emitOneHint suppresses deterministically via env and channel gates', async
     }
   });
 });
+
+test('emission success path fires once then cools down', async (t) => {
+  await t.test('eligible H-001 hint is emitted to stderr and recorded', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const root = await makeRoot('did-hint-emitted-');
+    const origErrWrite = process.stderr.write.bind(process.stderr);
+    const chunks = [];
+    try {
+      execFileSync('git', ['init', '-q'], { cwd: root });
+      execFileSync('git', ['config', 'user.email', 't@e.com'], { cwd: root });
+      execFileSync('git', ['config', 'user.name', 'T'], { cwd: root });
+      for (let i = 0; i < 5; i++) {
+        execFileSync(
+          'git',
+          ['commit', '-q', '--allow-empty', '--no-gpg-sign', '-m', `chore: seed ${i}`],
+          { cwd: root },
+        );
+      }
+      await withEnv({ CI: 'false', NO_HINTS: undefined }, async () => {
+        process.stderr.write = (chunk) => {
+          chunks.push(String(chunk));
+          return true;
+        };
+        const hint = await emitOneHint(root, 'doctor');
+        process.stderr.write = origErrWrite;
+        assert.ok(hint, 'first call should emit an eligible hint');
+        assert.equal(hint.id, 'H-001-no-dspy');
+        assert.ok(chunks.join('').includes('💡 Tip:'), 'formatted tip expected on stderr');
+        const second = await emitOneHint(root, 'doctor');
+        assert.equal(second, null, 'cooldown must suppress immediate replay');
+      });
+    } finally {
+      process.stderr.write = origErrWrite;
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
+test('emitAllHints fans out every eligible hint once, then cools down', async () => {
+  const { execFileSync: efs } = await import('node:child_process');
+  const root = await mkdtemp(path.join(os.tmpdir(), 'did-hint-fanout-'));
+  const run = (args) => efs('git', args, { cwd: root });
+  const savedErrWrite = process.stderr.write.bind(process.stderr);
+  const chunks = [];
+  try {
+    run(['init', '-q']);
+    run(['config', 'user.email', 't@example.com']);
+    run(['config', 'user.name', 't']);
+    for (let i = 0; i < 5; i += 1) {
+      run(['commit', '--allow-empty', '-q', '--no-gpg-sign', '-m', `chore: seed ${i}`]);
+    }
+    await withEnv({ CI: 'false', NO_HINTS: undefined }, async () => {
+      process.stderr.write = (chunk) => {
+        chunks.push(String(chunk));
+        return true;
+      };
+      const first = await emitAllHints(root, 'doctor');
+      assert.ok(Array.isArray(first) && first.length >= 1, 'at least H-001 should fan out');
+      assert.ok(first.some((h) => h.id === 'H-001-no-dspy'));
+      assert.ok(chunks.join('').split('💡 Tip:').length >= 2, 'one footer per emitted hint');
+      const second = await emitAllHints(root, 'doctor');
+      assert.equal(second.length, 0, 'cooldown suppresses immediate refanout');
+    });
+  } finally {
+    process.stderr.write = savedErrWrite;
+    await rm(root, { recursive: true, force: true });
+  }
+});
