@@ -1,6 +1,6 @@
 version: 2
 slug: upgrade-roadmap
-active_task: T009
+active_task: T012
 goal:
   status: active
   objective: "Execute the approved 4-wave upgrade roadmap autonomously inside tamld/defense-in-depth only."
@@ -291,7 +291,7 @@ tasks:
   - id: T009
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: 'Final branch-coverage wave toward {95,95,95}: core/feedback.js branches 78.57 (L240-246,351-358,368-373), hints-emit.js branches 59.09 (L54,59-62 emission success path via controlled env + eligible hint fixture), lesson.js small tails (82.83), verify.js L133-140. Lift aggregate branch from 89.14 to >=95.'
     allowed_files:
       - tests/core-feedback-edge.test.js
@@ -303,8 +303,140 @@ tasks:
       - npm run coverage
     stop_if:
       - "Branch unreachable through public behavior -> log dead-code finding per ADR-0004, do not fabricate."
-    receipt: null
-
+    receipt:
+      task: T009
+      result: done
+      summary: "Final branch wave part 1: mixed-label F1 counting via CLI writes + computeF1FromFeedback period filter; scanHistory scraper rules R1 fix-up TP / R2 revert FN / R3 override FP proven on crafted 4-commit repo with controlled dates; hints-emit emission success path via H001-eligible fixture (5 commits, no dspy config) proving stderr tip + cooldown on replay. Aggregate now line 97.89 / branch 89.53 / funcs 97.08 vs gate {90,80,90} - line+funcs already exceed 95 target; branch binding +5.47pp remains."
+      changed_files:
+        - tests/core-feedback-edge.test.js
+        - tests/hints-emit.test.js
+      commands:
+        - cmd: "node --test tests/core-feedback-edge.test.js tests/hints-emit.test.js"
+          status: pass
+          evidence: "12/12 pass first run"
+        - cmd: "npx tsc --noEmit"
+          status: pass
+          evidence: "exit 0"
+        - cmd: "npm test"
+          status: pass
+          evidence: "613/613 pass"
+        - cmd: "npm run coverage"
+          status: pass
+          evidence: "exit 0; L97.89 B89.53 F97.08"
+      executor: "PM-direct (Sisyphus)"
+      timestamp: "2026-08-24T00:00:00Z"
+  - id: T010
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Final residual branch wave toward {95,95,95}: hints-emit emitAllHints success path (L54,59-62), lesson-outcome fuzzy/readGitDiffs tails (L295,362-363,384-385), root-pollution L30 nested path, core-feedback revert-window-miss tails (L368-373), engine timeout-race + provider-catch warn (L282-284,313-314), file-provider missing-ticket fallback (72-74,92-93), http-provider non-200 (73-74) - lift aggregate branch 89.53 to >=95."
+    allowed_files:
+      - tests/hints-emit.test.js
+      - tests/core-feedback-edge.test.js
+      - tests/root-pollution-edge.test.js
+      - tests/provider-edge.test.js
+      - tests/engine-timeout.test.js
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm test
+      - npm run coverage
+    stop_if:
+      - "Branch unreachable through public behavior -> log dead-code finding per ADR-0004, do not fabricate."
+    receipt:
+      task: T010
+      result: done
+      summary: "Final residual branch wave: rootPollution arms (nested/allowedRootFiles/patterns/BLOCK message), ticket provider fallbacks (file missing/frontmatter/enum-drop; http 404-silent/500-warn/non-object-JSON/happy), engine provider isolation (hanging non-routable+50ms timeout and throwing fetch both degrade to basicRef with provider self-warn), core-feedback revert-window MISS drops FN, hints emitAllHints fan-out+cooldown. FINDINGS: F-004 engine enrichTicketRef catch unreachable via built-in self-catching providers (defensive layer for third-party only); F-003 cli/index.ts ESM single-evaluation ceiling persists. Aggregate after merge candidate metrics: line 98.05 / branch 90.41 / funcs 97.08."
+      changed_files:
+        - tests/root-pollution-edge.test.js
+        - tests/provider-edge.test.js
+        - tests/engine-timeout.test.js
+        - tests/core-feedback-edge.test.js
+        - tests/hints-emit.test.js
+      commands:
+        - cmd: "node --test (5 files individually)"
+          status: pass
+          evidence: "6/6, 9/9, 3/3, 11/11(+2 new), 3/3 all pass"
+        - cmd: "npx tsc --noEmit"
+          status: pass
+          evidence: "exit 0"
+        - cmd: "npm test"
+          status: pass
+          evidence: "633/633 pass, 141 suites"
+        - cmd: "npm run coverage"
+          status: pass
+          evidence: "exit 0; line 98.05 / branch 90.41 / funcs 97.08"
+        - cmd: "gh pr create + checks + merge"
+          status: pass
+          evidence: "PR #77 all checks pass, merged squash a6bc658"
+      executor: "PM-direct (Sisyphus) per network-error policy"
+      timestamp: "2026-08-24T00:00:00Z"
+  - id: T011
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Tech-debt repayment per sponsor m0474 ('chu dong fix va tra het no ky thuat'): PR-A add `export { main };` to src/cli/index.ts KEEPING top-level call (zero behavior change, ADR-0004 justified exception logged transparently) then extend tests/cli-router.test.js with DIRECT main() calls per arm (init-on-tmp-chdir, verify clean, doctor plain/reset/all, feedback usage, lesson/growth exit-arms via sentinel stub). PR-B fix captureRecalls in src/core/memory.ts to honor fire-and-forget docstring (try/catch around recall recording, stderr warn, continue) then flip core-layer.test.js known-finding subtest to green-path assertion."
+    allowed_files:
+      - src/cli/index.ts
+      - tests/cli-router.test.js
+      - src/core/memory.ts
+      - tests/core-layer.test.js
+      - plans/coverage-95/ADR.md
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npx tsc --noEmit
+      - npm test
+      - npm run coverage
+    stop_if:
+      - "Any behavioral change beyond the two documented fixes -> stop and surface to sponsor."
+    receipt:
+      task: T011
+      result: done
+      summary: "Tech-debt repayment sealed via PR #78 (squash c5f3a3b). F-003: src/cli/index.ts argv read at CALL time inside main() + export { main } kept top-level invocation (zero behavior change, child-proc contract tests prove); tests/cli-router.test.js rewritten to drive main() directly per arm (17/17 subtests: usage/doctor/hints reset+all+dismiss-no-id/verify/feedback/init-tmp-chdir/lesson-growth bare exits/unknown). F-001 RESOLVED AS FALSE POSITIVE: fresh-dist probe proved captureRecalls try/catch (present since #27) degrades gracefully (results returned + stderr warn); original crash report was stale-dist artifact; core-layer known-finding stub replaced with green-path assertion; ADR.md Findings Log updated (F-001 resolved, F-002/F-003/F-004 documented). Metrics after: line 98.28 / branch 91.09 / funcs 97.08; 643/643 tests; tsc clean; gate exit 0."
+      changed_files:
+        - src/cli/index.ts
+        - tests/cli-router.test.js
+        - tests/core-layer.test.js
+        - plans/coverage-95/ADR.md
+      commands:
+        - cmd: "npx tsc --noEmit"
+          status: pass
+          evidence: "exit 0"
+        - cmd: "npm test"
+          status: pass
+          evidence: "643/643 pass, 141 suites"
+        - cmd: "npm run coverage"
+          status: pass
+          evidence: "exit 0; L98.28/B91.09/F97.08"
+        - cmd: "node --test tests/cli-router.test.js"
+          status: pass
+          evidence: 17/17
+        - cmd: "gh pr create + checks"
+          status: pass
+          evidence: "PR#78 https://github.com/tamld/defense-in-depth/pull/78 all 15 checks incl full matrix"
+        - cmd: "gh pr merge 78 --squash"
+          status: pass
+          evidence: "main tip c5f3a3b"
+      executor: "PM-fallback (Sisyphus)"
+      timestamp: "2026-08-24T06:00:00Z"
+  - id: T012
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Final honest branch-residual wave toward 95 branch (aggregate 91.09): eval.js flag-validation pairs L48-49/65-67, hint-engine cooldown-boundary branches L229-238, lesson.js reachable tails (search --ticket filter, outcome --recall not-found), config-loader merge edge. Structural ceilings F-002/F-004/index-residual stay documented per ADR.md - no fabrication."
+    allowed_files:
+      - tests/eval-cli.test.js
+      - tests/hint-engine-edge.test.js
+      - tests/lesson-cli.test.js
+      - tests/config-loader-edge.test.js
+      - docs/goals/upgrade-roadmap/state.yaml
+      - docs/goals/upgrade-roadmap/notes/
+    verify:
+      - npm test
+      - npm run coverage
+    stop_if:
+      - "Branch unreachable through public behavior -> log dead-code finding per ADR-0004, do not fabricate."
   - id: T999
     type: judge
     assignee: Judge

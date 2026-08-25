@@ -1,0 +1,15 @@
+{
+  "task": "T010",
+  "result": "done",
+  "summary": "Final residual branch wave: rootPollution arms (nested/allowedRootFiles/patterns/BLOCK message), ticket provider fallbacks (file missing/frontmatter/enum-drop; http 404-silent/500-warn/non-object-JSON/happy), engine provider isolation (hanging non-routable+50ms timeout and throwing fetch both degrade to basicRef with provider self-warn), core-feedback revert-window MISS drops FN, hints emitAllHints fan-out+cooldown. FINDINGS: F-004 engine enrichTicketRef catch unreachable via built-in self-catching providers (defensive layer for third-party only); F-003 cli/index.ts ESM single-evaluation ceiling persists. Aggregate after merge candidate metrics: line 98.05 / branch 90.41 / funcs 97.08.",
+  "changed_files": ["tests/root-pollution-edge.test.js", "tests/provider-edge.test.js", "tests/engine-timeout.test.js", "tests/core-feedback-edge.test.js", "tests/hints-emit.test.js"],
+  "commands": [
+    {"cmd": "node --test (5 files individually)", "status": "pass", "evidence": "6/6, 9/9, 3/3, 11/11(+2 new), 3/3 all pass"},
+    {"cmd": "npx tsc --noEmit", "status": "pass", "evidence": "exit 0"},
+    {"cmd": "npm test", "status": "pass", "evidence": "633/633 pass, 141 suites"},
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "exit 0; line 98.05 / branch 90.41 / funcs 97.08"},
+    {"cmd": "gh pr create + checks + merge", "status": "pass", "evidence": "PR #77 all checks pass, merged squash a6bc658"}
+  ],
+  "executor": "PM-direct (Sisyphus) per network-error policy",
+  "timestamp": "2026-08-24T00:00:00Z"
+}

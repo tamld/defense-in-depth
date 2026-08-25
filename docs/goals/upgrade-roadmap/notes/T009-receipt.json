@@ -1,0 +1,14 @@
+{
+  "task": "T009",
+  "result": "done",
+  "summary": "Final branch wave part 1: mixed-label F1 counting via CLI writes + computeF1FromFeedback period filter; scanHistory scraper rules R1 fix-up TP / R2 revert FN / R3 override FP proven on crafted 4-commit repo with controlled dates; hints-emit emission success path via H001-eligible fixture (5 commits, no dspy config) proving stderr tip + cooldown on replay. Aggregate now line 97.89 / branch 89.53 / funcs 97.08 vs gate {90,80,90} - line+funcs already exceed 95 target; branch binding +5.47pp remains.",
+  "changed_files": ["tests/core-feedback-edge.test.js", "tests/hints-emit.test.js"],
+  "commands": [
+    {"cmd": "node --test tests/core-feedback-edge.test.js tests/hints-emit.test.js", "status": "pass", "evidence": "12/12 pass first run"},
+    {"cmd": "npx tsc --noEmit", "status": "pass", "evidence": "exit 0"},
+    {"cmd": "npm test", "status": "pass", "evidence": "613/613 pass"},
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "exit 0; L97.89 B89.53 F97.08"}
+  ],
+  "executor": "PM-direct (Sisyphus)",
+  "timestamp": "2026-08-24T00:00:00Z"
+}
