@@ -1,0 +1,14 @@
+{
+  "task": "T012",
+  "result": "done",
+  "summary": "Final honest branch-residual wave: eval extension-injection arms + endpoint override ternaries; hint-engine H-001/H-004/H-002 rule arms + cooldownDays boundary; lesson tails (--ticket attribution, ghost --recall, list --since/--limit); config-loader deepMerge array-replace/sibling-survival/parse-error/DEFAULT_CONFIG. Aggregate line 98.40 / branch 91.43 / funcs 97.50. Remaining ~3.6pp branch behind documented structural ceilings F-002/F-004/ESM-router; threshold intentionally NOT bumped per stop_if.",
+  "changed_files": ["tests/eval-cli.test.js", "tests/hint-engine-edge.test.js", "tests/lesson-cli.test.js", "tests/config-loader-edge.test.js"],
+  "commands": [
+    {"cmd": "npx tsc --noEmit", "status": "pass", "evidence": "exit 0"},
+    {"cmd": "npm test", "status": "pass", "evidence": "all pass incl 11/11 hint-engine-edge + 6/6 config-loader-edge"},
+    {"cmd": "npm run coverage", "status": "pass", "evidence": "exit 0; L98.40 B91.43 F97.50 (/tmp/cov-t012.log)"},
+    {"cmd": "gh pr create + checks watch", "status": "pass", "evidence": "PR#79 https://github.com/tamld/defense-in-depth/pull/79, 16 checks pass, CHECKS_EXIT=0"}
+  ],
+  "executor": "PM-direct (subagent infra retired per m0273 policy)",
+  "timestamp": "2026-08-24T00:00:00Z"
+}

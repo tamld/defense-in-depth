@@ -1,6 +1,6 @@
 version: 2
 slug: upgrade-roadmap
-active_task: T012
+active_task: T999
 goal:
   status: active
   objective: "Execute the approved 4-wave upgrade roadmap autonomously inside tamld/defense-in-depth only."
@@ -423,7 +423,7 @@ tasks:
   - id: T012
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Final honest branch-residual wave toward 95 branch (aggregate 91.09): eval.js flag-validation pairs L48-49/65-67, hint-engine cooldown-boundary branches L229-238, lesson.js reachable tails (search --ticket filter, outcome --recall not-found), config-loader merge edge. Structural ceilings F-002/F-004/index-residual stay documented per ADR.md - no fabrication."
     allowed_files:
       - tests/eval-cli.test.js
@@ -437,10 +437,34 @@ tasks:
       - npm run coverage
     stop_if:
       - "Branch unreachable through public behavior -> log dead-code finding per ADR-0004, do not fabricate."
+    receipt:
+      task: T012
+      result: done
+      summary: "Final honest branch-residual wave: eval extension-injection arms + endpoint override ternaries; hint-engine H-001/H-004/H-002 rule arms + cooldownDays boundary; lesson tails (--ticket attribution, ghost --recall, list --since/--limit); config-loader deepMerge array-replace/sibling-survival/parse-error/DEFAULT_CONFIG. Aggregate line 98.40 / branch 91.43 / funcs 97.50. Remaining ~3.6pp branch behind documented structural ceilings F-002/F-004/ESM-router; threshold intentionally NOT bumped per stop_if."
+      changed_files:
+        - tests/eval-cli.test.js
+        - tests/hint-engine-edge.test.js
+        - tests/lesson-cli.test.js
+        - tests/config-loader-edge.test.js
+      commands:
+        - cmd: "npx tsc --noEmit"
+          status: pass
+          evidence: "exit 0"
+        - cmd: "npm test"
+          status: pass
+          evidence: "all pass incl 11/11 hint-engine-edge + 6/6 config-loader-edge"
+        - cmd: "npm run coverage"
+          status: pass
+          evidence: "exit 0; L98.40 B91.43 F97.50 (/tmp/cov-t012.log)"
+        - cmd: "gh pr create + checks watch"
+          status: pass
+          evidence: "PR#79 https://github.com/tamld/defense-in-depth/pull/79, 16 checks pass, CHECKS_EXIT=0"
+      executor: "PM-direct (subagent infra retired per m0273 policy)"
+      timestamp: "2026-08-24T00:00:00Z"
   - id: T999
     type: judge
     assignee: Judge
-    status: queued
+    status: active
     objective: "Final audit: map all receipts to charter success criteria W1–W4; verify zero untracked gaps; full_outcome_complete decision."
     inputs:
       - "All done task receipts"
