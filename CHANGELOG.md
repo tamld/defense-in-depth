@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## Unreleased
+## [0.7.1] - 2026-08-25
 
 ### Changed
 - Ticket provider injection via constructor options (test/embedding hook); enables honest coverage of the engine provider-failure path; resolves F-004 ceiling.
