@@ -291,3 +291,54 @@ test('lesson CLI handler branches', async (t) => {
     }
   });
 });
+
+test('lesson tails: ticket attribution, ghost recall, list filters', async (t) => {
+  await t.test('search --ticket attributes recorded recall to the ticket', async () => {
+    const root = await makeRoot();
+    try {
+      await recordSeed(root);
+      const res = await runLesson(root, ['search', 'Lockfile', '--ticket', 'TK-9']);
+      assert.equal(res.exitCode, null);
+      const content = await readFile(path.join(root, RECALLS_REL), 'utf8');
+      assert.ok(content.includes('"TK-9"'), 'recall must carry ticket attribution, got: ' + content);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('outcome with unknown --recall id exits 1', async () => {
+    const root = await makeRoot();
+    try {
+      const lessonId = await recordSeed(root);
+      await seedRecall(root, lessonId, 'rec-real');
+      const res = await runLesson(root, ['outcome', lessonId, '--helpful', '--recall', 'rec-ghost']);
+      assertExitOne(res, 'ghost recall id must exit 1');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('recalls list honors --since and --limit filters', async () => {
+    const root = await makeRoot();
+    try {
+      await mkdir(path.join(root, '.agents', 'records'), { recursive: true });
+      const mkLine = (id, ts) => JSON.stringify({ id, lessonId: 'LES-F', ticketId: '', queryHash: 'h-' + id, matchMethod: 'string', source: 'search', executor: 'human', timestamp: ts });
+      await writeFile(
+        path.join(root, RECALLS_REL),
+        mkLine('rec-old', '2026-01-01T00:00:00.000Z') + '\n' + mkLine('rec-new', '2026-06-01T00:00:00.000Z') + '\n',
+        'utf8',
+      );
+      const future = await runLesson(root, ['recalls', 'list', '--since', '2099-01-01T00:00:00Z']);
+      assert.equal(future.exitCode, null);
+      const futureOut = [future.stdout, future.logs.join('\n')].join('\n').toLowerCase();
+      assert.ok(futureOut.includes('no recall events match'));
+
+      const limited = await runLesson(root, ['recalls', 'list', '--limit', '1']);
+      assert.equal(limited.exitCode, null);
+      const out = [limited.stdout, limited.logs.join('\n')].join('\n');
+      assert.equal((out.match(/lesson=/g) || []).length, 1, 'limit 1 must yield a single row');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});

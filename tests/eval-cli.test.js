@@ -126,3 +126,49 @@ test('eval CLI handler branches', async (t) => {
     }
   });
 });
+
+test('eval extension-injection and endpoint override arms', async (t) => {
+  await t.test('extensionless target skips extension push but still evaluates', async () => {
+    const root = await makeRoot();
+    try {
+      const p = path.join(root, 'PLAINFILE');
+      await writeFile(p, 'A plain artifact with more than fifty characters of substantive content for the guard.', 'utf8');
+      const res = await runEval(root, [p]);
+      assert.equal(res.exitCode, null, 'extensionless target should evaluate cleanly');
+      assert.ok(res.logs.join('\n').toUpperCase().includes('PASSED'));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('unusual extension is injected into guard extensions', async () => {
+    const root = await makeRoot();
+    try {
+      const p = path.join(root, 'notes.tsx');
+      await writeFile(p, 'TypeScript-flavored notes file with plenty of substantive content beyond fifty chars.', 'utf8');
+      const res = await runEval(root, [p]);
+      assert.equal(res.exitCode, null, '.tsx target should not crash evaluation');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('custom dspyEndpoint override degrades through closed port', async () => {
+    const root = await makeRoot();
+    try {
+      await writeFile(
+        path.join(root, 'defense.config.yml'),
+        ['guards:', '  hollowArtifact:', '    dspyEndpoint: "http://127.0.0.1:1"', '    dspyTimeoutMs: 50', ''].join('\n'),
+        'utf8',
+      );
+      const p = path.join(root, 'doc.md');
+      await writeFile(p, 'Substantive documentation body long enough to satisfy the meaningful-content heuristic.', 'utf8');
+      const res = await runEval(root, [p]);
+      assert.equal(res.exitCode, null);
+      const signal = [res.stderrRaw, res.errors.join('\n')].join('\n');
+      assert.ok(signal.includes('DSPy unavailable'), 'override endpoint must be attempted then degrade');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
