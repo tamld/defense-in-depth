@@ -1,0 +1,13 @@
+{
+  "task": "T005",
+  "result": "done",
+  "summary": "Release prep UNBLOCKED per sponsor m0269: F1 action-pin refresh d8f6f1f (checkout@v4->v7, setup-node@v4->v7, pnpm/action-setup@v4->v6; CI run 32811418020 WATCH_EXIT=0 green across full matrix); v0.7.0 stable cut c23c5e1 (package.json 0.7.0-rc.1->0.7.0, CHANGELOG '## [0.7.0] Stable Promotion 2026-08-25', npm pack dry-run 165 files 142.5 kB); annotated tag v0.7.0 pushed; release-commit CI run 32811728094 MAIN_WATCH_EXIT=0. npm publish deferred (credentials/2FA manual sponsor step). Version selection delegated to agent per m0269/m0271; chose v0.7.0 stable per semver+CHANGELOG truth.",
+  "changed_files": [".github/workflows/ci.yml", "package.json", "CHANGELOG.md"],
+  "commands": [
+    {"cmd": "gh run watch 32811418020 --exit-status", "status": "pass", "evidence": "WATCH_EXIT=0 pins-refresh green"},
+    {"cmd": "npm pack --dry-run", "status": "pass", "evidence": "defense-in-depth-0.7.0.tgz 165 files"},
+    {"cmd": "gh run watch 32811728094 --exit-status", "status": "pass", "evidence": "MAIN_WATCH_EXIT=0 release commit green"},
+    {"cmd": "git push origin v0.7.0", "status": "pass", "evidence": "[new tag] v0.7.0"}
+  ],
+  "executor": "PM-direct"
+}

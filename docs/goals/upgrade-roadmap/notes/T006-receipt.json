@@ -1,0 +1,12 @@
+{
+  "task": "T006",
+  "result": "done",
+  "summary": "Repo hardening: created .github/dependabot.yml (version 2, npm ecosystem weekly + github-actions ecosystem weekly) committed as 3d08b3c through ruleset gate; attempted secret-scanning API enable expecting 403 on free plan but SUCCEEDED beyond expectation - PATCH security_and_analysis enabled BOTH secret_scanning AND secret_scanning_push_protection on tamld/defense-in-depth (verified via API response). npm publish remains manual sponsor step (credentials/2FA).",
+  "changed_files": [".github/dependabot.yml"],
+  "commands": [
+    {"cmd": "git push origin v0.7.0", "status": "pass", "evidence": "[new tag] v0.7.0"},
+    {"cmd": "commit 3d08b3c chore(ci): add dependabot config", "status": "pass", "evidence": "pushed main through gate"},
+    {"cmd": "gh api PATCH security_and_analysis", "status": "pass", "evidence": "secret_scanning enabled + push_protection enabled"}
+  ],
+  "executor": "PM-direct"
+}
