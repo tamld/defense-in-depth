@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.7.0] — Stable Promotion - 2026-08-25
+
+> v0.7.0-rc.1 promoted to stable after a governance-hardening cycle: public API freeze verified by contract tests, engine/CLI hardening, and a self-hosted quality-gate overhaul (the project now dogfoods its own verify gate on every PR diff).
+
+### Added
+- **Guard lifecycle hooks** (#69) — `init`/`dispose` + priority ordering + crash-isolation semantics for every Guard.
+- **Public API contract tests** (#63) — exit-code contracts for meta-command/verify/doctor/init, Guard/GuardResult/EngineVerdict shape stability, Severity/EvidenceLevel enum value pinning; subpath exports map (`./guards`, `/federation`, `/types`, `/errors`) (#62).
+- **Typed error hierarchy** (#67) — `DiDError` subclasses replace string throws across core/federation.
+- **Shared JSONL store** (#65) — idempotent append, window dedupe, runtime row validation extracted from feedback/lesson stores.
+- **CI self-dogfooding** — `defense-in-depth verify --files <PR-diff>` runs inside the CI matrix itself; composite action pinned `@v0.7.0`.
+
+### Changed
+- **BREAKING**: `engine.run()` accepts an options object (`{ files, branch }`) instead of positional args (#68); `execFileSync` standardization replaces `execSync` shells (#64).
+- Regex metacharacters in user-supplied patterns are escaped safely (#60); SEMVER policy documented (#57).
+- Toolchain pinned to `pnpm@10.34.5`; CI migrated to lockfile-aware pnpm cache/install with refreshed action majors (checkout@v7 / setup-node@v7 / action-setup@v6).
+
+### Quality
+- Coverage raised line 89.94→98.40%, branch 80.45→91.43%, funcs 92.02→97.50% via 10+ behavioral test waves; remaining branch gap documented as structural ceilings (dead-code candidates, provider self-catch, ESM single-evaluation router arms) in `plans/coverage-95/ADR.md`.
+- Findings ledger maintained (F-001 resolved false-positive, F-002/F-004 documented ceilings); ruleset-gated main + owner fast-lane active.
+
+---
+
 ## [0.7.0-rc.1] — Memory Layer + Progressive Discovery (Path A) - 2026-04-27
 
 > First v0.7 release candidate. Closes the three Path A tickets that turn the Tier-2 memory layer from a one-way write surface into a learning loop, and bridges Persona A → Persona B with non-blocking earned-signal hints.
