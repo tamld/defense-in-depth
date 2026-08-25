@@ -99,7 +99,7 @@ Each commit independently green (tsc + test + coverage). PR opened only at W4 co
 - **Where**: `src/cli/index.ts` — main() executed at module load; ESM single-evaluation means exactly one arm earns honest in-process credit via import.
 - **Resolution**: FIXED in T011 — argv reading moved inside main() (call-time) + `export { main };` added while keeping the top-level invocation. Tests now drive every arm directly via router.main(). Zero behavior change verified by child-process contract tests.
 
-### F-004 [RUNTIME] engine enrichTicketRef catch unreachable via built-in providers (found 2026-08-24, T010)
+### F-004 RESOLVED 2026-08-25: engine enrichTicketRef catch now honestly reachable via ticketProviderFactory constructor option (commit 1158764, subtest C in tests/engine-timeout.test.js) — originally found 2026-08-24 T010 as unreachable via built-in providers
 - **Where**: `src/core/engine.ts` L298-305 warn + Promise.race timeout-reject branch.
 - **Claim vs reality**: both FileTicketProvider and HttpTicketProvider self-catch all errors internally (warn their own message, resolve undefined), so the engine-level defensive catch never fires through shipped providers. Probes: non-routable endpoint timeout 50ms and fetch TypeError both degrade at provider level ('⚠ HttpTicketProvider: Failed to resolve ...') with basicRef fallback.
 - **Disposition**: accepted documented ceiling — the branch exists for third-party providers. Future option: provider injection hook for testing.
