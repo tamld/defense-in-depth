@@ -24,10 +24,13 @@ const __dirname = dirname(__filename);
 const packageJson = JSON.parse(readFileSync(join(__dirname, "../../package.json"), "utf-8"));
 const VERSION = packageJson.version;
 
-const args = process.argv.slice(2);
-const command = args[0];
-
+/**
+ * Entry point. Reads argv at CALL time so tests can drive individual
+ * arms directly; the CLI binary below invokes it exactly once.
+ */
 async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const command = args[0];
   switch (command) {
     case "init":
       await init(process.cwd());
@@ -143,6 +146,8 @@ function parseDoctorOptions(rest: string[]): DoctorOptions {
   }
   return { hintsAction: "all" };
 }
+
+export { main };
 
 main().catch((err) => {
   console.error("Fatal:", err);
