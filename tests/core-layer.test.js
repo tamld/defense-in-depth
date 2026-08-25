@@ -311,3 +311,23 @@ test('dspy-stub unknown mode serves its defensive 500 guard', async (t) => {
     return root;
   }
 });
+
+// F-002 resolution: the raw-body catch is honestly reachable by POSTing
+// malformed JSON straight at the stub — no dead code after all.
+test('dspy-stub records malformed request bodies as raw strings', async () => {
+  const stub = await createDspyStub({ mode: 'score', score: 0.5 });
+  try {
+    const res = await fetch(`${stub.endpoint}/evaluate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{bad json',
+    });
+    assert.equal(res.status, 200);
+    const payload = await res.json();
+    assert.equal(payload.score, 0.5);
+    assert.equal(stub.requests.length, 1);
+    assert.equal(stub.requests[0].body, '{bad json');
+  } finally {
+    await stub.close();
+  }
+});
