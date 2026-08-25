@@ -50,9 +50,9 @@ unstructured commits.*<br/>
 > pipeline is the enforcement loop.
 
 > [!NOTE]
-> **Current status (`v0.7.0-rc.1`, April 2026)** — release candidate, not yet promoted to `npm latest`.
+> **Current status (`v0.7.0`, August 2026)** — stable promotion; `npm latest` pending publish with new auth token.
 >
-> **Shipped**: 9 built-in guards (v0.1–v0.6), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1), API stabilisation pass (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks).
+> **Shipped**: 9 built-in guards (v0.1–v0.6), Memory layer (v0.4), DSPy semantic eval opt-in (v0.5), Federation guards (v0.6), Test/Op hardening (v0.6.2), Path A memory loop MVP + Progressive Discovery hints (v0.7-rc.1), API stabilisation pass (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks), v0.7.0 stable promotion (CI self-dogfooding, coverage gate 98/91/97, repo hardening).
 >
 > **In flight (Track A — Adoption)**: A1 docs reconcile ✅ ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) · A2 guard breadth bump ✅ ([#41](https://github.com/tamld/defense-in-depth/issues/41)) · A3 v1.0 release lifecycle ✅ (P0 done, P1 [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) remaining) · A4 30-day adoption push 📋. All tracked under [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42).
 >
@@ -268,10 +268,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: tamld/defense-in-depth/.github/actions/verify@v0.7.0-rc.1
+      - uses: tamld/defense-in-depth/.github/actions/verify@v0.7.0
         # Optional inputs:
         # with:
-        #   defense-version: '0.7.0-rc.1'
+        #   defense-version: '0.7.0'
         #   node-version: '22'
         #   base-ref: 'origin/main'
 ```

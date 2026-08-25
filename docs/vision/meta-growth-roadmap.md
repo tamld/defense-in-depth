@@ -18,7 +18,7 @@
 
 ## Phase 0 — Current State Baseline
 
-**Version**: `v0.7.0-rc.1` (shipped 2026-04-22, tag pushed 2026-04-27)
+**Version**: `v0.7.0` stable (promoted 2026-08-25, tag pushed)
 
 **Path A delivered** [CODE]:
 - Stage 1 Distillation — `did lesson record/search/list/show` (v0.4)
