@@ -43,9 +43,9 @@
 > Hook ở local giúp phản hồi nhanh; còn thiết lập trên hệ thống CI/CD sẽ mang tính chất cưỡng chế (bắt buộc tuân thủ).
 
 > [!NOTE]
-> **Trạng thái hiện tại (`v1.0.0-rc.1`, tháng 4 năm 2026)** — release candidate, chưa promote lên `npm latest`.
+> **Trạng thái hiện tại (`v0.7.0`, tháng 8 năm 2026)** — stable promotion; `npm latest` chờ publish với auth token mới.
 >
-> **Đã phát hành**: 9 guard có sẵn (v0.1–v0.6), Tầng Memory (v0.4), Đánh giá ngữ nghĩa bằng DSPy (v0.5, tùy chọn), Federation guards (v0.6), Bảo mật Test/Op (v0.6.2), Vòng lặp Path A memory MVP + progressive discovery hints (v0.7-rc.1), Đóng băng API (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks).
+> **Đã phát hành**: 9 guard có sẵn (v0.1–v0.6), Tầng Memory (v0.4), Đánh giá ngữ nghĩa bằng DSPy (v0.5, tùy chọn), Federation guards (v0.6), Bảo mật Test/Op (v0.6.2), Vòng lặp Path A memory MVP + progressive discovery hints (v0.7-rc.1), Đóng băng API (subpath exports, contract tests, typed errors, options-object engine, Guard lifecycle hooks), v0.7.0 stable promotion (CI self-dogfooding, coverage gate 98/91/97, repo hardening).
 >
 > **Đang triển khai (Giai đoạn A — Thúc đẩy ứng dụng)**: A1 đồng bộ docs ✅ ([#40](https://github.com/tamld/defense-in-depth/issues/40), [#52](https://github.com/tamld/defense-in-depth/pull/52), [#53](https://github.com/tamld/defense-in-depth/issues/53)) · A2 mở rộng độ phủ guard ✅ ([#41](https://github.com/tamld/defense-in-depth/issues/41)) · A3 đóng băng API cho v1.0 ✅ (P0 done, P1 [#38](https://github.com/tamld/defense-in-depth/issues/38)/[#39](https://github.com/tamld/defense-in-depth/issues/39) còn mở) · A4 push adoption 30 ngày 📋. Tất cả theo dõi ở [umbrella issue #42](https://github.com/tamld/defense-in-depth/issues/42).
 >
@@ -259,7 +259,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: tamld/defense-in-depth/.github/actions/verify@v0.7.0-rc.1
+      - uses: tamld/defense-in-depth/.github/actions/verify@v0.7.0
         # Tuỳ chọn:
         # with:
         #   defense-version: '0.7.0-rc.1'
