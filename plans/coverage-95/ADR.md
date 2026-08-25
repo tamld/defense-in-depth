@@ -90,7 +90,7 @@ Each commit independently green (tsc + test + coverage). PR opened only at W4 co
 - **RESOLVED 2026-08-24 (T011): false positive.** Root cause of the original probe was a stale `dist/` build predating the jsonl-store hardening. Fresh-dist probe (`npx tsc` rebuild then node -e): recordLesson → break `.agents/records` into a file → `searchLessons` returns RESULTS=1 with stderr warning '[recall] failed' — captureRecalls try/catch has been present since #27 and honors the fire-and-forget docstring. git log confirms memory.ts unchanged since 6ae6d36.
 - **Test marker**: `tests/core-layer.test.js` subtest 'recall storage failure degrades gracefully with stderr warning' now asserts the green path.
 
-### F-002 [CODE] dspy-stub raw-body catch branch unreachable through normal use (found 2026-08-23, T003)
+### F-002 [CODE] dspy-stub raw-body catch branch — RESOLVED 2026-08-25: reachable by direct malformed POST; covered honestly in tests/core-layer.test.js (commit 24b26ec), no dead code after all
 - **Where**: `tests/helpers/dspy-stub.js` L55-56 — the catch that pushes raw body when a client POSTs invalid JSON.
 - **Claim vs reality**: callDspy always sends valid JSON, so the branch cannot be exercised by any real consumer.
 - **Disposition**: dead-code candidate per ADR-0004; kept for now as defensive stub behavior. Removal decision deferred to sponsor review.
