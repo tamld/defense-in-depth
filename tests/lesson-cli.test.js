@@ -342,3 +342,150 @@ test('lesson tails: ticket attribution, ghost recall, list filters', async (t) =
     }
   });
 });
+
+// Executor: Sisyphus (OhMyOpenCode)
+// [PROVEN] Residual branch coverage for dist/cli/lesson.js uncovered ranges
+// 39-48 (--file), 99-105 + 107-109 (quality gate), 144-146 (semantic
+// relevance line), 153-157 (outcome lessonId guard), 240-245 (scan read
+// failure). DSPy paths bind the default endpoint localhost:8080 because the
+// CLI hardcodes { enabled: true } without an endpoint override.
+import { createServer } from 'node:http';
+
+async function withDspyServer(responseBody, fn) {
+  const server = createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(responseBody));
+  });
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(8080, resolve);
+  });
+  try {
+    return await fn();
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+}
+
+test('lesson residuals: --file ingestion, outcome guard, scan read failure', async (t) => {
+  await t.test('record --file ingests payload from disk and persists', async () => {
+    const root = await makeRoot();
+    try {
+      const payloadPath = path.join(root, 'payload.json');
+      await writeFile(payloadPath, JSON.stringify(VALID_PAYLOAD), 'utf8');
+      const res = await runLesson(root, ['record', '--file', payloadPath]);
+      assert.equal(res.exitCode, null, '--file record should succeed');
+      const raw = await readFile(path.join(root, 'lessons.jsonl'), 'utf8');
+      assert.equal(JSON.parse(raw.trim().split('\n')[0]).title, VALID_PAYLOAD.title);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('record --file unreadable path exits 1 with read error', async () => {
+    const root = await makeRoot();
+    try {
+      const res = await runLesson(root, ['record', '--file', path.join(root, 'ghost.json')]);
+      assertExitOne(res, 'missing payload file must exit 1');
+      assert.ok(res.errors.join('\n').includes('Failed to read payload file'));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('outcome without lessonId or flag-like lessonId exits 1', async () => {
+    const root = await makeRoot();
+    try {
+      const none = await runLesson(root, ['outcome']);
+      assertExitOne(none, 'missing lessonId must exit 1');
+      const flagLike = await runLesson(root, ['outcome', '--helpful']);
+      assertExitOne(flagLike, 'flag-like lessonId must exit 1');
+      assert.ok(flagLike.errors.join('\n').includes('requires a <lessonId>'));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('scan-outcomes exits 1 when lessons.jsonl is corrupt', async () => {
+    const root = await makeRoot();
+    try {
+      await writeFile(path.join(root, 'lessons.jsonl'), '{not-valid-json\n', 'utf8');
+      const res = await runLesson(root, ['scan-outcomes']);
+
+      assertExitOne(res, 'corrupt lessons store must exit 1');
+      assert.ok(`${res.stderrRaw}\n${res.errors.join('\n')}`.includes('failed to read lessons.jsonl'));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('scan-outcomes prints UNKNOWN proposals for unjudged recalls', async () => {
+    const root = await makeRoot();
+    try {
+      await writeFile(
+        path.join(root, 'lessons.jsonl'),
+        `${JSON.stringify({ id: 'les-x', title: 't', wrongApproach: 'did bad' })}\n`,
+        'utf8'
+      );
+      await seedRecall(root, 'les-x');
+      const res = await runLesson(root, ['scan-outcomes']);
+
+      assert.equal(res.exitCode, null, 'scan should not exit');
+      const out = `${res.stdout}\n${res.logs.join('\n')}`;
+      assert.ok(out.includes('UNKNOWN'), 'unjudged recall must print UNKNOWN verdict');
+      assert.ok(out.includes('lesson=les-x'), 'lesson id expected in proposal line');
+      assert.ok(out.includes('recall=rec-1'), 'recall id expected in proposal line');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
+test('lesson quality-gate: rejection and scored success via DSPy endpoint', async (t) => {
+  await t.test('--quality-gate rejects low-scoring lesson with feedback and exits 1', async () => {
+    const root = await makeRoot();
+    try {
+      await withDspyServer({ score: 0.2, feedback: 'too vague to recall' }, async () => {
+        const res = await runLesson(root, ['record', '--quality-gate', '--data', JSON.stringify(VALID_PAYLOAD)]);
+        assertExitOne(res, 'rejected lesson must exit 1');
+        const joined = `${res.stderrRaw}\n${res.errors.join('\n')}`;
+        assert.ok(joined.includes('REJECTED by quality gate'));
+        assert.ok(joined.includes('0.20'), 'score expected in rejection message');
+        assert.ok(joined.includes('too vague to recall'), 'feedback expected');
+      });
+      const raw = await readFile(path.join(root, 'lessons.jsonl'), 'utf8').catch(() => '');
+      assert.equal(raw, '', 'rejected lesson must NOT be persisted');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('--quality-gate success prints quality score', async () => {
+    const root = await makeRoot();
+    try {
+      await withDspyServer({ score: 0.85 }, async () => {
+        const res = await runLesson(root, ['record', '--quality-gate', '--data', JSON.stringify(VALID_PAYLOAD)]);
+        assert.equal(res.exitCode, null);
+        assert.ok(res.logs.join('\n').includes('Quality score: 0.85/1.00'));
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('search --semantic prints relevance from DSPy ranking', async () => {
+    const root = await makeRoot();
+    try {
+      const lessonId = await recordSeed(root);
+      await withDspyServer({ results: [{ id: lessonId, score: 0.9 }] }, async () => {
+        const res = await runLesson(root, ['search', 'Lockfile', '--semantic']);
+        assert.equal(res.exitCode, null);
+        const joined = res.logs.join('\n');
+        assert.ok(joined.includes('[Relevance] 90%'), `relevance line expected, got: ${joined}`);
+        assert.ok(joined.includes('semantic mode'), 'semantic mode label expected');
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});

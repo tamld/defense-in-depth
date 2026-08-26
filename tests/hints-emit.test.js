@@ -51,6 +51,50 @@ test('formatHint renders plain text with dismissal footer outside TTY', () => {
   assert.ok(!text.includes('\x1b['), 'no ANSI color codes on non-TTY stderr');
 });
 
+test('formatHint applies dim ANSI wrap when stderr is a TTY and NO_COLOR unset', async () => {
+  const savedIsTTY = process.stderr.isTTY;
+  const savedNoColor = process.env.NO_COLOR;
+  process.stderr.isTTY = true;
+  delete process.env.NO_COLOR;
+  try {
+    const text = formatHint(SAMPLE_HINT);
+    assert.ok(text.includes('\x1b[2m'), 'dim ANSI prefix expected on TTY stderr');
+    assert.ok(text.includes('💡 Tip:'), 'tip body expected');
+  } finally {
+    if (savedIsTTY === undefined) delete process.stderr.isTTY;
+    else process.stderr.isTTY = savedIsTTY;
+    if (savedNoColor === undefined) delete process.env.NO_COLOR;
+    else process.env.NO_COLOR = savedNoColor;
+  }
+});
+
+test('cooldownDays config override disables cooldown suppression', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const { writeFile } = await import('node:fs/promises');
+  const root = await makeRoot('did-hint-cd0-');
+  const run = (args) => execFileSync('git', args, { cwd: root });
+  const savedErrWrite = process.stderr.write.bind(process.stderr);
+  try {
+    run(['init', '-q']);
+    run(['config', 'user.email', 't@e.com']);
+    run(['config', 'user.name', 'T']);
+    for (let i = 0; i < 5; i++) {
+      run(['commit', '-q', '--allow-empty', '--no-gpg-sign', '-m', `chore: seed ${i}`]);
+    }
+    await writeFile(path.join(root, 'defense.config.yml'), 'hints:\n  cooldownDays: 0\n', 'utf8');
+    await withEnv({ CI: 'false', NO_HINTS: undefined }, async () => {
+      process.stderr.write = () => true;
+      const first = await emitOneHint(root, 'doctor');
+      assert.ok(first, 'first emit should fire');
+      const replay = await emitOneHint(root, 'doctor');
+      assert.ok(replay && replay.id === first.id, 'cooldownDays:0 must allow immediate re-emission of same hint');
+    });
+  } finally {
+    process.stderr.write = savedErrWrite;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('isChannelEnabled honors config defaults and overrides', async (t) => {
   await t.test('default config enables standard channels', async () => {
     const root = await makeRoot('did-hint-chan-default-');
