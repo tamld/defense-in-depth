@@ -290,8 +290,25 @@ function readFeedbackEventsSafe(projectRoot: string): FeedbackEvent[] {
   }
 }
 
-/** Count commits on the current HEAD. Returns 0 if the repo isn't initialised. */
+interface GitMetricCache {
+  commits?: { count: number; timestamp: number };
+  contributors?: { count: number; timestamp: number };
+}
+
+const gitMetricCache = new Map<string, GitMetricCache>();
+const GIT_CACHE_TTL_MS = 30_000;
+
+export function clearGitMetricCache(): void {
+  gitMetricCache.clear();
+}
+
+/** Count commits on the current HEAD with 30s TTL cache. */
 function countCommits(projectRoot: string): number {
+  const cached = gitMetricCache.get(projectRoot)?.commits;
+  if (cached && Date.now() - cached.timestamp < GIT_CACHE_TTL_MS) {
+    return cached.count;
+  }
+
   try {
     const out = execFileSync("git", ["rev-list", "--count", "HEAD"], {
       cwd: projectRoot,
@@ -299,16 +316,25 @@ function countCommits(projectRoot: string): number {
       stdio: ["ignore", "pipe", "ignore"],
     });
     const n = Number(out.trim());
-    return Number.isFinite(n) ? n : 0;
+    const count = Number.isFinite(n) ? n : 0;
+    const current = gitMetricCache.get(projectRoot) ?? {};
+    current.commits = { count, timestamp: Date.now() };
+    gitMetricCache.set(projectRoot, current);
+    return count;
   } catch {
     return 0;
   }
 }
 
-/** Count distinct author emails. Returns 0 outside a git repo. */
+/** Count distinct author emails with 30s TTL cache. */
 function countContributors(projectRoot: string): number {
+  const cached = gitMetricCache.get(projectRoot)?.contributors;
+  if (cached && Date.now() - cached.timestamp < GIT_CACHE_TTL_MS) {
+    return cached.count;
+  }
+
   try {
-    const out = execFileSync("git", ["log", "--format=%ae"], {
+    const out = execFileSync("git", ["log", "-n", "1000", "--format=%ae"], {
       cwd: projectRoot,
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -318,7 +344,11 @@ function countContributors(projectRoot: string): number {
       const trimmed = line.trim();
       if (trimmed.length > 0) set.add(trimmed);
     }
-    return set.size;
+    const count = set.size;
+    const current = gitMetricCache.get(projectRoot) ?? {};
+    current.contributors = { count, timestamp: Date.now() };
+    gitMetricCache.set(projectRoot, current);
+    return count;
   } catch {
     return 0;
   }
