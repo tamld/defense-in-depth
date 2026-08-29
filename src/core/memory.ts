@@ -1,6 +1,6 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import * as crypto from "crypto";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as crypto from "node:crypto";
 import { Lesson, GrowthMetric } from "./types.js";
 import { callDspy, callDspyRank, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "./dspy-client.js";
 import { recordRecall } from "./lesson-outcome.js";
@@ -96,8 +96,8 @@ async function readAllLessons(projectRoot: string): Promise<Lesson[]> {
   const targetPath = path.join(projectRoot, LESSONS_FILE);
   try {
     const content = await fs.readFile(targetPath, "utf-8");
-    const lines = content.split("\n").filter(line => line.trim().length > 0);
-    return lines.map(line => JSON.parse(line));
+    const lines = content.split("\n").filter((line: string) => line.trim().length > 0);
+    return lines.map((line: string) => JSON.parse(line));
   } catch (err: unknown) {
     if (err && typeof err === "object" && "code" in err && err.code === "ENOENT") {
       return [];
