@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/tamld/defense-in-depth/main/templates/defense.config.schema.json",
+  "title": "DefenseInDepthConfig",
+  "description": "Configuration schema for defense-in-depth governance hooks",
+  "type": "object",
+  "required": ["version", "guards"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Configuration schema version"
+    },
+    "guards": {
+      "type": "object",
+      "description": "Guard definitions and policies",
+      "additionalProperties": false,
+      "properties": {
+        "hollowArtifact": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "extensions": { "type": "array", "items": { "type": "string" } },
+            "patterns": { "type": "array", "items": { "type": "string" } },
+            "minContentLength": { "type": "integer", "minimum": 0 },
+            "useDspy": { "type": "boolean" },
+            "dspyEndpoint": { "type": "string", "format": "uri" },
+            "dspyTimeoutMs": { "type": "integer", "minimum": 100 }
+          }
+        },
+        "ssotPollution": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "protectedPaths": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "rootPollution": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "allowedRootFiles": { "type": "array", "items": { "type": "string" } },
+            "allowedRootPatterns": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "commitFormat": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "pattern": { "type": "string" },
+            "types": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "branchNaming": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "pattern": { "type": "string" }
+          }
+        },
+        "phaseGate": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "planFile": { "type": "string" },
+            "sourcePatterns": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "ticketIdentity": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "tkidPattern": { "type": "string" },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "provider": { "type": "string" },
+            "providerConfig": { "type": "object" }
+          }
+        },
+        "hitlReview": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "protectedBranches": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "federation": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "parentEndpoint": { "type": "string" },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "blockedParentPhases": { "type": "array", "items": { "type": "string" } },
+            "provider": { "type": "string" },
+            "providerConfig": { "type": "object" }
+          }
+        },
+        "secretDetection": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "customPatterns": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "fileSizeLimit": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "maxSizeBytes": { "type": "integer", "minimum": 1 },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "ignoredExtensions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "dependencyAudit": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "severity": { "type": "string", "enum": ["warn", "block"] }
+          }
+        }
+      }
+    },
+    "hints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "cooldownDays": { "type": "integer", "minimum": 0 },
+        "channels": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["doctor", "verify-success"] }
+        }
+      }
+    }
+  }
+}

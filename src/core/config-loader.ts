@@ -133,11 +133,142 @@ export function loadConfig(projectRoot: string): DefendConfig {
           { configPath },
         );
       }
+      validateConfigSchema(parsed, configPath);
       return deepMerge(DEFAULT_CONFIG, parsed as Partial<DefendConfig>);
     }
   }
 
   return DEFAULT_CONFIG;
+}
+
+const KNOWN_GUARD_KEYS = new Set([
+  "hollowArtifact",
+  "ssotPollution",
+  "rootPollution",
+  "commitFormat",
+  "branchNaming",
+  "phaseGate",
+  "ticketIdentity",
+  "hitlReview",
+  "federation",
+  "secretDetection",
+  "fileSizeLimit",
+  "dependencyAudit",
+]);
+
+const ALLOWED_TOP_LEVEL_KEYS = new Set(["version", "guards", "hints"]);
+
+/**
+ * Validates parsed YAML configuration against the JSON Schema structure.
+ * Pure function: throws ConfigError on schema violations.
+ */
+export function validateConfigSchema(parsed: unknown, configPath: string): void {
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new ConfigError("Configuration root must be an object", { configPath });
+  }
+
+  const obj = parsed as Record<string, unknown>;
+
+  for (const key of Object.keys(obj)) {
+    if (!ALLOWED_TOP_LEVEL_KEYS.has(key)) {
+      throw new ConfigError(
+        `Unknown top-level configuration key "${key}". Allowed keys: ${[...ALLOWED_TOP_LEVEL_KEYS].join(", ")}`,
+        { configPath },
+      );
+    }
+  }
+
+  if (obj.version !== undefined && typeof obj.version !== "string" && typeof obj.version !== "number") {
+    throw new ConfigError('Configuration "version" must be a string or number', { configPath });
+  }
+
+  if (obj.guards !== undefined) {
+    if (typeof obj.guards !== "object" || obj.guards === null || Array.isArray(obj.guards)) {
+      throw new ConfigError('"guards" must be an object mapping guard IDs to configurations', { configPath });
+    }
+
+    const guardsObj = obj.guards as Record<string, unknown>;
+
+    for (const [guardName, guardVal] of Object.entries(guardsObj)) {
+      if (!KNOWN_GUARD_KEYS.has(guardName)) {
+        throw new ConfigError(
+          `Unknown guard "${guardName}". Known guards: ${[...KNOWN_GUARD_KEYS].join(", ")}`,
+          { configPath },
+        );
+      }
+
+      if (typeof guardVal !== "object" || guardVal === null || Array.isArray(guardVal)) {
+        throw new ConfigError(`Configuration for guard "${guardName}" must be an object`, { configPath });
+      }
+
+      const g = guardVal as Record<string, unknown>;
+
+      if (g.enabled !== undefined && typeof g.enabled !== "boolean") {
+        throw new ConfigError(`guards.${guardName}.enabled must be a boolean`, { configPath });
+      }
+
+      if (g.severity !== undefined && g.severity !== "warn" && g.severity !== "block") {
+        throw new ConfigError(`guards.${guardName}.severity must be "warn" or "block"`, { configPath });
+      }
+
+      // Check numeric bounds
+      const nonNegativeNumbers: Array<[string, unknown]> = [
+        ["minContentLength", g.minContentLength],
+        ["dspyTimeoutMs", g.dspyTimeoutMs],
+        ["maxSizeBytes", g.maxSizeBytes],
+      ];
+
+      for (const [field, val] of nonNegativeNumbers) {
+        if (val !== undefined && (typeof val !== "number" || isNaN(val) || val < 0)) {
+          throw new ConfigError(`guards.${guardName}.${field} must be a non-negative number`, { configPath });
+        }
+      }
+
+      // Check string arrays
+      const stringArrays: Array<[string, unknown]> = [
+        ["extensions", g.extensions],
+        ["patterns", g.patterns],
+        ["protectedPaths", g.protectedPaths],
+        ["allowedRootFiles", g.allowedRootFiles],
+        ["allowedRootPatterns", g.allowedRootPatterns],
+        ["types", g.types],
+        ["sourcePatterns", g.sourcePatterns],
+        ["protectedBranches", g.protectedBranches],
+        ["blockedParentPhases", g.blockedParentPhases],
+        ["customPatterns", g.customPatterns],
+        ["ignoredExtensions", g.ignoredExtensions],
+      ];
+
+      for (const [field, val] of stringArrays) {
+        if (val !== undefined) {
+          if (!Array.isArray(val) || !val.every((item) => typeof item === "string")) {
+            throw new ConfigError(`guards.${guardName}.${field} must be an array of strings`, { configPath });
+          }
+        }
+      }
+    }
+  }
+
+  if (obj.hints !== undefined) {
+    if (typeof obj.hints !== "object" || obj.hints === null || Array.isArray(obj.hints)) {
+      throw new ConfigError('"hints" must be an object', { configPath });
+    }
+
+    const hints = obj.hints as Record<string, unknown>;
+    if (hints.enabled !== undefined && typeof hints.enabled !== "boolean") {
+      throw new ConfigError("hints.enabled must be a boolean", { configPath });
+    }
+
+    if (hints.cooldownDays !== undefined && (typeof hints.cooldownDays !== "number" || hints.cooldownDays < 0)) {
+      throw new ConfigError("hints.cooldownDays must be a non-negative number", { configPath });
+    }
+
+    if (hints.channels !== undefined) {
+      if (!Array.isArray(hints.channels) || !hints.channels.every((c) => c === "doctor" || c === "verify-success")) {
+        throw new ConfigError('hints.channels must be an array of "doctor" or "verify-success"', { configPath });
+      }
+    }
+  }
 }
 
 /**
