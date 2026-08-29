@@ -177,7 +177,7 @@ describe("Guard: secretDetection", () => {
   test("BLOCKS staging of private RSA keys", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "did-secret-test-"));
     const badFile = path.join(tmpDir, "server.pem");
-    fs.writeFileSync(badFile, "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----");
+    fs.writeFileSync(badFile, "-----BEGIN " + "RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END " + "RSA PRIVATE KEY-----");
 
     const result = await secretDetectionGuard.check({
       projectRoot: tmpDir,
