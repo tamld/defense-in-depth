@@ -30,7 +30,16 @@ export const hitlReviewGuard: Guard = {
       };
     }
 
-    const config = ctx.config.guards.hitlReview;
+    const config = ctx.config?.guards?.hitlReview;
+    if (!config?.enabled) {
+      return {
+        guardId: "hitlReview",
+        passed: true,
+        findings: [],
+        durationMs: performance.now() - start,
+      };
+    }
+
     const protectedBranches = config?.protectedBranches || DEFAULT_PROTECTED_BRANCHES;
 
     // Check if the current branch is protected
