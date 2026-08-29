@@ -50,6 +50,20 @@ export function createJsonlStore<T>(
   filePath: string,
   schema: JsonlSchema<T>,
 ): JsonlStore<T> {
+  let idCache: Set<string> | null = null;
+
+  function ensureIdCache(): Set<string> {
+    if (idCache === null) {
+      idCache = new Set<string>();
+      if (fs.existsSync(filePath)) {
+        for (const existing of readAll()) {
+          idCache.add(schema.idOf(existing));
+        }
+      }
+    }
+    return idCache;
+  }
+
   function readAll(): T[] {
     if (!fs.existsSync(filePath)) return [];
     const out: T[] = [];
@@ -71,12 +85,19 @@ export function createJsonlStore<T>(
   function append(record: T): JsonlAppendResult<T> {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     const targetId = schema.idOf(record);
-    for (const existing of readAll()) {
-      if (schema.idOf(existing) === targetId) {
-        return { written: false, event: existing, path: filePath };
+    const cache = ensureIdCache();
+
+    if (cache.has(targetId)) {
+      for (const existing of readAll()) {
+        if (schema.idOf(existing) === targetId) {
+          return { written: false, event: existing, path: filePath };
+        }
       }
+      return { written: false, event: record, path: filePath };
     }
+
     fs.appendFileSync(filePath, JSON.stringify(record) + "\n", "utf-8");
+    cache.add(targetId);
     return { written: true, event: record, path: filePath };
   }
 
@@ -91,14 +112,22 @@ export function createJsonlStore<T>(
     }
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     const targetId = schema.idOf(record);
+    const cache = ensureIdCache();
+
+    if (cache.has(targetId)) {
+      for (const existing of readAll()) {
+        if (schema.idOf(existing) === targetId) {
+          return { written: false, event: existing, path: filePath };
+        }
+      }
+      return { written: false, event: record, path: filePath };
+    }
+
     const incomingTsRaw = schema.timestampOf(record);
     const incomingTs = incomingTsRaw ? Date.parse(incomingTsRaw) : NaN;
     const incomingKey = options.windowKeyOf(record);
 
     for (const existing of readAll()) {
-      if (schema.idOf(existing) === targetId) {
-        return { written: false, event: existing, path: filePath };
-      }
       if (Number.isNaN(incomingTs)) continue;
       if (options.windowKeyOf(existing) !== incomingKey) continue;
       const eTsRaw = schema.timestampOf(existing);
@@ -114,6 +143,7 @@ export function createJsonlStore<T>(
       }
     }
     fs.appendFileSync(filePath, JSON.stringify(record) + "\n", "utf-8");
+    cache.add(targetId);
     return { written: true, event: record, path: filePath };
   }
 
@@ -139,10 +169,8 @@ export function createJsonlStore<T>(
   }
 
   function exists(id: string): boolean {
-    for (const r of readAll()) {
-      if (schema.idOf(r) === id) return true;
-    }
-    return false;
+    const cache = ensureIdCache();
+    return cache.has(id);
   }
 
   return { path: filePath, append, appendWithWindow, read, exists };
