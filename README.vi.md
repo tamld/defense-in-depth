@@ -85,7 +85,7 @@ jobs:
 
 | Guard | Mặc định | Mức độ | Điểm kích hoạt | Lỗi phát hiện & ngăn chặn |
 |:---|:---:|:---:|:---:|:---|
-| **Hollow Artifact** | ✅ BẬT | `BLOCK` | `pre-commit` | Các đánh dấu chưa hoàn thiện (`TODO`, `TBD`, `PLACEHOLDER`) hoặc tệp khung rỗng |
+| **Hollow Artifact** | ✅ BẬT | `BLOCK` | `pre-commit` | Các đánh dấu chưa hoàn thiện hoặc tệp khung rỗng |
 | **SSoT Pollution** | ✅ BẬT | `BLOCK` | `pre-commit` | Chỉnh sửa trái phép vào tệp quản trị/trạng thái (`.agents/**`, `backlog.yml`) |
 | **Root Pollution** | ✅ BẬT | `BLOCK` | `pre-commit` | Tạo tệp nháp hoặc thư mục không được cấp phép tại thư mục gốc |
 | **Commit Format** | ✅ BẬT | `WARN` | `commit-msg` | Thông điệp commit không tuân thủ Conventional Commits (`type(scope): description`) |

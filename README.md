@@ -85,7 +85,7 @@ jobs:
 
 | Guard | Default | Severity | Hook Trigger | What It Catches |
 |:---|:---:|:---:|:---:|:---|
-| **Hollow Artifact** | ✅ ON | `BLOCK` | `pre-commit` | Unfilled `TODO`/`TBD`/`PLACEHOLDER` tokens and empty scaffolding |
+| **Hollow Artifact** | ✅ ON | `BLOCK` | `pre-commit` | Unfilled stub markers and empty scaffolding |
 | **SSoT Pollution** | ✅ ON | `BLOCK` | `pre-commit` | Unauthorized edits to governance files (`.agents/**`, `backlog.yml`) |
 | **Root Pollution** | ✅ ON | `BLOCK` | `pre-commit` | Unapproved scratch files or folders placed in the repository root |
 | **Commit Format** | ✅ ON | `WARN` | `commit-msg` | Non-conventional commit messages (`type(scope): description`) |
