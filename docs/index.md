@@ -16,6 +16,8 @@
 | **Progressive Discovery Hints** | [`user-guide/hints.md`](user-guide/hints.md) | 5 min |
 | **Core Architecture & Engine** | [`dev-guide/architecture.md`](dev-guide/architecture.md) | 8 min |
 | **Authoring a Custom Guard** | [`dev-guide/writing-guards.md`](dev-guide/writing-guards.md) | 10 min |
+| **Custom Guard Plugin Guide** | [`dev-guide/custom-guards.md`](dev-guide/custom-guards.md) | 8 min |
+| **API Reference & Catalog** | [`api/index.md`](api/index.md) | 5 min |
 | **Authoring a Custom Provider** | [`dev-guide/writing-providers.md`](dev-guide/writing-providers.md) | 8 min |
 | **Connecting DSPy Inference** | [`dev-guide/dspy-providers.md`](dev-guide/dspy-providers.md) | 8 min |
 | **Engine Execution & Fail-Fast Policy** | [`dev-guide/fail-fast-policy.md`](dev-guide/fail-fast-policy.md) | 5 min |
