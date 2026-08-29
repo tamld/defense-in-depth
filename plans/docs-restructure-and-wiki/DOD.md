@@ -49,7 +49,7 @@
 
 ## 4. Governance & HITL Quality Standards
 
-- [ ] Zero hollow markers (`TODO`, `TBD`, `PLACEHOLDER`) in all committed markdown files (`rule-zero-theater.md`).
+- [ ] Zero incomplete markers in all committed markdown files (`rule-zero-theater.md`).
 - [ ] Every document complies with `rule-document-budget.md` and `rule-flowchart-mandate.md`.
 - [ ] All changes partitioned into dedicated GitHub Issues and Pull Requests.
 - [ ] No direct commits to `main`; all PRs reviewed and merged with human approval (`rule-hitl-enforcement.md`).
