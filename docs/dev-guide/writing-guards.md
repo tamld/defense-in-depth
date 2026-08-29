@@ -1,101 +1,229 @@
-# Writing Custom Guards
+# Authoring Custom Guards
 
-> Your first guard in 5 minutes.
+> **The canonical guide to designing, implementing, registering, and testing a new Guard in `defense-in-depth`.**  
+> *Target: Developers extending the deterministic Tier 0 guard pipeline.*
 
 ---
 
-## The Guard Interface
+## 1. The Core Philosophy of a Guard
 
-Every guard implements this interface from `src/core/types.ts`:
+Every Guard in `defense-in-depth` is a **pure, deterministic validator** that runs before code is committed to Git history.
+
+### The 6 Immutable Guard Invariants
+1. **Pure Functions**: No side effects. A guard only reads files in the staging area or workspace. It never writes to the filesystem, mutates global state, or opens network connections.
+2. **Crash-Safe**: Every internal error must be caught and handled gracefully. A guard must never crash the pipeline or invoke `process.exit()`.
+3. **Execution Budget (<100ms)**: Guards run in the pre-commit hot path. Processing for typical changesets (≤50 files) must complete in milliseconds.
+4. **Independent**: Guards never import or depend on other guards.
+5. **Evidence-Tagged**: All findings attach an `EvidenceLevel` (`CODE`, `RUNTIME`, `INFER`, `HYPO`) to provide auditable proof.
+6. **Actionable Fixes**: Any finding with `Severity.BLOCK` **must** provide a concrete `fix` string showing developers how to resolve the block.
+
+---
+
+## 2. The `Guard` Interface
+
+From `src/core/types/guard.ts` (and exported at `defense-in-depth/types`):
 
 ```typescript
-interface Guard {
-  readonly id: string;          // Unique kebab-case ID
-  readonly name: string;        // Human-readable name
-  readonly description: string; // What does this guard catch?
+import type { Finding, Severity, EvidenceLevel } from "./engine.js";
+
+export interface GuardContext {
+  readonly projectRoot: string;
+  readonly stagedFiles: readonly string[];
+  readonly allFiles?: readonly string[];
+  readonly config: DefendConfig;
+  readonly branchName?: string;
+  readonly commitMessage?: string;
+}
+
+export interface GuardResult {
+  readonly guardId: string;
+  readonly passed: boolean;
+  readonly findings: readonly Finding[];
+  readonly durationMs: number;
+}
+
+export interface Guard {
+  readonly id: string;          // Kebab-case identifier (e.g. "secret-detection")
+  readonly name: string;        // Human-readable title (e.g. "Secret Detection Guard")
+  readonly description: string; // What anti-pattern this guard catches
   check(ctx: GuardContext): Promise<GuardResult>;
 }
 ```
 
 ---
 
-## Example: File Size Guard
+## 3. Step-by-Step Tutorial: Authoring a Guard
+
+Let's build a **Secret Detection Guard** that catches accidentally staged private keys and API tokens.
+
+### Step 1: Create the Guard File (`src/guards/secret-detection.ts`)
 
 ```typescript
-// src/guards/file-size.ts
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { performance } from "node:perf_hooks";
 import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
 import { Severity, EvidenceLevel } from "../core/types.js";
 
-const MAX_LINES = 500;
+const SECRET_PATTERNS: Array<{ name: string; regex: RegExp }> = [
+  { name: "Private Key", regex: /-----BEGIN (RSA|EC|OPENSSH|PGP) PRIVATE KEY-----/ },
+  { name: "AWS Access Key", regex: /\b(AKIA|ABIA|ACCA|ASIA)[0-9A-Z]{16}\b/ },
+  { name: "Generic API Token", regex: /(api_key|secret_key|auth_token)\s*=\s*['"][0-9a-zA-Z_\-]{20,}['"]/i },
+];
 
-export const fileSizeGuard: Guard = {
-  id: "file-size",
-  name: "File Size Guard",
-  description: "Prevents files larger than 500 lines from being committed",
+export const secretDetectionGuard: Guard = {
+  id: "secret-detection",
+  name: "Secret Detection Guard",
+  description: "Prevents accidental commits of private keys, AWS credentials, and API secrets",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
+    const startTime = performance.now();
     const findings: Finding[] = [];
+
+    // Respect configuration toggles
+    const config = ctx.config.guards?.secretDetection;
+    if (config?.enabled === false) {
+      return {
+        guardId: "secret-detection",
+        passed: true,
+        findings: [],
+        durationMs: performance.now() - startTime,
+      };
+    }
 
     for (const file of ctx.stagedFiles) {
       const fullPath = path.join(ctx.projectRoot, file);
       if (!fs.existsSync(fullPath)) continue;
 
-      const content = fs.readFileSync(fullPath, "utf-8");
-      const lineCount = content.split("\n").length;
+      try {
+        const content = fs.readFileSync(fullPath, "utf-8");
+        const lines = content.split("\n");
 
-      if (lineCount > MAX_LINES) {
-        findings.push({
-          guardId: "file-size",
-          severity: Severity.WARN,
-          message: `File has ${lineCount} lines (max: ${MAX_LINES})`,
-          filePath: file,
-          fix: "Split into smaller modules",
-          evidence: EvidenceLevel.RUNTIME,
+        lines.forEach((line, index) => {
+          for (const pattern of SECRET_PATTERNS) {
+            if (pattern.regex.test(line)) {
+              findings.push({
+                guardId: "secret-detection",
+                severity: Severity.BLOCK,
+                message: `Potential secret detected (${pattern.name}) at line ${index + 1}`,
+                filePath: file,
+                line: index + 1,
+                evidence: EvidenceLevel.CODE,
+                fix: `Remove the hardcoded secret from ${file} and store it in an environment variable (.env) or secret vault.`,
+              });
+            }
+          }
         });
+      } catch {
+        // Gracefully ignore binary files or unreadable entries
       }
     }
 
     return {
-      guardId: "file-size",
-      passed: findings.length === 0,
+      guardId: "secret-detection",
+      passed: findings.filter((f) => f.severity === Severity.BLOCK).length === 0,
       findings,
-      durationMs: 0,
+      durationMs: performance.now() - startTime,
     };
   },
 };
 ```
 
-## Rules for Guards
+---
 
-1. **Pure functions** — No side effects. Do not write files, make HTTP requests, or modify state.
-2. **Crash-safe** — Handle errors internally. Never let an exception crash the pipeline.
-3. **Fast** — Target < 100ms for typical workloads (≤ 50 files).
-4. **Independent** — Do not import from other guards.
-5. **Evidence-tagged** — Use `EvidenceLevel` on findings to show how you verified.
-6. **Fix suggestions** — BLOCK findings MUST include a `fix` string.
+## 4. Registering Your Guard
 
-## Registering Your Guard
-
-Add to `src/guards/index.ts`:
+### 1. Barrel Export (`src/guards/index.ts`)
+Add your guard to the public barrel:
 
 ```typescript
-export { fileSizeGuard } from "./file-size.js";
+export { secretDetectionGuard } from "./secret-detection.js";
 ```
 
-That's it. The engine discovers guards through this barrel export.
+### 2. Config Schema (`src/core/types/config.ts`)
+Add the optional configuration key to `GuardsConfig`:
 
-## Testing Your Guard
+```typescript
+export interface SecretDetectionConfig {
+  readonly enabled?: boolean;
+  readonly severity?: "block" | "warn";
+  readonly customPatterns?: readonly string[];
+}
+
+export interface GuardsConfig {
+  readonly hollowArtifact?: HollowArtifactConfig;
+  readonly ssotPollution?: SSoTPollutionConfig;
+  readonly secretDetection?: SecretDetectionConfig;
+  // ...
+}
+```
+
+---
+
+## 5. Adversarial Testing Pattern
+
+Every guard must be paired with an adversarial test suite in `tests/guards/<guard-name>.test.ts` verifying both positive catches and bypass resistance:
+
+```typescript
+import { test, describe } from "node:test";
+import assert from "node:assert/strict";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
+import { secretDetectionGuard } from "../../dist/guards/secret-detection.js";
+import { Severity, EvidenceLevel } from "../../dist/core/types.js";
+
+describe("Guard: secretDetection", () => {
+  test("BLOCKS staging of private RSA keys", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "did-secret-test-"));
+    const badFile = path.join(tmpDir, "server.pem");
+    fs.writeFileSync(badFile, "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----");
+
+    const result = await secretDetectionGuard.check({
+      projectRoot: tmpDir,
+      stagedFiles: ["server.pem"],
+      config: {},
+    });
+
+    assert.equal(result.passed, false);
+    assert.equal(result.findings.length, 1);
+    assert.equal(result.findings[0].severity, Severity.BLOCK);
+    assert.match(result.findings[0].message, /Private Key/);
+    assert.ok(result.findings[0].fix.length > 0);
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  test("PASSES clean source files with zero false-positives", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "did-clean-test-"));
+    const cleanFile = path.join(tmpDir, "index.ts");
+    fs.writeFileSync(cleanFile, "export const API_URL = process.env.API_URL || 'http://localhost:3000';");
+
+    const result = await secretDetectionGuard.check({
+      projectRoot: tmpDir,
+      stagedFiles: ["index.ts"],
+      config: {},
+    });
+
+    assert.equal(result.passed, true);
+    assert.equal(result.findings.length, 0);
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+});
+```
+
+---
+
+## 6. Verification Commands
 
 ```bash
-# Build
-npm run build
+# 1. Type check
+npx tsc --noEmit
 
-# Run your guard specifically
-npx defense-in-depth verify --files "path/to/large-file.ts"
+# 2. Run unit tests
+npm test
+
+# 3. Dogfood verification on your own repository
+npx defense-in-depth verify
 ```
-
-## Full Contract Reference
-
-See [`../../.agents/contracts/guard-interface.md`](../../.agents/contracts/guard-interface.md) for the complete interface specification with all types and invariants.
