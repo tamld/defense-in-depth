@@ -11,6 +11,9 @@ export { phaseGateGuard } from "./phase-gate.js";
 export { ticketIdentityGuard } from "./ticket-identity.js";
 export { hitlReviewGuard } from "./hitl-review.js";
 export { federationGuard } from "./federation.js";
+export { secretDetectionGuard } from "./secret-detection.js";
+export { fileSizeLimitGuard } from "./file-size-limit.js";
+export { dependencyAuditGuard } from "./dependency-audit.js";
 
 import { hollowArtifactGuard } from "./hollow-artifact.js";
 import { ssotPollutionGuard } from "./ssot-pollution.js";
@@ -21,6 +24,9 @@ import { phaseGateGuard } from "./phase-gate.js";
 import { ticketIdentityGuard } from "./ticket-identity.js";
 import { hitlReviewGuard } from "./hitl-review.js";
 import { federationGuard } from "./federation.js";
+import { secretDetectionGuard } from "./secret-detection.js";
+import { fileSizeLimitGuard } from "./file-size-limit.js";
+import { dependencyAuditGuard } from "./dependency-audit.js";
 import type { Guard } from "../core/types.js";
 
 /** All built-in guards, ready to register with the engine */
@@ -34,4 +40,7 @@ export const allBuiltinGuards: Guard[] = [
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  secretDetectionGuard,
+  fileSizeLimitGuard,
+  dependencyAuditGuard,
 ];

@@ -46,6 +46,9 @@ export type {
   TicketIdentityConfig,
   HitlReviewConfig,
   FederationGuardConfig,
+  SecretDetectionConfig,
+  FileSizeLimitConfig,
+  DependencyAuditConfig,
 } from "./core/types.js";
 
 // ─── Built-in guards ───
@@ -59,6 +62,9 @@ export {
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  secretDetectionGuard,
+  fileSizeLimitGuard,
+  dependencyAuditGuard,
   allBuiltinGuards,
 } from "./guards/index.js";
 

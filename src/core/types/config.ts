@@ -101,6 +101,29 @@ export interface FederationGuardConfig {
   providerConfig?: Record<string, unknown>;
 }
 
+export interface SecretDetectionConfig {
+  enabled: boolean;
+  /** Custom regex patterns to scan in addition to built-in secret patterns */
+  customPatterns?: string[];
+}
+
+export interface FileSizeLimitConfig {
+  enabled: boolean;
+  /** Maximum file size in bytes before blocking (default: 1048576 = 1 MB) */
+  maxSizeBytes?: number;
+  /** Severity: 'warn' or 'block' (default: 'block') */
+  severity?: 'warn' | 'block';
+  /** File extensions to exempt from size checks (e.g. [".mp4", ".zip"]) */
+  ignoredExtensions?: string[];
+}
+
+export interface DependencyAuditConfig {
+  /** Opt-in switch for running npm audit during verification (default: false) */
+  enabled: boolean;
+  /** Severity: 'warn' or 'block' on high/critical vulnerabilities (default: 'block') */
+  severity?: 'warn' | 'block';
+}
+
 /** Root configuration loaded from defense.config.yml */
 export interface DefendConfig {
   version: string;
@@ -114,6 +137,9 @@ export interface DefendConfig {
     ticketIdentity?: TicketIdentityConfig;
     hitlReview?: HitlReviewConfig;
     federation?: FederationGuardConfig;
+    secretDetection?: SecretDetectionConfig;
+    fileSizeLimit?: FileSizeLimitConfig;
+    dependencyAudit?: DependencyAuditConfig;
   };
   /** v0.7 (#21): Progressive Discovery UX — earned, dim-formatted hints. */
   hints?: HintsConfig;

@@ -36,6 +36,9 @@ import {
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  secretDetectionGuard,
+  fileSizeLimitGuard,
+  dependencyAuditGuard,
   allBuiltinGuards,
   // Federation (values)
   createProvider,
@@ -82,6 +85,9 @@ describe("public API barrel — built-in guards", () => {
     ["ticketIdentityGuard", ticketIdentityGuard, "ticketIdentity"],
     ["hitlReviewGuard", hitlReviewGuard, "hitlReview"],
     ["federationGuard", federationGuard, "federation"],
+    ["secretDetectionGuard", secretDetectionGuard, "secretDetection"],
+    ["fileSizeLimitGuard", fileSizeLimitGuard, "fileSizeLimit"],
+    ["dependencyAuditGuard", dependencyAuditGuard, "dependencyAudit"],
   ];
 
   for (const [exportName, guard, expectedId] of guardCases) {
@@ -144,6 +150,9 @@ describe("public API barrel — module shape", () => {
       "ticketIdentityGuard",
       "hitlReviewGuard",
       "federationGuard",
+      "secretDetectionGuard",
+      "fileSizeLimitGuard",
+      "dependencyAuditGuard",
       "allBuiltinGuards",
       "createProvider",
       "FileTicketProvider",
