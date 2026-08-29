@@ -26,7 +26,7 @@ npx defense-in-depth init
    - `.git/hooks/pre-commit`: Runs fast deterministic guards on staged files.
    - `.git/hooks/pre-push`: Runs branch and federation checks before pushing.
 3. **Enables Essential Guards**:
-   - `hollow-artifact` (catches unfilled TODOs and empty templates).
+   - `hollow-artifact` (catches unfilled stub markers and empty templates).
    - `ssot-pollution` (prevents unauthorized modification of governance state).
 
 ---

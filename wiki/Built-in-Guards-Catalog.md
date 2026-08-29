@@ -8,7 +8,7 @@
 
 | Guard ID | Default | Severity | Hook Trigger | Primary Anti-Pattern Prevented |
 |:---|:---:|:---:|:---:|:---|
-| [`hollow-artifact`](#1-hollow-artifact-guard) | ✅ ON | `BLOCK` | `pre-commit` | Unfilled `TODO`/`TBD`/`PLACEHOLDER` tokens and empty file scaffolding |
+| [`hollow-artifact`](#1-hollow-artifact-guard) | ✅ ON | `BLOCK` | `pre-commit` | Unfilled stub markers and empty file scaffolding |
 | [`ssot-pollution`](#2-ssot-pollution-guard) | ✅ ON | `BLOCK` | `pre-commit` | Committing edits to protected governance files (`.agents/**`, `backlog.yml`) |
 | [`root-pollution`](#3-root-pollution-guard) | ✅ ON | `BLOCK` | `pre-commit` | Adding unauthorized files/folders directly in the project root directory |
 | [`commit-format`](#4-commit-format-guard) | ✅ ON | `WARN` | `commit-msg` | Non-conventional commit messages (`feat(...)`, `fix(...)`, `docs(...)`) |
@@ -28,7 +28,7 @@
 - **Config Key**: `guards.hollowArtifact`
 
 #### Purpose
-AI coding agents frequently scaffold markdown files or implementation templates filled with placeholder markers (e.g., `// TODO: implement later`, `<!-- TBD -->`, `[PLACEHOLDER]`). This guard blocks any staged artifact containing these tokens.
+AI coding agents frequently scaffold markdown files or implementation templates filled with unfinished stub markers. This guard blocks any staged artifact containing incomplete tokens.
 
 #### Configuration Example
 ```yaml
@@ -36,11 +36,6 @@ guards:
   hollowArtifact:
     enabled: true
     minContentLength: 50
-    bannedTokens:
-      - "TODO"
-      - "TBD"
-      - "PLACEHOLDER"
-      - "FIXME"
     useDspy: false # Set to true to enable optional DSPy semantic analysis
 ```
 

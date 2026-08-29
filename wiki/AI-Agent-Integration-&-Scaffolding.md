@@ -31,7 +31,7 @@ project-root/
 Ensure your `.cursorrules` references the bootstrap chain:
 ```markdown
 Read AGENTS.md and follow .agents/rules/rule-consistency.md.
-Never commit TODO/TBD placeholders. Always test with `npm test` before committing.
+Never commit unfinished stubs. Always test with `npm test` before committing.
 ```
 
 ### 2. Google Gemini CLI
