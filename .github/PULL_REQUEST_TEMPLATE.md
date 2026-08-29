@@ -15,7 +15,7 @@ Fixes #
 
 ## Checklist
 
-- [ ] My code follows the [consistency rules](.agents/rules/rule-consistency.md)
+- [ ] My code follows the [consistency rules](../.agents/rules/rule-consistency.md)
 - [ ] I used conventional commit format for the PR title
 - [ ] I added tests for new functionality
 - [ ] All existing tests pass (`npm test`)
