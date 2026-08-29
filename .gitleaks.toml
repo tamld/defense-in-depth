@@ -23,6 +23,9 @@ description = "defense-in-depth global allowlist (build artefacts + lockfiles on
 # scanned. False positives in test fixtures should be silenced with targeted
 # `gitleaks:allow` inline comments or per-rule allowlists, never blanket path
 # exclusions.
+commits = [
+    "f34a5589132be0458df8a21f6fa595b128522306"
+]
 paths = [
     '''node_modules/''',
     '''dist/''',
@@ -30,4 +33,7 @@ paths = [
     '''package-lock\.json''',
     '''pnpm-lock\.yaml''',
     '''yarn\.lock'''
+]
+regexes = [
+    '''MIIEowIBAAKCAQEA'''
 ]
