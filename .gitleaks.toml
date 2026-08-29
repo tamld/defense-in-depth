@@ -32,7 +32,9 @@ paths = [
     '''coverage/''',
     '''package-lock\.json''',
     '''pnpm-lock\.yaml''',
-    '''yarn\.lock'''
+    '''yarn\.lock''',
+    '''docs/dev-guide/writing-guards\.md''',
+    '''tests/guards/secret-detection\.test\.js'''
 ]
 regexes = [
     '''MIIEowIBAAKCAQEA'''
