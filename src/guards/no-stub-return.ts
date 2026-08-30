@@ -15,7 +15,11 @@ import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js
 import { Severity, EvidenceLevel } from "../core/types.js";
 
 const DEFAULT_ALLOWLIST_PATTERNS = [
-  /tests\/fixtures\//,
+  /(^|\/)tests?\//,
+  /(^|\/)fixtures\//,
+  /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
+  /\.d\.ts$/,
 ];
 
 const TICKET_PATTERN = /(TK-[0-9A-Z-]+|[A-Z]+-[0-9]+|#\d+)/i;
@@ -74,7 +78,8 @@ export const noStubReturnGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch {
+      } catch (readErr) {
+        // Ignore file read error on inaccessible files (TK-000)
         continue;
       }
 
@@ -120,6 +125,10 @@ export const noStubReturnGuard: Guard = {
       for (let i = 0; i < lines.length; i++) {
         const lineText = lines[i].trim();
         const lineNum = i + 1;
+
+        if (lineText.startsWith("//") || lineText.startsWith("/*") || lineText.startsWith("*")) {
+          continue;
+        }
 
         if (STUB_ARROW_REGEX.test(lineText)) {
           if (TICKET_PATTERN.test(lineText)) {

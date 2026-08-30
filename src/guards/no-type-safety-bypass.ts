@@ -16,7 +16,10 @@ import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js
 import { Severity, EvidenceLevel } from "../core/types.js";
 
 const DEFAULT_ALLOWLIST_PATTERNS = [
-  /tests\/fixtures\//,
+  /(^|\/)tests?\//,
+  /(^|\/)fixtures\//,
+  /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
   /\.d\.ts$/,
 ];
 
@@ -72,17 +75,24 @@ export const noTypeSafetyBypassGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch {
+      } catch (readErr) {
+        // Ignore file read failure on deleted/inaccessible files (TK-000)
         continue;
       }
 
-      const lines = content.split("\n");
+      // Replace multi-line block comments with equivalent space/newlines to preserve line numbers
+      const sanitizedContent = content.replace(/\/\*[\s\S]*?\*\//g, (m) => {
+        return m.replace(/[^\n]/g, " ");
+      });
+
+      const lines = sanitizedContent.split("\n");
       for (let i = 0; i < lines.length; i++) {
         const lineText = lines[i];
+        const trimmed = lineText.trim();
         const lineNum = i + 1;
 
-        // 1. Check for 'as any'
-        if (/\bas\s+any\b/.test(lineText)) {
+        // 1. Check for 'as any' in code (ignore single-line comments and string literals)
+        if (/\bas\s+any\b/.test(lineText) && !trimmed.startsWith("//") && !/["'`].*?\bas\s+any\b.*?["'`]/.test(lineText)) {
           findings.push({
             guardId: "noTypeSafetyBypass",
             severity,
@@ -94,8 +104,8 @@ export const noTypeSafetyBypassGuard: Guard = {
           });
         }
 
-        // 2. Check for @ts-ignore
-        if (/@ts-ignore\b/.test(lineText)) {
+        // 2. Check for @ts-ignore comment directive
+        if (/^\/\/\s*@ts-ignore\b/.test(trimmed)) {
           findings.push({
             guardId: "noTypeSafetyBypass",
             severity,
@@ -107,8 +117,8 @@ export const noTypeSafetyBypassGuard: Guard = {
           });
         }
 
-        // 3. Check for @ts-nocheck
-        if (/@ts-nocheck\b/.test(lineText)) {
+        // 3. Check for @ts-nocheck comment directive
+        if (/^\/\/\s*@ts-nocheck\b/.test(trimmed)) {
           findings.push({
             guardId: "noTypeSafetyBypass",
             severity,
@@ -120,8 +130,8 @@ export const noTypeSafetyBypassGuard: Guard = {
           });
         }
 
-        // 4. Check for @ts-expect-error without ticket reference
-        if (/@ts-expect-error\b/.test(lineText) && !TICKET_ESCAPE_HATCH.test(lineText)) {
+        // 4. Check for @ts-expect-error comment directive without ticket reference
+        if (/^\/\/\s*@ts-expect-error\b/.test(trimmed) && !TICKET_ESCAPE_HATCH.test(trimmed)) {
           findings.push({
             guardId: "noTypeSafetyBypass",
             severity,

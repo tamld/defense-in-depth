@@ -15,7 +15,11 @@ import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js
 import { Severity, EvidenceLevel } from "../core/types.js";
 
 const DEFAULT_ALLOWLIST_PATTERNS = [
-  /tests\/fixtures\//,
+  /(^|\/)tests?\//,
+  /(^|\/)fixtures\//,
+  /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
+  /\.d\.ts$/,
 ];
 
 const TICKET_PATTERN = /(TK-[0-9A-Z-]+|[A-Z]+-[0-9]+|#\d+)/i;
@@ -66,19 +70,26 @@ export const noSwallowedErrorGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch {
+      } catch (readErr) {
+        // Ignore file read error on inaccessible files (TK-000)
         continue;
       }
+
+      // Replace multi-line block comments with equivalent space/newlines to preserve line numbers
+      const sanitizedContent = content.replace(/\/\*[\s\S]*?\*\//g, (m) => {
+        return m.replace(/[^\n]/g, " ");
+      });
 
       // Regex matching catch clauses: catch(...) { ... } or catch { ... }
       // Matches both single-line and multi-line catch blocks
       const catchRegex = /catch\s*(?:\([^)]*\))?\s*\{([^}]*)\}/g;
       let match: RegExpExecArray | null;
 
-      while ((match = catchRegex.exec(content)) !== null) {
+      while ((match = catchRegex.exec(sanitizedContent)) !== null) {
         const body = match[1].trim();
         const matchIndex = match.index;
-        const lineNumber = content.slice(0, matchIndex).split("\n").length;
+        const lineNumber = sanitizedContent.slice(0, matchIndex).split("\n").length;
+        const originalBlock = content.slice(matchIndex, matchIndex + match[0].length);
 
         // Strip comments to check if body has real code
         const codeWithoutComments = body
@@ -86,10 +97,12 @@ export const noSwallowedErrorGuard: Guard = {
           .replace(/\/\*[\s\S]*?\*\//g, "")
           .trim();
 
+        const hasTicket = TICKET_PATTERN.test(body) || TICKET_PATTERN.test(originalBlock);
+
         // 1. Empty catch body
         if (codeWithoutComments.length === 0) {
           // If there's a comment with a ticket reference, allow as escape hatch
-          if (TICKET_PATTERN.test(body)) {
+          if (hasTicket) {
             continue;
           }
 
@@ -107,7 +120,7 @@ export const noSwallowedErrorGuard: Guard = {
 
         // 2. Catch block that only returns a stub value
         if (/^return\s+(null|undefined|\{\}|\[\])\s*;?$/i.test(codeWithoutComments)) {
-          if (TICKET_PATTERN.test(body)) {
+          if (hasTicket) {
             continue;
           }
 

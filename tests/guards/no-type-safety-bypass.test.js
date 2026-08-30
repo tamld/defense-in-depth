@@ -119,7 +119,10 @@ test("noTypeSafetyBypassGuard — allowlists & escape hatches", async (t) => {
   await t.test("allows legitimate 'as unknown as ConcreteType'", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "valid.ts"), "const parsed = raw as unknown as Config;\n");
+      await writeFile(
+        path.join(root, "valid.ts"),
+        "/**\n * Description mentioning 'as any' or '@ts-ignore' in docs\n */\nconst parsed = raw as unknown as Config;\n",
+      );
       const result = await noTypeSafetyBypassGuard.check({
         stagedFiles: ["valid.ts"],
         projectRoot: root,
