@@ -146,7 +146,7 @@ test('scanHistory drops FN when reverted commit is absent from the scanned windo
       Object.fromEntries([phantomStamp, ['GIT_COMMITTER_DATE', phantomStamp[1]]]),
     );
 
-    const result = scanHistory(root, {});
+    const result = await scanHistory(root, {});
     const revertEvents = result.proposed.filter((p) => p.source === 'scraper-revert');
     assert.equal(revertEvents.length, 0, 'referenced sha absent -> no FN proposal');
   } finally {
