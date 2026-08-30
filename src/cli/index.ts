@@ -12,7 +12,7 @@
 import { init } from "./init.js";
 import { verify } from "./verify.js";
 import { doctor, type DoctorOptions } from "./doctor.js";
-import { handleLessonCommand } from "./lesson.js";
+import { handleLessonCommand } from "./lesson/index.js";
 import { handleGrowthCommand } from "./growth.js";
 import { handleFeedbackCommand } from "./feedback.js";
 import { readFileSync } from "fs";
