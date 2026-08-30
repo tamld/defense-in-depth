@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/github-branch-protection.json",
+  "description": "Defense-in-Depth Required Server-Side Branch Protection Baseline (Issue #117)",
+  "branches": {
+    "main": {
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "ci (18.x)",
+          "ci (20.x)",
+          "ci (22.x)",
+          "coverage-gate"
+        ]
+      },
+      "enforce_admins": true,
+      "required_pull_request_reviews": {
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": false,
+        "required_approving_review_count": 1
+      },
+      "required_linear_history": true,
+      "allow_force_pushes": false,
+      "allow_deletions": false
+    }
+  }
+}

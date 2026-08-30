@@ -40,6 +40,15 @@ async function main(): Promise<void> {
       await verify(process.cwd(), args.slice(1));
       break;
 
+    case "verify:server": {
+      const { verifyServer } = await import("./verify-server.js");
+      const passed = await verifyServer(process.cwd(), args.slice(1));
+      if (!passed) {
+        process.exit(1);
+      }
+      break;
+    }
+
     case "doctor":
       await doctor(process.cwd(), parseDoctorOptions(args.slice(1)));
       break;
@@ -87,9 +96,10 @@ Usage:
   defense-in-depth <command> [options]
 
 Commands:
-  init      Install Git hooks (pre-commit + pre-push) into your project
-  verify    Run all guards against staged files or a path
-  doctor    Health check — verify config, hooks, and guard status
+  init           Install Git hooks (pre-commit + pre-push) into your project
+  verify         Run all guards against staged files or a path
+  verify:server  Verify server-side branch protection on GitHub matches baseline (v0.8)
+  doctor         Health check — verify config, hooks, and guard status
   lesson    Manage lessons (án lệ) in the local memory (v0.4)
   growth    Manage growth metrics checking the system's learning velocity (v0.4)
   feedback  Record TP/FP/FN/TN labels for guards (v0.7, F1 input pipeline)
