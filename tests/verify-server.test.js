@@ -12,21 +12,15 @@ async function makeTmpDir() {
 async function runSilentVerifyServer(root, args = []) {
   const origLog = console.log;
   const origErr = console.error;
-  const origOut = process.stdout.write.bind(process.stdout);
-  const origErrW = process.stderr.write.bind(process.stderr);
 
   console.log = () => {};
   console.error = () => {};
-  process.stdout.write = () => true;
-  process.stderr.write = () => true;
 
   try {
     return await verifyServer(root, args);
   } finally {
     console.log = origLog;
     console.error = origErr;
-    process.stdout.write = origOut;
-    process.stderr.write = origErrW;
   }
 }
 
