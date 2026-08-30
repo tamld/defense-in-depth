@@ -140,6 +140,36 @@
             "enabled": { "type": "boolean" },
             "severity": { "type": "string", "enum": ["warn", "block"] }
           }
+        },
+        "noTypeSafetyBypass": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "allowlistPaths": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "noSwallowedError": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "allowlistPaths": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "noStubReturn": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "allowlistPaths": { "type": "array", "items": { "type": "string" } }
+          }
         }
       }
     },
