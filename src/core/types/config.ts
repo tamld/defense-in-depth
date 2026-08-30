@@ -101,7 +101,6 @@ export interface FederationGuardConfig {
   providerConfig?: Record<string, unknown>;
 }
 
-<<<<<<< HEAD
 export interface SecretDetectionConfig {
   enabled: boolean;
   /** Custom regex patterns to scan in addition to built-in secret patterns */
