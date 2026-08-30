@@ -156,7 +156,18 @@ Khám phá 5 trụ cột tài liệu hoàn chỉnh của dự án:
 - 🛠️ **[Dành cho Lập trình viên](docs/dev-guide/architecture.md)** — [Kiến trúc](docs/dev-guide/architecture.md), [Viết Guard tùy biến](docs/dev-guide/writing-guards.md), [Tầng DSPy](docs/dev-guide/dspy-providers.md), và [Chính sách Fail-Fast](docs/dev-guide/fail-fast-policy.md).
 - 🤖 **[Hệ sinh thái & Quản trị](docs/ecosystem/agent-workspace-guidelines.md)** — [Không gian làm việc Agent](docs/ecosystem/agent-workspace-guidelines.md) và [Phối hợp đa Agent](docs/ecosystem/ai-agent-coordination.md).
 - 🔭 **[Tầm nhìn & Định hướng](docs/vision/meta-architecture.md)** — [Kiến trúc Meta-Memory](docs/vision/meta-architecture.md), [System Blueprint](docs/vision/system-blueprint.md), và [Chiến lược STRATEGY.md](STRATEGY.md).
-- 📖 **[Master Docs Index](docs/index.md)** — Bản đồ điều hướng toàn diện cho lập trình viên và AI agents.
+---
+
+## 🛠️ Phát triển (Development)
+
+```bash
+npm run dev          # Biên dịch ở chế độ theo dõi (watch mode)
+npm test             # Chạy bộ kiểm thử (test suite)
+npm run test:watch   # Chạy kiểm thử ở chế độ watch mode
+npm run coverage     # Kiểm tra độ bao phủ mã nguồn (coverage gate)
+npm run lint         # Kiểm tra kiểu nghiêm ngặt với TypeScript
+npm run sync:wiki    # Đồng bộ thư mục wiki/ lên kho GitHub Wiki
+```
 
 ---
 

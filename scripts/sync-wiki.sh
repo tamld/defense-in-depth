@@ -2,12 +2,26 @@
 set -euo pipefail
 
 # sync-wiki.sh — Synchronizes local wiki/ directory with GitHub Wiki repository
-# Usage: ./scripts/sync-wiki.sh
+# Usage: ./scripts/sync-wiki.sh [--dry-run]
+
+DRY_RUN=false
+for arg in "$@"; do
+  if [ "$arg" = "--dry-run" ]; then
+    DRY_RUN=true
+  fi
+done
 
 REPO_URL="https://github.com/tamld/defense-in-depth.wiki.git"
 TEMP_DIR=$(mktemp -d /tmp/did-wiki-sync.XXXXXX)
 
 echo "==> Synchronizing defense-in-depth wiki..."
+
+if [ "$DRY_RUN" = true ]; then
+  echo "==> [dry-run] Files in wiki/ to synchronize:"
+  ls -la wiki/
+  rm -rf "$TEMP_DIR"
+  exit 0
+fi
 
 # Clone or init remote wiki repo
 if git clone "$REPO_URL" "$TEMP_DIR" 2>/dev/null; then

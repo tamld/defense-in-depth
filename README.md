@@ -156,7 +156,18 @@ Explore our comprehensive 5-pillar documentation:
 - 🛠️ **[Developer Guide](docs/dev-guide/architecture.md)** — [Architecture](docs/dev-guide/architecture.md), [Writing Custom Guards](docs/dev-guide/writing-guards.md), [DSPy Layer](docs/dev-guide/dspy-providers.md), and [Fail-Fast Policy](docs/dev-guide/fail-fast-policy.md).
 - 🤖 **[Ecosystem & Governance](docs/ecosystem/agent-workspace-guidelines.md)** — [Agent Guidelines](docs/ecosystem/agent-workspace-guidelines.md) and [Multi-Agent Coordination](docs/ecosystem/ai-agent-coordination.md).
 - 🔭 **[Vision & Roadmap](docs/vision/meta-architecture.md)** — [Meta-Architecture](docs/vision/meta-architecture.md), [System Blueprint](docs/vision/system-blueprint.md), and [STRATEGY.md](STRATEGY.md).
-- 📖 **[Master Docs Index](docs/index.md)** — Complete navigation map for developers and AI agents.
+---
+
+## 🛠️ Development
+
+```bash
+npm run dev          # Watch mode compilation
+npm test             # Run test suite
+npm run test:watch   # Run tests in watch mode
+npm run coverage     # Run tests with strict coverage gate
+npm run lint         # TypeScript strict type check
+npm run sync:wiki    # Sync wiki/ directory to GitHub Wiki repo
+```
 
 ---
 
