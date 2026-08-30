@@ -158,6 +158,8 @@ const KNOWN_GUARD_KEYS = new Set([
   "noTypeSafetyBypass",
   "noSwallowedError",
   "noStubReturn",
+  "noTriviallyTrueTest",
+  "selfProtection",
 ]);
 
 const ALLOWED_TOP_LEVEL_KEYS = new Set(["version", "guards", "hints"]);

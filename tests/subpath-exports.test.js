@@ -74,6 +74,8 @@ test("subpath exports — package self-referencing (issue #36)", async (t) => {
       "noTypeSafetyBypassGuard",
       "noSwallowedErrorGuard",
       "noStubReturnGuard",
+      "noTriviallyTrueTestGuard",
+      "selfProtectionGuard",
     ];
     for (const name of expected) {
       assert.strictEqual(

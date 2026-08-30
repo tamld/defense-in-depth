@@ -52,6 +52,8 @@ export type {
   NoTypeSafetyBypassConfig,
   NoSwallowedErrorConfig,
   NoStubReturnConfig,
+  NoTriviallyTrueTestConfig,
+  SelfProtectionConfig,
 } from "./core/types.js";
 
 // ─── Built-in guards ───
@@ -71,6 +73,8 @@ export {
   noTypeSafetyBypassGuard,
   noSwallowedErrorGuard,
   noStubReturnGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
   allBuiltinGuards,
 } from "./guards/index.js";
 
