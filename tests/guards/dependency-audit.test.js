@@ -7,6 +7,14 @@ import { dependencyAuditGuard } from "../../dist/guards/dependency-audit.js";
 import { Severity } from "../../dist/core/types.js";
 
 describe("dependencyAuditGuard", () => {
+  function safeRm(p) {
+    try {
+      fs.rmSync(p, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    } catch {
+      // Best effort cleanup
+    }
+  }
+
   function makeTmpRepo(files) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "did-audit-test-"));
     for (const [rel, content] of Object.entries(files)) {
@@ -30,7 +38,7 @@ describe("dependencyAuditGuard", () => {
       assert.equal(res.passed, true);
       assert.equal(res.findings.length, 0);
     } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+      safeRm(dir);
     }
   });
 
@@ -47,7 +55,7 @@ describe("dependencyAuditGuard", () => {
       assert.equal(res.passed, true);
       assert.equal(res.findings.length, 0);
     } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+      safeRm(dir);
     }
   });
 
@@ -65,7 +73,7 @@ describe("dependencyAuditGuard", () => {
       assert.equal(res.passed, true);
       assert.equal(res.findings.length, 0);
     } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+      safeRm(dir);
     }
   });
 
@@ -81,7 +89,7 @@ describe("dependencyAuditGuard", () => {
       });
       assert.ok(typeof res.passed === "boolean");
     } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+      safeRm(dir);
     }
   });
 
@@ -98,7 +106,7 @@ describe("dependencyAuditGuard", () => {
       });
       assert.ok(typeof res.passed === "boolean");
     } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+      safeRm(dir);
     }
   });
 
@@ -116,7 +124,7 @@ describe("dependencyAuditGuard", () => {
       return {
         cleanup() {
           process.env.PATH = origPath;
-          fs.rmSync(binDir, { recursive: true, force: true });
+          safeRm(binDir);
         },
       };
     }
@@ -143,7 +151,7 @@ describe("dependencyAuditGuard", () => {
         assert.ok(res.findings[0].message.includes("1 critical, 1 high"));
       } finally {
         mock.cleanup();
-        fs.rmSync(dir, { recursive: true, force: true });
+        safeRm(dir);
       }
     });
 
@@ -168,7 +176,7 @@ describe("dependencyAuditGuard", () => {
         assert.equal(res.findings[0].severity, Severity.WARN);
       } finally {
         mock.cleanup();
-        fs.rmSync(dir, { recursive: true, force: true });
+        safeRm(dir);
       }
     });
 
@@ -194,7 +202,7 @@ describe("dependencyAuditGuard", () => {
         assert.ok(res.findings[0].message.includes("2 moderate"));
       } finally {
         mock.cleanup();
-        fs.rmSync(dir, { recursive: true, force: true });
+        safeRm(dir);
       }
     });
 
@@ -211,7 +219,7 @@ describe("dependencyAuditGuard", () => {
         assert.equal(res.findings.length, 0);
       } finally {
         mock.cleanup();
-        fs.rmSync(dir, { recursive: true, force: true });
+        safeRm(dir);
       }
     });
 
@@ -229,7 +237,7 @@ describe("dependencyAuditGuard", () => {
         assert.ok(res.findings[0].message.includes("Failed to parse audit results"));
       } finally {
         mock.cleanup();
-        fs.rmSync(dir, { recursive: true, force: true });
+        safeRm(dir);
       }
     });
   });
