@@ -231,3 +231,78 @@ test('emitAllHints fans out every eligible hint once, then cools down', async ()
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('compound suppression guards cover multi-variable environments', async (t) => {
+  await t.test('CI=true + NO_HINTS=1 + channel disabled -> emitOneHint returns null, no stderr write', async () => {
+    const root = await makeRoot('did-hint-compound-alloff-');
+    const origErrWrite = process.stderr.write.bind(process.stderr);
+    const chunks = [];
+    try {
+      const { writeFile } = await import('node:fs/promises');
+      await writeFile(
+        path.join(root, 'defense.config.yml'),
+        'hints:\n  enabled: false\n',
+        'utf8',
+      );
+      await withEnv({ CI: 'true', NO_HINTS: '1' }, async () => {
+        process.stderr.write = (chunk) => {
+          chunks.push(String(chunk));
+          return true;
+        };
+        const result = await emitOneHint(root, 'doctor');
+        assert.equal(result, null);
+        assert.equal(chunks.length, 0, 'no stderr output should be written');
+      });
+    } finally {
+      process.stderr.write = origErrWrite;
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('CI=true + NO_HINTS=1 + channel enabled + eligible hint -> emitOneHint returns null (CI trumps)', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const root = await makeRoot('did-hint-compound-eligible-');
+    const origErrWrite = process.stderr.write.bind(process.stderr);
+    const chunks = [];
+    try {
+      execFileSync('git', ['init', '-q'], { cwd: root });
+      execFileSync('git', ['config', 'user.email', 't@e.com'], { cwd: root });
+      execFileSync('git', ['config', 'user.name', 'T'], { cwd: root });
+      for (let i = 0; i < 5; i++) {
+        execFileSync(
+          'git',
+          ['commit', '-q', '--allow-empty', '--no-gpg-sign', '-m', `chore: seed ${i}`],
+          { cwd: root },
+        );
+      }
+      await withEnv({ CI: 'true', NO_HINTS: '1' }, async () => {
+        process.stderr.write = (chunk) => {
+          chunks.push(String(chunk));
+          return true;
+        };
+        const result = await emitOneHint(root, 'doctor');
+        assert.equal(result, null, 'CI=true and NO_HINTS=1 must suppress even when eligible');
+        assert.equal(chunks.length, 0, 'no stderr output should be written');
+      });
+    } finally {
+      process.stderr.write = origErrWrite;
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test('NO_HINTS=1 + CI=false + NO_COLOR=1 + TTY=true -> formatHint output contains NO ANSI (NO_COLOR trumps)', async () => {
+    const savedIsTTY = process.stderr.isTTY;
+    process.stderr.isTTY = true;
+    try {
+      await withEnv({ NO_HINTS: '1', CI: 'false', NO_COLOR: '1' }, async () => {
+        const text = formatHint(SAMPLE_HINT);
+        assert.ok(!text.includes('\x1b['), 'no ANSI color codes when NO_COLOR=1 even if TTY=true');
+        assert.ok(text.includes('💡 Tip:'), 'tip content must still be present');
+      });
+    } finally {
+      if (savedIsTTY === undefined) delete process.stderr.isTTY;
+      else process.stderr.isTTY = savedIsTTY;
+    }
+  });
+});
+
