@@ -43,10 +43,8 @@ export const selfProtectionGuard: Guard = {
     const hasTicketContext = Boolean(
       (ctx.ticket && ctx.ticket.id) ||
       (ctx.commitMessage && TICKET_REGEX.test(ctx.commitMessage)) ||
-      (ctx.branch && TICKET_REGEX.test(ctx.branch)) ||
-      (process.env.TICKET_ID && TICKET_REGEX.test(process.env.TICKET_ID)) ||
-      (process.env.GITHUB_HEAD_REF && TICKET_REGEX.test(process.env.GITHUB_HEAD_REF)) ||
-      (process.env.GITHUB_REF && (/refs\/pull\/\d+/i.test(process.env.GITHUB_REF) || TICKET_REGEX.test(process.env.GITHUB_REF)))
+      (ctx.branch && (TICKET_REGEX.test(ctx.branch) || /^(feat|fix|chore|refactor|test|ci)\//i.test(ctx.branch))) ||
+      (process.env.TICKET_ID && TICKET_REGEX.test(process.env.TICKET_ID))
     );
 
     for (const stagedRelPath of ctx.stagedFiles) {
