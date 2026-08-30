@@ -149,8 +149,47 @@ guards:
 
   it("validates hints block correctly", () => {
     assert.throws(
+      () => validateConfigSchema({ hints: "not-an-object" }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes('"hints" must be an object'),
+    );
+    assert.throws(
+      () => validateConfigSchema({ hints: { enabled: "true" } }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes("hints.enabled must be a boolean"),
+    );
+    assert.throws(
+      () => validateConfigSchema({ hints: { cooldownDays: -5 } }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes("hints.cooldownDays must be a non-negative number"),
+    );
+    assert.throws(
       () => validateConfigSchema({ hints: { channels: ["invalid-channel"] } }, "test.yml"),
       (err) => err instanceof ConfigError && err.message.includes("hints.channels"),
+    );
+  });
+
+  it("validates version, guards container, and guard values structure", () => {
+    assert.throws(
+      () => validateConfigSchema({ version: {} }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes('Configuration "version" must be a string or number'),
+    );
+    assert.throws(
+      () => validateConfigSchema({ guards: "not-an-object" }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes('"guards" must be an object'),
+    );
+    assert.throws(
+      () => validateConfigSchema({ guards: { hollowArtifact: "on" } }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes('Configuration for guard "hollowArtifact" must be an object'),
+    );
+    assert.throws(
+      () => validateConfigSchema({ guards: { hollowArtifact: { dspyTimeoutMs: -100 } } }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes("must be a non-negative number"),
+    );
+    assert.throws(
+      () => validateConfigSchema({ guards: { fileSizeLimit: { maxSizeBytes: NaN } } }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes("must be a non-negative number"),
+    );
+    assert.throws(
+      () => validateConfigSchema({ guards: { noTypeSafetyBypass: { allowlistPaths: [123] } } }, "test.yml"),
+      (err) => err instanceof ConfigError && err.message.includes("must be an array of strings"),
     );
   });
 });
