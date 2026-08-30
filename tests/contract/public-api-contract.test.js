@@ -56,6 +56,8 @@ import {
   noTypeSafetyBypassGuard,
   noSwallowedErrorGuard,
   noStubReturnGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
   allBuiltinGuards,
   createProvider,
   FileTicketProvider,
