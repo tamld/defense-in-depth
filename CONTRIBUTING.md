@@ -1,99 +1,157 @@
 # Contributing to defense-in-depth
 
-> Executor: Gemini-CLI
+Thank you for your interest in contributing to **defense-in-depth** (DiD)!
 
-Thank you for your interest in contributing! This project follows strict standards to maintain quality.
+defense-in-depth is an open-source governance middleware that validates code and artifacts using Git hooks and progressive intelligence pipelines before changes reach Git history. We welcome contributions from human engineers and AI coding agents operating under human direction.
 
----
-
-## Before You Open a PR
-
-> [!IMPORTANT]
-> **Comment your implementation plan on the issue BEFORE opening a PR.**
-> State which files you will modify, what specifically you will change, and how you
-> will verify it. A maintainer will respond within 48 hours. PRs opened without a
-> prior plan comment may be closed without review.
-
-### Scope discipline
-
-Read the issue's **acceptance criteria** in full — not just the title. Issues often
-have a scope update in the first maintainer comment. That comment overrides the
-original description.
-
-**Key rule: update existing SSoT, don't create new files.**
-Do not create new top-level `.md` files when the information belongs in an existing
-document (e.g., `README.md`, `SECURITY.md`). This fragments the documentation.
-
-| Ask yourself | Answer |
-|:---|:---|
-| Does this information belong in an existing file? | Update that file |
-| Is there already a doc covering this? | Link to it, don't duplicate |
-| Does the issue say to update README + SECURITY? | Do exactly that, nothing else |
+> 🌐 **Language**: [Tiếng Việt (Vietnamese)](CONTRIBUTING.vi.md) | **English**
+> 🤖 **AI Agents**: If you are an automated AI agent, please load [AGENTS.md](AGENTS.md) and [.agents/AGENTS.md](.agents/AGENTS.md) first.
 
 ---
 
-## Quick Start
+## 📋 Table of Contents
+
+1. [Development Setup](#-development-setup)
+2. [Running Tests & Coverage Gate](#-running-tests--coverage-gate)
+3. [Commit Conventions](#-commit-conventions)
+4. [Branch Naming](#-branch-naming)
+5. [Pull Request Workflow](#-pull-request-workflow)
+6. [Writing Custom Guards](#-writing-custom-guards)
+7. [AI Collaboration & HITL Policy](#-ai-collaboration--hitl-policy)
+8. [Security Reporting](#-security-reporting)
+
+---
+
+## 🛠️ Development Setup
+
+### Prerequisites
+- **Node.js**: `>= 18.0.0`
+- **pnpm** (recommended) or **npm**: `>= 9.0.0`
+- **Git**: `>= 2.30.0`
+
+### Initializing the Workspace
 
 ```bash
-# 1. Fork and clone
-git clone https://github.com/YOUR_USERNAME/defense-in-depth.git
+# 1. Clone the repository
+git clone https://github.com/tamld/defense-in-depth.git
 cd defense-in-depth
 
 # 2. Install dependencies
-npm install
+pnpm install # or npm install
 
-# 3. Build
+# 3. Build TypeScript sources
 npm run build
 
-# 4. Run tests
-npm test
+# 4. Initialize defense-in-depth hooks locally
+npx defense-in-depth init
 ```
 
-## Rules (Non-Negotiable)
+---
 
-Before writing any code, read this first:
-- [`.agents/philosophy/COGNITIVE_TREE.md`](.agents/philosophy/COGNITIVE_TREE.md) — Understand our core beliefs and philosophy
+## 🧪 Running Tests & Coverage Gate
 
-Then, review these foundational rules:
-- [`.agents/rules/rule-consistency.md`](.agents/rules/rule-consistency.md) — Folder structure, naming, dependencies
-- [`.agents/rules/rule-guard-lifecycle.md`](.agents/rules/rule-guard-lifecycle.md) — How to add new guards
-- [`.agents/rules/rule-contribution-workflow.md`](.agents/rules/rule-contribution-workflow.md) — PR flow
-- [`.agents/rules/rule-coderabbit-integration.md`](.agents/rules/rule-coderabbit-integration.md) — Automated PR Review Integration (Operational)
+Every contribution must pass the full test suite and strict coverage threshold before merging.
 
-### The 5 Absolute Standards
+```bash
+# Run unit and integration tests
+npm test
 
-1. **TypeScript strict** — No `any`, no exceptions
-2. **Conventional commits** — `feat(guards): add new guard`
-3. **One guard = one file** — in `src/guards/`
-4. **One test per guard** — in `tests/guards/`
-5. **Zero external deps** — stdlib + `yaml` only
+# Run tests in watch mode during active development
+npm run test:watch
 
-## Adding a New Guard
+# Verify strict coverage thresholds (Line >= 98%, Branch >= 91%, Funcs >= 97%)
+npm run coverage
 
-1. Create `src/guards/my-guard.ts` implementing the `Guard` interface
-2. Add to `src/guards/index.ts` barrel export
-3. Add config type in `src/core/types.ts`
-4. Create `tests/guards/my-guard.test.ts`
-5. Update the guards table in [`docs/user-guide/configuration.md`](docs/user-guide/configuration.md)
-6. PR with title: `feat(guards): add my-guard`
+# Perform TypeScript strict type-check
+npm run lint
+```
 
-### Guard Requirements
+---
 
-- Must be a **pure function** (no side effects beyond reading files)
-- Must handle its own errors
-- Must run in <100ms for typical workloads
-- Must include `fix` suggestions for BLOCK findings
+## 💬 Commit Conventions
 
-## PR Process
+We enforce [Conventional Commits](https://www.conventionalcommits.org/) format for all commits:
 
-1. Fork → Branch (`feat/my-feature`)
-2. Follow conventional commits
-3. Ensure `npm test` passes locally
-4. Submit PR to `main`
-5. CI runs on 3 OS × 3 Node versions
-6. Automated Review Gateway (if configured)
-7. Maintainer review for breaking changes
+```
+<type>(<scope>): <short summary>
 
-## Code of Conduct
+[optional body]
 
-Be respectful. Be constructive. Show evidence, not opinions.
+[optional footer(s)]
+```
+
+### Allowed Types
+- `feat`: New user-facing feature or guard
+- `fix`: Bug fix in runtime or CLI logic
+- `refactor`: Code changes that neither fix a bug nor add a feature
+- `test`: Adding or correcting tests
+- `docs`: Documentation changes only
+- `chore`: Tooling, script, or configuration updates
+
+### Examples
+- `feat(guards): add AST-based secret scanning guard (#42)`
+- `fix(cli/lesson): resolve type narrowing error in record subcommand (#102)`
+- `docs(root): add CONTRIBUTING.md for human contributors (#107)`
+
+---
+
+## 🌿 Branch Naming
+
+Use the standard naming scheme for branches:
+
+| Branch Pattern | Purpose | Example |
+|:---|:---|:---|
+| `feat/<feature-name>` | New capabilities or guards | `feat/ticket-identity-guard` |
+| `fix/<bug-name>` | Bug fixes | `fix/cli-enum-cast` |
+| `refactor/<target>` | Structural refactoring | `refactor/split-lesson-cli` |
+| `test/<test-scope>` | Test additions / hardening | `test/hints-emit-compound` |
+| `docs/<topic>` | Documentation updates | `docs/contributing-guide` |
+
+---
+
+## 🔄 Pull Request Workflow
+
+1. **Create a topic branch** from `main`.
+2. **Implement changes** cleanly following TypeScript strict rules (no `any` casts).
+3. **Verify locally**:
+   ```bash
+   npm run build
+   npm run lint
+   npm test
+   npm run coverage
+   ```
+4. **Push your branch** and open a Pull Request against `main`.
+5. **PR Checklist**:
+   - [ ] Clear description linking related issues (`Closes #123`).
+   - [ ] All tests pass without weakening assertions.
+   - [ ] No SSoT files committed (enforced by `ssotPollution` guard).
+   - [ ] No hollow artifacts (e.g. stub files, empty templates, unfinished scaffoldings).
+
+---
+
+## 🛡️ Writing Custom Guards
+
+Guards are the core extensibility pillar of defense-in-depth. Every guard implements the pure `Guard` interface.
+
+- Read the full guard development guide: [Writing Custom Guards](docs/dev-guide/writing-guards.md)
+- Ensure your guard is pure: no network requests, no filesystem mutation, deterministic outputs.
+- Test your guard against positive cases, negative controls, and adversarial bypass attempts.
+
+---
+
+## 🤖 AI Collaboration & HITL Policy
+
+defense-in-depth is designed for the era of Human-in-the-Loop (HITL) AI-assisted development:
+
+- **AI Agents**: Autonomous agents (Gemini, Claude, Jules) must adhere to the rules in [AGENTS.md](AGENTS.md) and [.agents/rules/](.agents/rules/).
+- **Human Authority**: No AI agent has unilateral merge authority. Human review is supreme.
+
+---
+
+## 🔒 Security Reporting
+
+If you discover a security vulnerability within defense-in-depth, please **do not open a public issue**. Instead, report it privately via GitHub Security Advisories or by contacting the maintainers directly.
+
+---
+
+Thank you for helping make AI-assisted engineering safer and more resilient!

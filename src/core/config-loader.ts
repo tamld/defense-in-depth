@@ -47,6 +47,7 @@ const DEFAULT_CONFIG: DefendConfig = {
         "README.vi.md",
         "CHANGELOG.md",
         "CONTRIBUTING.md",
+        "CONTRIBUTING.vi.md",
         "CODE_OF_CONDUCT.md",
         "SECURITY.md",
         "STRATEGY.md",
