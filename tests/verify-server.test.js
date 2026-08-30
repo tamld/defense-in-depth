@@ -9,6 +9,27 @@ async function makeTmpDir() {
   return mkdtemp(path.join(os.tmpdir(), "did-verify-server-"));
 }
 
+async function runSilentVerifyServer(root, args = []) {
+  const origLog = console.log;
+  const origErr = console.error;
+  const origOut = process.stdout.write.bind(process.stdout);
+  const origErrW = process.stderr.write.bind(process.stderr);
+
+  console.log = () => {};
+  console.error = () => {};
+  process.stdout.write = () => true;
+  process.stderr.write = () => true;
+
+  try {
+    return await verifyServer(root, args);
+  } finally {
+    console.log = origLog;
+    console.error = origErr;
+    process.stdout.write = origOut;
+    process.stderr.write = origErrW;
+  }
+}
+
 describe("verifyServer", () => {
   it("parseVerifyServerArgs — flag extraction", () => {
     const args = [
@@ -30,7 +51,7 @@ describe("verifyServer", () => {
     it("fails when configuration file does not exist", async () => {
       const root = await makeTmpDir();
       try {
-        const ok = await verifyServer(root, ["--offline"]);
+        const ok = await runSilentVerifyServer(root, ["--offline"]);
         assert.equal(ok, false);
       } finally {
         await rm(root, { recursive: true, force: true });
@@ -42,7 +63,7 @@ describe("verifyServer", () => {
       try {
         await mkdir(path.join(root, ".github"), { recursive: true });
         await writeFile(path.join(root, ".github", "branch-protection.json"), "{ invalid JSON");
-        const ok = await verifyServer(root, ["--offline"]);
+        const ok = await runSilentVerifyServer(root, ["--offline"]);
         assert.equal(ok, false);
       } finally {
         await rm(root, { recursive: true, force: true });
@@ -54,7 +75,7 @@ describe("verifyServer", () => {
       try {
         await mkdir(path.join(root, ".github"), { recursive: true });
         await writeFile(path.join(root, ".github", "branch-protection.json"), JSON.stringify({ branches: {} }));
-        const ok = await verifyServer(root, ["--offline"]);
+        const ok = await runSilentVerifyServer(root, ["--offline"]);
         assert.equal(ok, false);
       } finally {
         await rm(root, { recursive: true, force: true });
@@ -76,7 +97,7 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await verifyServer(root, ["--offline"]);
+        const ok = await runSilentVerifyServer(root, ["--offline"]);
         assert.equal(ok, false);
       } finally {
         await rm(root, { recursive: true, force: true });
@@ -98,7 +119,7 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await verifyServer(root, ["--offline"]);
+        const ok = await runSilentVerifyServer(root, ["--offline"]);
         assert.equal(ok, false);
       } finally {
         await rm(root, { recursive: true, force: true });
@@ -121,7 +142,7 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await verifyServer(root, ["--offline"]);
+        const ok = await runSilentVerifyServer(root, ["--offline"]);
         assert.equal(ok, true);
       } finally {
         await rm(root, { recursive: true, force: true });
@@ -129,7 +150,7 @@ describe("verifyServer", () => {
     });
 
     it("passes on the real repo .github/branch-protection.json", async () => {
-      const ok = await verifyServer(process.cwd(), ["--offline"]);
+      const ok = await runSilentVerifyServer(process.cwd(), ["--offline"]);
       assert.equal(ok, true);
     });
   });
@@ -157,7 +178,7 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await verifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
         assert.equal(ok, false);
       } finally {
         globalThis.fetch = originalFetch;
@@ -190,7 +211,7 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await verifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
         assert.equal(ok, false);
       } finally {
         globalThis.fetch = originalFetch;
@@ -223,7 +244,7 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await verifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
         assert.equal(ok, true);
       } finally {
         globalThis.fetch = originalFetch;
@@ -253,13 +274,13 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok1 = await verifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok1 = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
         assert.equal(ok1, true);
 
         globalThis.fetch = async () => {
           throw new Error("DNS resolution failure");
         };
-        const ok2 = await verifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok2 = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
         assert.equal(ok2, true);
       } finally {
         globalThis.fetch = originalFetch;
