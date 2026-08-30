@@ -125,7 +125,7 @@ Use the standard naming scheme for branches:
    - [ ] Clear description linking related issues (`Closes #123`).
    - [ ] All tests pass without weakening assertions.
    - [ ] No SSoT files committed (enforced by `ssotPollution` guard).
-   - [ ] No hollow placeholder artifacts (`TODO`/`TBD`/`PLACEHOLDER`).
+   - [ ] No hollow artifacts (e.g. stub files, empty templates, unfinished scaffoldings).
 
 ---
 

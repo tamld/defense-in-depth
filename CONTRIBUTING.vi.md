@@ -125,7 +125,7 @@ Sử dụng định dạng tiêu chuẩn khi tạo nhánh:
    - [ ] Mô tả PR rõ ràng, đính kèm liên kết issue liên quan (`Closes #123`).
    - [ ] Toàn bộ kiểm thử đều pass mà không làm giảm mức độ nghiêm ngặt của assertion.
    - [ ] Không commit các file SSoT bị bảo vệ (được kiểm soát bởi `ssotPollution` guard).
-   - [ ] Không chứa các tạo tác rỗng (`TODO`/`TBD`/`PLACEHOLDER`).
+   - [ ] Không chứa các tạo tác rỗng (ví dụ: file mẫu chưa hoàn thiện, nội dung giữ chỗ).
 
 ---
 
