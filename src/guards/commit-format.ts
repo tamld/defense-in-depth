@@ -38,6 +38,17 @@ export const commitFormatGuard: Guard = {
 
     // Only check the first line (subject)
     const subject = ctx.commitMessage.split("\n")[0].trim();
+
+    // In CI pull_request runs, synthetic merge commits should not be blocked
+    if (subject.startsWith("Merge ") && (process.env.GITHUB_EVENT_NAME === "pull_request" || process.env.CI)) {
+      return {
+        guardId: "commitFormat",
+        passed: true,
+        findings: [],
+        durationMs: performance.now() - start,
+      };
+    }
+
     const matches = pattern.test(subject);
 
     if (!matches) {
