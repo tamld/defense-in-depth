@@ -171,11 +171,29 @@ function getBranch(root: string): string | undefined {
 
 function getLastCommitMessage(root: string): string | undefined {
   try {
-    return execFileSync(
+    let msg = execFileSync(
       "git",
       ["log", "-1", "--format=%s"],
       { encoding: "utf-8", cwd: root },
     ).trim();
+
+    // If inside a GitHub Actions pull_request synthetic merge commit, inspect the PR head commit (HEAD^2)
+    if (msg.startsWith("Merge ") && (process.env.GITHUB_EVENT_NAME === "pull_request" || process.env.CI)) {
+      try {
+        const prMsg = execFileSync(
+          "git",
+          ["log", "-1", "--format=%s", "HEAD^2"],
+          { encoding: "utf-8", cwd: root },
+        ).trim();
+        if (prMsg) {
+          msg = prMsg;
+        }
+      } catch (err) {
+        // TK-000: fallback if HEAD^2 does not exist
+      }
+    }
+
+    return msg;
   } catch (err) {
     // TK-000: fallback when git log query fails
     return undefined;
