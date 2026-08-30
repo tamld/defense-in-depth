@@ -37,3 +37,19 @@ If you try to commit a file like `root_test_script.js` and the Guard blocks you:
 3. Move the file:
    `mv "root_test_script.js" <target-directory>/root_test_script.js`
 4. Stage the other files and re-commit!
+
+---
+
+## 🔒 Server-Side Branch Protection Baseline (Issue #117)
+
+Local Git hooks (`pre-commit`, `pre-push`) are the first line of defense, but can be bypassed with `--no-verify`. To ensure **defense-in-depth**, server-side branch protection enforces:
+
+1. **`main` Branch Requirements**:
+   - **Required Pull Request**: Direct commits to `main` are strictly blocked.
+   - **Required Approving Reviews**: Minimum of 1 human review.
+   - **Required Status Checks**: All CI matrix checks (`ci (18.x)`, `ci (20.x)`, `ci (22.x)`, `coverage-gate`, `branch-protection-verify`) must pass before merge.
+   - **Enforce Admins**: Administrators cannot bypass required status checks.
+   - **Linear History**: Merge commits prohibited; rebase or squash only.
+2. **Server Gate Verification CLI**:
+   - Run `npx defense-in-depth verify:server` to validate that GitHub branch protection rules match `.github/branch-protection.json`.
+
