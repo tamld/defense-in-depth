@@ -36,6 +36,8 @@ import {
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
   allBuiltinGuards,
   // Federation (values)
   createProvider,
@@ -82,6 +84,8 @@ describe("public API barrel — built-in guards", () => {
     ["ticketIdentityGuard", ticketIdentityGuard, "ticketIdentity"],
     ["hitlReviewGuard", hitlReviewGuard, "hitlReview"],
     ["federationGuard", federationGuard, "federation"],
+    ["noTriviallyTrueTestGuard", noTriviallyTrueTestGuard, "noTriviallyTrueTest"],
+    ["selfProtectionGuard", selfProtectionGuard, "selfProtection"],
   ];
 
   for (const [exportName, guard, expectedId] of guardCases) {
@@ -144,6 +148,8 @@ describe("public API barrel — module shape", () => {
       "ticketIdentityGuard",
       "hitlReviewGuard",
       "federationGuard",
+      "noTriviallyTrueTestGuard",
+      "selfProtectionGuard",
       "allBuiltinGuards",
       "createProvider",
       "FileTicketProvider",

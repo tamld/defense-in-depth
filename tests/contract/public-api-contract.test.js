@@ -50,6 +50,8 @@ import {
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
   allBuiltinGuards,
   createProvider,
   FileTicketProvider,

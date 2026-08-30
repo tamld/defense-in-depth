@@ -46,6 +46,8 @@ export type {
   TicketIdentityConfig,
   HitlReviewConfig,
   FederationGuardConfig,
+  NoTriviallyTrueTestConfig,
+  SelfProtectionConfig,
 } from "./core/types.js";
 
 // ─── Built-in guards ───
@@ -59,6 +61,8 @@ export {
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
   allBuiltinGuards,
 } from "./guards/index.js";
 

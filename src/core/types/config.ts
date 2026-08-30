@@ -101,6 +101,18 @@ export interface FederationGuardConfig {
   providerConfig?: Record<string, unknown>;
 }
 
+export interface NoTriviallyTrueTestConfig {
+  enabled: boolean;
+  severity?: 'warn' | 'block';
+  allowlistPaths?: string[];
+}
+
+export interface SelfProtectionConfig {
+  enabled: boolean;
+  severity?: 'warn' | 'block';
+  protectedPaths?: string[];
+}
+
 /** Root configuration loaded from defense.config.yml */
 export interface DefendConfig {
   version: string;
@@ -114,6 +126,8 @@ export interface DefendConfig {
     ticketIdentity?: TicketIdentityConfig;
     hitlReview?: HitlReviewConfig;
     federation?: FederationGuardConfig;
+    noTriviallyTrueTest?: NoTriviallyTrueTestConfig;
+    selfProtection?: SelfProtectionConfig;
   };
   /** v0.7 (#21): Progressive Discovery UX — earned, dim-formatted hints. */
   hints?: HintsConfig;
