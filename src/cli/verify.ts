@@ -64,8 +64,11 @@ export async function verify(
   engine.useAll(allBuiltinGuards);
 
   // Get optional context
-  const branch = getBranch(projectRoot);
-  const commitMessage = hook === "pre-push" ? getLastCommitMessage(projectRoot) : undefined;
+  let branch = getBranch(projectRoot);
+  if (!branch || branch === "HEAD" || branch.startsWith("(HEAD detached")) {
+    branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || branch;
+  }
+  const commitMessage = getLastCommitMessage(projectRoot);
 
   // Run
   const verdict = await engine.run({ files, branch, commitMessage });

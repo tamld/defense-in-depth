@@ -67,7 +67,7 @@ const DEFAULT_CONFIG: DefendConfig = {
     commitFormat: {
       enabled: true,
       pattern:
-        "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\\\(.*\\\\))?(!)?:\\\\s.+",
+        "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\([^)]*\\))?(!)?:\\s.+",
       types: [
         "feat", "fix", "chore", "docs",
         "refactor", "test", "style", "perf", "ci",
