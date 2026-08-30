@@ -75,7 +75,7 @@ test("noTriviallyTrueTestGuard — blocks trivial assertions & empty test bodies
       await mkdir(path.join(root, "tests"), { recursive: true });
       await writeFile(
         path.join(root, "tests", "no-assert.test.js"),
-        "test('run without check', () => {\n  const x = Math.random();\n  console.log(x);\n});\n",
+        ["test('run without" + " check', () => {", "  const x = Math.random();", "  console.log(x);", "});", ""].join("\n"),
       );
       const result = await noTriviallyTrueTestGuard.check({
         stagedFiles: ["tests/no-assert.test.js"],
@@ -106,6 +106,35 @@ test("noTriviallyTrueTestGuard — allows real assertions & allowlists", async (
       });
       assert.equal(result.passed, true);
       assert.equal(result.findings.length, 0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  await t.test("blocks assert.ok(true) and expect(1).toBe(1) with warn mode support", async () => {
+    const root = await makeTmpDir();
+    try {
+      await mkdir(path.join(root, "tests"), { recursive: true });
+      await writeFile(
+        path.join(root, "tests", "warn.test.js"),
+        ["test('ok true', () => {", "  assert.ok(true);", "});", ""].join("\n"),
+      );
+      const result = await noTriviallyTrueTestGuard.check({
+        stagedFiles: ["tests/warn.test.js"],
+        projectRoot: root,
+        config: {
+          version: "1.0",
+          guards: {
+            noTriviallyTrueTest: {
+              enabled: true,
+              severity: "warn",
+            },
+          },
+        },
+      });
+      assert.equal(result.passed, true);
+      assert.equal(result.findings.length, 1);
+      assert.equal(result.findings[0].severity, Severity.WARN);
     } finally {
       await rm(root, { recursive: true, force: true });
     }

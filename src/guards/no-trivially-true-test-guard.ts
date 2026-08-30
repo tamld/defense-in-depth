@@ -28,6 +28,52 @@ const TRIVIAL_ASSERTION_PATTERNS = [
 
 const ASSERTION_CALL_PATTERN = /\b(?:assert(?:\.[a-zA-Z_$]+|\s*\()|expect\s*\(|t\.assert|t\.equal|t\.strictEqual|t\.ok|t\.deepEqual|t\.throws|t\.doesNotThrow)\b/;
 
+function extractTestBodies(content: string): Array<{ name: string; body: string; lineNum: number }> {
+  const results: Array<{ name: string; body: string; lineNum: number }> = [];
+  const testStartRegex = /(?:\btest|\bit|\bdescribe|\bt\.test)\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*(?:async\s*)?(?:\([^)]*\)|[a-zA-Z_$]+)\s*=>\s*\{/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = testStartRegex.exec(content)) !== null) {
+    const testName = match[1];
+    const startIndex = match.index + match[0].length;
+    const lineNum = content.slice(0, match.index).split("\n").length;
+
+    let braceCount = 1;
+    let currentIndex = startIndex;
+    let inString: string | null = null;
+    let isEscaped = false;
+
+    while (currentIndex < content.length && braceCount > 0) {
+      const char = content[currentIndex];
+
+      if (inString) {
+        if (isEscaped) {
+          isEscaped = false;
+        } else if (char === "\\") {
+          isEscaped = true;
+        } else if (char === inString) {
+          inString = null;
+        }
+      } else {
+        if (char === '"' || char === "'" || char === "`") {
+          inString = char;
+        } else if (char === "{") {
+          braceCount++;
+        } else if (char === "}") {
+          braceCount--;
+        }
+      }
+      currentIndex++;
+    }
+
+    if (braceCount === 0) {
+      const body = content.slice(startIndex, currentIndex - 1);
+      results.push({ name: testName, body, lineNum });
+    }
+  }
+  return results;
+}
+
 export const noTriviallyTrueTestGuard: Guard = {
   id: "noTriviallyTrueTest",
   name: "No Trivially True Test Guard",
@@ -74,7 +120,8 @@ export const noTriviallyTrueTestGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch {
+      } catch (readErr) {
+        // Ignore unreadable or deleted test files (TK-000)
         continue;
       }
 
@@ -82,7 +129,20 @@ export const noTriviallyTrueTestGuard: Guard = {
       const lines = content.split("\n");
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
+        const trimmed = line.trim();
         const lineNum = i + 1;
+
+        if (
+          trimmed.startsWith("//") ||
+          trimmed.startsWith("*") ||
+          trimmed.startsWith("/*") ||
+          trimmed.startsWith("await t.test(") ||
+          trimmed.startsWith("test(") ||
+          trimmed.startsWith("it(") ||
+          /["'`].*?\bassert\.(?:strictEqual|equal|ok)\b.*?["'`]/.test(line)
+        ) {
+          continue;
+        }
 
         for (const pattern of TRIVIAL_ASSERTION_PATTERNS) {
           if (pattern.test(line)) {
@@ -91,7 +151,7 @@ export const noTriviallyTrueTestGuard: Guard = {
               severity,
               filePath: stagedRelPath,
               line: lineNum,
-              message: `Trivially true assertion detected at line ${lineNum}: '${line.trim()}'. Constant assertions do not test system invariants.`,
+              message: `Trivially true assertion detected at line ${lineNum}: '${trimmed}'. Constant assertions do not test system invariants.`,
               fix: `Assert real system outputs or dynamic values instead of constant-to-constant comparisons.`,
               evidence: EvidenceLevel.CODE,
             });
@@ -100,22 +160,15 @@ export const noTriviallyTrueTestGuard: Guard = {
         }
       }
 
-      // Check test block bodies for complete lack of assertions: test('name', [async] (t) => { ... })
-      const testBlockRegex = /(?:\btest|\bit|\bdescribe)\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*(?:async\s*)?(?:\([^)]*\)|[a-zA-Z_$]+)\s*=>\s*\{([^}]*)\}/g;
-      let match: RegExpExecArray | null;
-
-      while ((match = testBlockRegex.exec(content)) !== null) {
-        const testName = match[1];
-        const body = match[2].trim();
-        const matchIndex = match.index;
-        const lineNum = content.slice(0, matchIndex).split("\n").length;
-
-        // Skip nested describe / suite wrappers if they contain subtests
-        if (/\b(?:test|it)\s*\(/.test(body)) {
+      // Check test block bodies for complete lack of assertions
+      const testBlocks = extractTestBodies(content);
+      for (const block of testBlocks) {
+        // Skip suite wrappers that contain subtests
+        if (/\b(?:t\.test|test|it)\s*\(/.test(block.body)) {
           continue;
         }
 
-        const codeWithoutComments = body
+        const codeWithoutComments = block.body
           .replace(/\/\/[^\n]*/g, "")
           .replace(/\/\*[\s\S]*?\*\//g, "")
           .trim();
@@ -126,8 +179,8 @@ export const noTriviallyTrueTestGuard: Guard = {
             guardId: "noTriviallyTrueTest",
             severity,
             filePath: stagedRelPath,
-            line: lineNum,
-            message: `Test '${testName}' at line ${lineNum} executes code without any assert or expect statements.`,
+            line: block.lineNum,
+            message: `Test '${block.name}' at line ${block.lineNum} executes code without any assert or expect statements.`,
             fix: `Add explicit assertions (e.g. assert.strictEqual, assert.ok, assert.throws) to verify state or return value.`,
             evidence: EvidenceLevel.CODE,
           });

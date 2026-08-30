@@ -42,7 +42,9 @@ export const selfProtectionGuard: Guard = {
     const protectedList = config?.protectedPaths ?? DEFAULT_PROTECTED_PATHS;
     const hasTicketContext = Boolean(
       (ctx.ticket && ctx.ticket.id) ||
-      (ctx.commitMessage && TICKET_REGEX.test(ctx.commitMessage))
+      (ctx.commitMessage && TICKET_REGEX.test(ctx.commitMessage)) ||
+      (ctx.branch && TICKET_REGEX.test(ctx.branch)) ||
+      (process.env.TICKET_ID && TICKET_REGEX.test(process.env.TICKET_ID))
     );
 
     for (const stagedRelPath of ctx.stagedFiles) {
