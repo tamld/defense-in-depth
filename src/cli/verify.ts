@@ -64,8 +64,11 @@ export async function verify(
   engine.useAll(allBuiltinGuards);
 
   // Get optional context
-  const branch = getBranch(projectRoot);
-  const commitMessage = hook === "pre-push" ? getLastCommitMessage(projectRoot) : undefined;
+  let branch = getBranch(projectRoot);
+  if (!branch || branch === "HEAD" || branch.startsWith("(HEAD detached")) {
+    branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || branch;
+  }
+  const commitMessage = getLastCommitMessage(projectRoot);
 
   // Run
   const verdict = await engine.run({ files, branch, commitMessage });
@@ -147,7 +150,8 @@ function getStagedFiles(root: string): string[] {
       { encoding: "utf-8", cwd: root },
     );
     return output.split("\n").map((l) => l.trim()).filter(Boolean);
-  } catch {
+  } catch (err) {
+    // TK-000: fallback when git diff fails or directory is not a git repository
     return [];
   }
 }
@@ -159,7 +163,8 @@ function getBranch(root: string): string | undefined {
       ["rev-parse", "--abbrev-ref", "HEAD"],
       { encoding: "utf-8", cwd: root },
     ).trim();
-  } catch {
+  } catch (err) {
+    // TK-000: fallback when git branch query fails
     return undefined;
   }
 }
@@ -171,7 +176,8 @@ function getLastCommitMessage(root: string): string | undefined {
       ["log", "-1", "--format=%s"],
       { encoding: "utf-8", cwd: root },
     ).trim();
-  } catch {
+  } catch (err) {
+    // TK-000: fallback when git log query fails
     return undefined;
   }
 }

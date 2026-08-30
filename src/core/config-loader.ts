@@ -67,7 +67,7 @@ const DEFAULT_CONFIG: DefendConfig = {
     commitFormat: {
       enabled: true,
       pattern:
-        "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\\\(.*\\\\))?(!)?:\\\\s.+",
+        "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\([^)]*\\))?(!)?:\\s.+",
       types: [
         "feat", "fix", "chore", "docs",
         "refactor", "test", "style", "perf", "ci",
@@ -158,6 +158,8 @@ const KNOWN_GUARD_KEYS = new Set([
   "noTypeSafetyBypass",
   "noSwallowedError",
   "noStubReturn",
+  "noTriviallyTrueTest",
+  "selfProtection",
 ]);
 
 const ALLOWED_TOP_LEVEL_KEYS = new Set(["version", "guards", "hints"]);

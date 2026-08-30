@@ -103,10 +103,14 @@ describe("dependencyAuditGuard", () => {
   });
 
   describe("mocked npm audit responses", () => {
-    function setupMockNpm(mockScriptContent) {
+    function setupMockNpm(outputString, exitCode = 0) {
       const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "mock-npm-bin-"));
-      const npmPath = path.join(binDir, "npm");
-      fs.writeFileSync(npmPath, `#!/bin/sh\n${mockScriptContent}`, { mode: 0o755 });
+      const runnerJs = path.join(binDir, "runner.js");
+      fs.writeFileSync(runnerJs, `process.stdout.write(${JSON.stringify(outputString)});\nprocess.exit(${exitCode});\n`);
+      const npmSh = path.join(binDir, "npm");
+      const npmCmd = path.join(binDir, "npm.cmd");
+      fs.writeFileSync(npmSh, `#!/bin/sh\nnode "${runnerJs}"\n`, { mode: 0o755 });
+      fs.writeFileSync(npmCmd, `@echo off\r\nnode "${runnerJs}"\r\n`, { mode: 0o755 });
       const origPath = process.env.PATH;
       process.env.PATH = `${binDir}${path.delimiter}${origPath}`;
       return {
@@ -118,11 +122,14 @@ describe("dependencyAuditGuard", () => {
     }
 
     it("blocks when critical or high vulnerabilities are detected", async () => {
-      const mock = setupMockNpm(`cat << 'EOF'
-{"metadata":{"vulnerabilities":{"info":0,"low":0,"moderate":0,"high":1,"critical":1,"total":2}}}
-EOF
-exit 1
-`);
+      const mock = setupMockNpm(
+        JSON.stringify({
+          metadata: {
+            vulnerabilities: { info: 0, low: 0, moderate: 0, high: 1, critical: 1, total: 2 },
+          },
+        }),
+        1,
+      );
       const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg"}' });
       try {
         const res = await dependencyAuditGuard.check({
@@ -141,11 +148,14 @@ exit 1
     });
 
     it("warns when critical or high vulnerabilities are detected and severity is warn", async () => {
-      const mock = setupMockNpm(`cat << 'EOF'
-{"metadata":{"vulnerabilities":{"info":0,"low":0,"moderate":0,"high":2,"critical":0,"total":2}}}
-EOF
-exit 1
-`);
+      const mock = setupMockNpm(
+        JSON.stringify({
+          metadata: {
+            vulnerabilities: { info: 0, low: 0, moderate: 0, high: 2, critical: 0, total: 2 },
+          },
+        }),
+        1,
+      );
       const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg"}' });
       try {
         const res = await dependencyAuditGuard.check({
@@ -163,11 +173,14 @@ exit 1
     });
 
     it("warns when moderate vulnerabilities are detected", async () => {
-      const mock = setupMockNpm(`cat << 'EOF'
-{"metadata":{"vulnerabilities":{"info":0,"low":1,"moderate":2,"high":0,"critical":0,"total":3}}}
-EOF
-exit 0
-`);
+      const mock = setupMockNpm(
+        JSON.stringify({
+          metadata: {
+            vulnerabilities: { info: 0, low: 1, moderate: 2, high: 0, critical: 0, total: 3 },
+          },
+        }),
+        0,
+      );
       const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg"}' });
       try {
         const res = await dependencyAuditGuard.check({
@@ -186,9 +199,7 @@ exit 0
     });
 
     it("handles non-JSON or invalid output gracefully", async () => {
-      const mock = setupMockNpm(`echo "not json"
-exit 0
-`);
+      const mock = setupMockNpm("not json\n", 0);
       const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg"}' });
       try {
         const res = await dependencyAuditGuard.check({
@@ -205,9 +216,7 @@ exit 0
     });
 
     it("handles JSON parse error when output starts with { but is malformed", async () => {
-      const mock = setupMockNpm(`echo "{ invalid json"
-exit 0
-`);
+      const mock = setupMockNpm("{ invalid json\n", 0);
       const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg"}' });
       try {
         const res = await dependencyAuditGuard.check({
