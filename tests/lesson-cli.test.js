@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { handleLessonCommand } from '../dist/cli/lesson.js';
+import { handleLessonCommand } from '../dist/cli/lesson/index.js';
 
 const EXIT_SENTINEL = '__PROCESS_EXIT__';
 const RECALLS_REL = path.join('.agents', 'records', 'lesson-recalls.jsonl');
