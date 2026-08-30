@@ -38,13 +38,22 @@
     "LICENSE"
   ],
   "scripts": {
+    "prepare": "npm run build",
     "pretest": "npm run build",
     "build": "tsc",
-    "postbuild": "node -e \"require('fs').chmodSync('dist/cli/index.js', 0o755)\"",
+    "postbuild": "node -e \"import('node:fs').then(fs => fs.chmodSync('dist/cli/index.js', 0o755))\"",
     "dev": "tsc --watch",
     "test": "node --test",
+    "test:watch": "node --test --watch",
     "coverage": "node scripts/check-coverage.mjs",
     "lint": "tsc --noEmit",
+    "lint:fix": "npm run lint",
+    "format": "git diff --check",
+    "format:check": "git diff --check",
+    "sync:wiki": "bash scripts/sync-wiki.sh",
+    "changelog": "echo 'See git log for conventional commits'",
+    "release": "npm run build && npm test",
+    "release:dry": "npm run build && npm test && echo 'Dry run release passed'",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
