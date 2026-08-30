@@ -41,7 +41,7 @@
     "prepare": "npm run build",
     "pretest": "npm run build",
     "build": "tsc",
-    "postbuild": "node -e \"require('fs').chmodSync('dist/cli/index.js', 0o755)\"",
+    "postbuild": "node -e \"import('node:fs').then(fs => fs.chmodSync('dist/cli/index.js', 0o755))\"",
     "dev": "tsc --watch",
     "test": "node --test",
     "test:watch": "node --test --watch",
