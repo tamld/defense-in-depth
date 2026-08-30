@@ -11,6 +11,9 @@ export { phaseGateGuard } from "./phase-gate.js";
 export { ticketIdentityGuard } from "./ticket-identity.js";
 export { hitlReviewGuard } from "./hitl-review.js";
 export { federationGuard } from "./federation.js";
+export { noTypeSafetyBypassGuard } from "./no-type-safety-bypass.js";
+export { noSwallowedErrorGuard } from "./no-swallowed-error.js";
+export { noStubReturnGuard } from "./no-stub-return.js";
 
 import { hollowArtifactGuard } from "./hollow-artifact.js";
 import { ssotPollutionGuard } from "./ssot-pollution.js";
@@ -21,6 +24,9 @@ import { phaseGateGuard } from "./phase-gate.js";
 import { ticketIdentityGuard } from "./ticket-identity.js";
 import { hitlReviewGuard } from "./hitl-review.js";
 import { federationGuard } from "./federation.js";
+import { noTypeSafetyBypassGuard } from "./no-type-safety-bypass.js";
+import { noSwallowedErrorGuard } from "./no-swallowed-error.js";
+import { noStubReturnGuard } from "./no-stub-return.js";
 import type { Guard } from "../core/types.js";
 
 /** All built-in guards, ready to register with the engine */
@@ -34,4 +40,7 @@ export const allBuiltinGuards: Guard[] = [
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  noTypeSafetyBypassGuard,
+  noSwallowedErrorGuard,
+  noStubReturnGuard,
 ];

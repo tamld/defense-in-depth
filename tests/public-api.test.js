@@ -36,6 +36,9 @@ import {
   ticketIdentityGuard,
   hitlReviewGuard,
   federationGuard,
+  noTypeSafetyBypassGuard,
+  noSwallowedErrorGuard,
+  noStubReturnGuard,
   allBuiltinGuards,
   // Federation (values)
   createProvider,
@@ -82,6 +85,9 @@ describe("public API barrel — built-in guards", () => {
     ["ticketIdentityGuard", ticketIdentityGuard, "ticketIdentity"],
     ["hitlReviewGuard", hitlReviewGuard, "hitlReview"],
     ["federationGuard", federationGuard, "federation"],
+    ["noTypeSafetyBypassGuard", noTypeSafetyBypassGuard, "noTypeSafetyBypass"],
+    ["noSwallowedErrorGuard", noSwallowedErrorGuard, "noSwallowedError"],
+    ["noStubReturnGuard", noStubReturnGuard, "noStubReturn"],
   ];
 
   for (const [exportName, guard, expectedId] of guardCases) {
@@ -144,6 +150,9 @@ describe("public API barrel — module shape", () => {
       "ticketIdentityGuard",
       "hitlReviewGuard",
       "federationGuard",
+      "noTypeSafetyBypassGuard",
+      "noSwallowedErrorGuard",
+      "noStubReturnGuard",
       "allBuiltinGuards",
       "createProvider",
       "FileTicketProvider",
