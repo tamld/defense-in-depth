@@ -74,15 +74,17 @@ export const dependencyAuditGuard: Guard = {
     try {
       let stdout = "";
       try {
-        stdout = execFileSync("npm", ["audit", "--json"], {
+        const npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+        stdout = execFileSync(npmExecutable, ["audit", "--json"], {
           cwd: ctx.projectRoot,
           encoding: "utf-8",
           timeout: 10000,
           stdio: ["ignore", "pipe", "ignore"],
+          shell: process.platform === "win32",
         });
       } catch (err: unknown) {
         // npm audit exits with non-zero when vulnerabilities are found and outputs JSON to stdout
-        if (err && typeof err === "object" && "stdout" in err && typeof err.stdout === "string") {
+        if (err && typeof err === "object" && "stdout" in err && typeof err.stdout === "string" && err.stdout.trim().length > 0) {
           stdout = err.stdout;
         } else {
           return {

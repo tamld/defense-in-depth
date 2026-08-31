@@ -140,8 +140,9 @@ export async function verifyServer(projectRoot: string, rawArgs: string[] = []):
         return true;
       }
 
-      const remote = await response.json() as Record<string, any>;
-      const remoteChecks: string[] = remote.required_status_checks?.contexts ?? [];
+      const remote = (await response.json()) as Record<string, unknown>;
+      const requiredChecks = remote.required_status_checks as { contexts?: string[] } | undefined;
+      const remoteChecks: string[] = requiredChecks?.contexts ?? [];
       const missingChecks = checks.filter((c) => !remoteChecks.includes(c));
 
       if (missingChecks.length > 0) {

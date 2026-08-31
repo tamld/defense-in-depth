@@ -1,4 +1,4 @@
-import { Lesson } from "../../core/types.js";
+import type { Lesson } from "../../core/types.js";
 import { scanOutcomes } from "../../core/lesson-outcome.js";
 import * as fs from "fs/promises";
 import * as path from "path";

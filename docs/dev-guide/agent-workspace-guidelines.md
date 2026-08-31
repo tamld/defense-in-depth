@@ -53,3 +53,14 @@ Local Git hooks (`pre-commit`, `pre-push`) are the first line of defense, but ca
 2. **Server Gate Verification CLI**:
    - Run `npx defense-in-depth verify:server` to validate that GitHub branch protection rules match `.github/branch-protection.json`.
 
+---
+
+## 🧹 Code Quality & Formatting (Biome)
+
+Before committing changes or opening PRs, format and lint code using Biome:
+- Run `npm run format` to auto-format files.
+- Run `npm run format:check` to verify formatting without modifying files.
+- Run `npm run lint` to execute Biome linter and TypeScript strict type-check.
+- Run `npm run lint:fix` to auto-fix lintable issues.
+
+

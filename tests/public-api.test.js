@@ -39,6 +39,11 @@ import {
   secretDetectionGuard,
   fileSizeLimitGuard,
   dependencyAuditGuard,
+  noTypeSafetyBypassGuard,
+  noSwallowedErrorGuard,
+  noStubReturnGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
   allBuiltinGuards,
   // Federation (values)
   createProvider,
@@ -88,6 +93,11 @@ describe("public API barrel — built-in guards", () => {
     ["secretDetectionGuard", secretDetectionGuard, "secretDetection"],
     ["fileSizeLimitGuard", fileSizeLimitGuard, "fileSizeLimit"],
     ["dependencyAuditGuard", dependencyAuditGuard, "dependencyAudit"],
+    ["noTypeSafetyBypassGuard", noTypeSafetyBypassGuard, "noTypeSafetyBypass"],
+    ["noSwallowedErrorGuard", noSwallowedErrorGuard, "noSwallowedError"],
+    ["noStubReturnGuard", noStubReturnGuard, "noStubReturn"],
+    ["noTriviallyTrueTestGuard", noTriviallyTrueTestGuard, "noTriviallyTrueTest"],
+    ["selfProtectionGuard", selfProtectionGuard, "selfProtection"],
   ];
 
   for (const [exportName, guard, expectedId] of guardCases) {
@@ -153,6 +163,11 @@ describe("public API barrel — module shape", () => {
       "secretDetectionGuard",
       "fileSizeLimitGuard",
       "dependencyAuditGuard",
+      "noTypeSafetyBypassGuard",
+      "noSwallowedErrorGuard",
+      "noStubReturnGuard",
+      "noTriviallyTrueTestGuard",
+      "selfProtectionGuard",
       "allBuiltinGuards",
       "createProvider",
       "FileTicketProvider",

@@ -35,7 +35,6 @@ const result = spawnSync(
   [
     "--experimental-test-coverage",
     "--test",
-    "tests/**/*.test.js",
   ],
   {
     cwd: REPO_ROOT,
@@ -45,13 +44,15 @@ const result = spawnSync(
   },
 );
 
+const stdout = result.stdout || "";
+if (stdout) {
+  process.stdout.write(stdout);
+}
+
 if (result.status !== 0) {
   console.error(`✘ Test run failed with exit code ${result.status}`);
   process.exit(result.status ?? 1);
 }
-
-const stdout = result.stdout;
-process.stdout.write(stdout);
 
 // Strip any residual ANSI escapes (NO_COLOR=1 should already prevent them,
 // but Node test reporter sometimes emits cursor moves anyway).

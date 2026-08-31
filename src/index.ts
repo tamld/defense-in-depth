@@ -49,6 +49,11 @@ export type {
   SecretDetectionConfig,
   FileSizeLimitConfig,
   DependencyAuditConfig,
+  NoTypeSafetyBypassConfig,
+  NoSwallowedErrorConfig,
+  NoStubReturnConfig,
+  NoTriviallyTrueTestConfig,
+  SelfProtectionConfig,
 } from "./core/types.js";
 
 // ─── Built-in guards ───
@@ -65,6 +70,11 @@ export {
   secretDetectionGuard,
   fileSizeLimitGuard,
   dependencyAuditGuard,
+  noTypeSafetyBypassGuard,
+  noSwallowedErrorGuard,
+  noStubReturnGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
   allBuiltinGuards,
 } from "./guards/index.js";
 

@@ -130,10 +130,9 @@ test('scanHistory derives TP/FN/FP from fix-up, revert and override commits', as
 });
 
 test('scanHistory drops FN when reverted commit is absent from the scanned window', async () => {
-  const { execFileSync: efs } = await import('node:child_process');
-  const root = await mkdtemp(path.join(os.tmpdir(), 'did-scraper-phantom-'));
+  const root = await makeRoot('did-scraper-phantom-');
   const run = (args, env = {}) =>
-    efs('git', args, { cwd: root, env: { ...process.env, ...env } });
+    execFileSync('git', args, { cwd: root, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
   try {
     run(['init', '-q']);
     run(['config', 'user.email', 't@example.com']);
@@ -146,7 +145,7 @@ test('scanHistory drops FN when reverted commit is absent from the scanned windo
       Object.fromEntries([phantomStamp, ['GIT_COMMITTER_DATE', phantomStamp[1]]]),
     );
 
-    const result = scanHistory(root, {});
+    const result = await scanHistory(root, {});
     const revertEvents = result.proposed.filter((p) => p.source === 'scraper-revert');
     assert.equal(revertEvents.length, 0, 'referenced sha absent -> no FN proposal');
   } finally {

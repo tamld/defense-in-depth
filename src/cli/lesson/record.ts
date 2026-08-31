@@ -1,6 +1,6 @@
 import { recordLesson } from "../../core/memory.js";
 import type { RecordLessonResult } from "../../core/memory.js";
-import { EvidenceLevel, Lesson } from "../../core/types.js";
+import { EvidenceLevel, type Lesson } from "../../core/types.js";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { printLessonUsage } from "./helpers.js";

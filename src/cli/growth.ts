@@ -43,7 +43,7 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
   }
 
   const value = parseFloat(valueStr);
-  if (isNaN(value) || !isFinite(value)) {
+  if (Number.isNaN(value) || !Number.isFinite(value)) {
     console.error(`❌ Invalid numeric value for --value: "${valueStr}"`);
     process.exit(1);
   }

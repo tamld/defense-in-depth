@@ -58,16 +58,19 @@ const DEFAULT_CONFIG: DefendConfig = {
         "defense.config.yml",
         "package.json",
         "package-lock.json",
+        "pnpm-lock.yaml",
         "tsconfig.json",
         ".gitignore",
         ".cursorrules",
+        "biome.json",
+        ".semgrep.yml",
       ],
       allowedRootPatterns: [],
     },
     commitFormat: {
       enabled: true,
       pattern:
-        "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\\\(.*\\\\))?(!)?:\\\\s.+",
+        "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\([^)]*\\))?(!)?:\\s.+",
       types: [
         "feat", "fix", "chore", "docs",
         "refactor", "test", "style", "perf", "ci",
@@ -155,6 +158,11 @@ const KNOWN_GUARD_KEYS = new Set([
   "secretDetection",
   "fileSizeLimit",
   "dependencyAudit",
+  "noTypeSafetyBypass",
+  "noSwallowedError",
+  "noStubReturn",
+  "noTriviallyTrueTest",
+  "selfProtection",
 ]);
 
 const ALLOWED_TOP_LEVEL_KEYS = new Set(["version", "guards", "hints"]);
@@ -220,7 +228,7 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
       ];
 
       for (const [field, val] of nonNegativeNumbers) {
-        if (val !== undefined && (typeof val !== "number" || isNaN(val) || val < 0)) {
+        if (val !== undefined && (typeof val !== "number" || Number.isNaN(val) || val < 0)) {
           throw new ConfigError(`guards.${guardName}.${field} must be a non-negative number`, { configPath });
         }
       }
@@ -238,6 +246,7 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
         ["blockedParentPhases", g.blockedParentPhases],
         ["customPatterns", g.customPatterns],
         ["ignoredExtensions", g.ignoredExtensions],
+        ["allowlistPaths", g.allowlistPaths],
       ];
 
       for (const [field, val] of stringArrays) {

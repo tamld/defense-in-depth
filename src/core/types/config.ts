@@ -124,6 +124,36 @@ export interface DependencyAuditConfig {
   severity?: 'warn' | 'block';
 }
 
+export interface NoTypeSafetyBypassConfig {
+  enabled: boolean;
+  severity?: 'warn' | 'block';
+  allowlistPaths?: string[];
+}
+
+export interface NoSwallowedErrorConfig {
+  enabled: boolean;
+  severity?: 'warn' | 'block';
+  allowlistPaths?: string[];
+}
+
+export interface NoStubReturnConfig {
+  enabled: boolean;
+  severity?: 'warn' | 'block';
+  allowlistPaths?: string[];
+}
+
+export interface NoTriviallyTrueTestConfig {
+  enabled: boolean;
+  severity?: 'warn' | 'block';
+  allowlistPaths?: string[];
+}
+
+export interface SelfProtectionConfig {
+  enabled: boolean;
+  severity?: 'warn' | 'block';
+  protectedPaths?: string[];
+}
+
 /** Root configuration loaded from defense.config.yml */
 export interface DefendConfig {
   version: string;
@@ -140,6 +170,11 @@ export interface DefendConfig {
     secretDetection?: SecretDetectionConfig;
     fileSizeLimit?: FileSizeLimitConfig;
     dependencyAudit?: DependencyAuditConfig;
+    noTypeSafetyBypass?: NoTypeSafetyBypassConfig;
+    noSwallowedError?: NoSwallowedErrorConfig;
+    noStubReturn?: NoStubReturnConfig;
+    noTriviallyTrueTest?: NoTriviallyTrueTestConfig;
+    selfProtection?: SelfProtectionConfig;
   };
   /** v0.7 (#21): Progressive Discovery UX — earned, dim-formatted hints. */
   hints?: HintsConfig;
