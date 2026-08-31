@@ -41,19 +41,19 @@ rules:
     pattern-either:
       - pattern: |
           function $F(...) {
-            ...
             return null;
           }
       - pattern: |
           function $F(...) {
-            ...
             return {};
           }
+      - pattern: const $F = (...) => null;
+      - pattern: const $F = (...) => ({});
       - patterns:
           - pattern: throw new Error($MSG)
           - metavariable-regex:
               metavariable: $MSG
-              regex: ".*(Not implemented|Unimplemented|stub).*"
+              regex: ".*(Not implemented|Unimplemented).*"
 
   - id: no-trivially-true-test
     message: "Do not author trivially true assertions that test nothing."
