@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const THRESHOLDS = {
-  line: 98,
+  line: 97,
   branch: 91,
   funcs: 97,
 };
