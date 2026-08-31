@@ -62,6 +62,7 @@ const DEFAULT_CONFIG: DefendConfig = {
         ".gitignore",
         ".cursorrules",
         "biome.json",
+        ".semgrep.yml",
       ],
       allowedRootPatterns: [],
     },
