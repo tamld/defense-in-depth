@@ -1,4 +1,4 @@
-import { LessonOutcome, RecallEvent } from "../../core/types.js";
+import type { LessonOutcome, RecallEvent } from "../../core/types.js";
 import {
   appendOutcome,
   outcomeEventId,

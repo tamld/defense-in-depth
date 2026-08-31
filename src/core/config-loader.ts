@@ -58,9 +58,12 @@ const DEFAULT_CONFIG: DefendConfig = {
         "defense.config.yml",
         "package.json",
         "package-lock.json",
+        "pnpm-lock.yaml",
         "tsconfig.json",
         ".gitignore",
         ".cursorrules",
+        "biome.json",
+        ".semgrep.yml",
       ],
       allowedRootPatterns: [],
     },
@@ -225,7 +228,7 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
       ];
 
       for (const [field, val] of nonNegativeNumbers) {
-        if (val !== undefined && (typeof val !== "number" || isNaN(val) || val < 0)) {
+        if (val !== undefined && (typeof val !== "number" || Number.isNaN(val) || val < 0)) {
           throw new ConfigError(`guards.${guardName}.${field} must be a non-negative number`, { configPath });
         }
       }
