@@ -17,6 +17,8 @@ export { dependencyAuditGuard } from "./dependency-audit.js";
 export { noTypeSafetyBypassGuard } from "./no-type-safety-bypass.js";
 export { noSwallowedErrorGuard } from "./no-swallowed-error.js";
 export { noStubReturnGuard } from "./no-stub-return.js";
+export { noTriviallyTrueTestGuard } from "./no-trivially-true-test-guard.js";
+export { selfProtectionGuard } from "./self-protection.js";
 
 import { hollowArtifactGuard } from "./hollow-artifact.js";
 import { ssotPollutionGuard } from "./ssot-pollution.js";
@@ -33,6 +35,8 @@ import { dependencyAuditGuard } from "./dependency-audit.js";
 import { noTypeSafetyBypassGuard } from "./no-type-safety-bypass.js";
 import { noSwallowedErrorGuard } from "./no-swallowed-error.js";
 import { noStubReturnGuard } from "./no-stub-return.js";
+import { noTriviallyTrueTestGuard } from "./no-trivially-true-test-guard.js";
+import { selfProtectionGuard } from "./self-protection.js";
 import type { Guard } from "../core/types.js";
 
 /** All built-in guards, ready to register with the engine */
@@ -52,4 +56,6 @@ export const allBuiltinGuards: Guard[] = [
   noTypeSafetyBypassGuard,
   noSwallowedErrorGuard,
   noStubReturnGuard,
+  noTriviallyTrueTestGuard,
+  selfProtectionGuard,
 ];

@@ -170,6 +170,26 @@
             "severity": { "type": "string", "enum": ["warn", "block"] },
             "allowlistPaths": { "type": "array", "items": { "type": "string" } }
           }
+        },
+        "noTriviallyTrueTest": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "allowlistPaths": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "selfProtection": {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "severity": { "type": "string", "enum": ["warn", "block"] },
+            "protectedPaths": { "type": "array", "items": { "type": "string" } }
+          }
         }
       }
     },
