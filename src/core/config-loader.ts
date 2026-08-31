@@ -58,6 +58,7 @@ const DEFAULT_CONFIG: DefendConfig = {
         "defense.config.yml",
         "package.json",
         "package-lock.json",
+        "pnpm-lock.yaml",
         "tsconfig.json",
         ".gitignore",
         ".cursorrules",
