@@ -65,10 +65,11 @@ async function main(): Promise<void> {
       await handleFeedbackCommand(process.cwd(), args.slice(1));
       break;
 
-    case "eval":
+    case "eval": {
       const { evalCommand } = await import("./eval.js");
       await evalCommand(process.cwd(), args.slice(1));
       break;
+    }
 
     case "--help":
     case "-h":

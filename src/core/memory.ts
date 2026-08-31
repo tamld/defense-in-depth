@@ -80,7 +80,7 @@ async function ensureFileExists(filepath: string): Promise<void> {
  * @param filepath - The absolute path of the target file
  * @param data - The JSON object to append
  */
-async function appendJsonl(filepath: string, data: any): Promise<void> {
+async function appendJsonl(filepath: string, data: unknown): Promise<void> {
   await ensureFileExists(filepath);
   const line = JSON.stringify(data) + "\n";
   await fs.appendFile(filepath, line, "utf-8");
