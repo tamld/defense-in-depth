@@ -1,0 +1,73 @@
+rules:
+  - id: no-as-any-cast
+    message: "Avoid 'as any' casts. Use proper types or unknown with type narrowing."
+    severity: ERROR
+    languages: [typescript]
+    paths:
+      include:
+        - "src/**"
+      exclude:
+        - "tests/**"
+        - "dist/**"
+    pattern: "$X as any"
+
+  - id: no-empty-catch
+    message: "Do not swallow errors in empty catch blocks. Log the error or re-throw."
+    severity: ERROR
+    languages: [typescript, javascript]
+    paths:
+      include:
+        - "src/**"
+      exclude:
+        - "tests/**"
+        - "dist/**"
+    patterns:
+      - pattern: |
+          try {
+            ...
+          } catch ($E) {
+          }
+
+  - id: no-stub-return
+    message: "Avoid stub returns or unimplemented exceptions in core functions."
+    severity: ERROR
+    languages: [typescript, javascript]
+    paths:
+      include:
+        - "src/**"
+      exclude:
+        - "tests/**"
+        - "dist/**"
+    pattern-either:
+      - pattern: |
+          function $F(...) {
+            return null;
+          }
+      - pattern: |
+          function $F(...) {
+            return {};
+          }
+      - pattern: const $F = (...) => null;
+      - pattern: const $F = (...) => ({});
+      - patterns:
+          - pattern: throw new Error($MSG)
+          - metavariable-regex:
+              metavariable: $MSG
+              regex: ".*(Not implemented|Unimplemented).*"
+
+  - id: no-trivially-true-test
+    message: "Do not author trivially true assertions that test nothing."
+    severity: ERROR
+    languages: [typescript, javascript]
+    paths:
+      include:
+        - "tests/**"
+      exclude:
+        - "tests/fixtures/**"
+    pattern-either:
+      - pattern: expect(true).toBe(true)
+      - pattern: assert.strictEqual(1, 1)
+      - pattern: assert.strictEqual(true, true)
+      - pattern: assert.equal(1, 1)
+      - pattern: assert.equal(true, true)
+      - pattern: assert.ok(true)
