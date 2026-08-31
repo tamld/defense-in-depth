@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   semgrep:
@@ -21,11 +22,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Semgrep custom rules (SARIF output)
+      - name: Run Semgrep custom rules
         uses: returntocorp/semgrep-action@v1
         with:
           config: .semgrep.yml
-          generateSarif: "1"
 
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
