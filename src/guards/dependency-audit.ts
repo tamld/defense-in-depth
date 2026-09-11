@@ -112,6 +112,9 @@ export function createDependencyAuditGuard(options: DependencyAuditOptions = {})
           if (err && typeof err === "object" && "stdout" in err && typeof err.stdout === "string") {
             stdout = err.stdout;
           } else {
+            console.warn(
+              `⚠ Dependency audit skipped: npm audit could not be executed (${err instanceof Error ? err.message : String(err)})`,
+            );
             return {
               guardId: "dependencyAudit",
               passed: true,
@@ -164,6 +167,9 @@ export function createDependencyAuditGuard(options: DependencyAuditOptions = {})
           });
         }
       } catch (parseErr) {
+        console.warn(
+          `⚠ Failed to parse audit results: ${parseErr instanceof Error ? parseErr.message : String(parseErr)}`,
+        );
         findings.push({
           guardId: "dependencyAudit",
           severity: Severity.WARN,
