@@ -31,7 +31,8 @@ export const HINT_STATE_RELATIVE_PATH = ".agents/state/hints-shown.json";
 const CURRENT_VERSION = 1 as const;
 
 function emptyState(): HintState {
-  return { version: CURRENT_VERSION, shown: {} };
+  const shown: Record<string, HintShownEntry> = {};
+  return { version: CURRENT_VERSION, shown };
 }
 
 function statePath(projectRoot: string): string {

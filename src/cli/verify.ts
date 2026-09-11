@@ -190,6 +190,9 @@ function getLastCommitMessage(root: string): string | undefined {
         }
       } catch (err) {
         // TK-000: fallback if HEAD^2 does not exist
+        console.warn(
+          `⚠ Failed to get PR head commit message: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
 
