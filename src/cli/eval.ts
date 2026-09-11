@@ -70,9 +70,12 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
   let fileContent = "";
   try {
     fileContent = await fs.readFile(fullPath, "utf-8");
-  } catch {
+  } catch (err) {
     // Already verified existence above; a read error here is exotic —
     // leave dspyEval null and let the banner fire.
+    console.warn(
+      `⚠ Failed to read file for DSPy evaluation: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 
   const dspyEval = fileContent
