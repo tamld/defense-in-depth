@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-rc.1] - 2026-09-12
+
+> **API Freeze Release** — Public surface frozen for 90 days minimum. Migrates npm `latest` from v0.1.0 to v1.0.0-rc.1.
+
+### Added
+- **Migration guide** ([MIGRATION-v0.1-to-v1.0.md](docs/MIGRATION-v0.1-to-v1.0.md)) — 1-page upgrade path for v0.1.0 consumers
+- **Linear & Jira providers** for federation/ticketIdentity — GraphQL (Linear) and REST (Jira) integrations with status→phase/type mapping
+- **Provider docs** ([providers.md](docs/user-guide/providers.md)) — Linear, Jira, HTTP providers with config examples
+- **Federation guard config** in [configuration.md](docs/user-guide/configuration.md) — blockedParentPhases, parentEndpoint
+
+### Changed
+- **Version bump** 0.8.0 → 1.0.0-rc.1
+- **README** updated: version badge, GitHub Action ref (v0.8.0 → v1.0.0-rc.1), v1.0-era guard count (9 guards)
+- **CHANGELOG** consolidated v0.1→v1.0 release notes
+- **Public API freeze** declared — 90-day minimum on Guard, GuardContext, GuardResult, Finding, Severity, EvidenceLevel, EngineVerdict, TicketStateProvider, TicketRef
+
+### Quality
+- **832 tests pass** (+30 new provider tests)
+- **Coverage**: line 98.21%, branch 91.70%, funcs 98.28% (thresholds: 97%/91%/97%)
+- **Semgrep**: 0 findings
+- **Biome lint**: 0 errors
+
+---
+
 ## [0.7.1] - 2026-08-25
 
 ### Changed

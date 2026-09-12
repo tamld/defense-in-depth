@@ -81,9 +81,19 @@ guards:
     enabled: false
     tkidPattern: "TK-[0-9A-Z-]+"
     severity: "warn"
-    provider: "file"           # Pluggable state resolution
+    provider: "file"           # Pluggable state resolution: file, linear, jira, http
     providerConfig:
       ticketFile: "TICKET.md"
+
+  # Cross-project ticket state validation (Parent ↔ Child)
+  # Requires ticketIdentity to be enabled with a provider
+  federation:
+    enabled: false
+    severity: "block"
+    provider: "file"           # Pluggable: file, linear, jira, http
+    providerConfig: {}         # Provider-specific config (see [Providers](providers.md))
+    parentEndpoint: ""         # Optional: separate endpoint for parent ticket resolution
+    blockedParentPhases: ["BLOCKED", "CANCELLED", "ARCHIVED"]
 ```
 
 ## DSPy Semantic Evaluation (v0.5)
