@@ -10,7 +10,7 @@
 <br/>
 
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](#)
-[![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-blue.svg)](https://github.com/tamld/defense-in-depth/releases)
+[![Version: 1.0.0-rc.1](https://img.shields.io/badge/Version-1.0.0--rc.1-blue.svg)](https://github.com/tamld/defense-in-depth/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: Cross-Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-orange.svg)](#)
 [![Node: ≥18](https://img.shields.io/badge/Node-%E2%89%A518-green.svg)](#)
@@ -76,7 +76,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: tamld/defense-in-depth/.github/actions/verify@v0.8.0
+      - uses: tamld/defense-in-depth/.github/actions/verify@v1.0.0-rc.1
 ```
 
 ---
