@@ -34,6 +34,7 @@ paths = [
     '''pnpm-lock\.yaml''',
     '''yarn\.lock''',
     '''docs/dev-guide/writing-guards\.md''',
+    '''docs/user-guide/providers\.md''',
     '''tests/guards/secret-detection\.test\.js'''
 ]
 regexes = [
