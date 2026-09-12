@@ -12,6 +12,8 @@
 
 import { FileTicketProvider } from "./file-provider.js";
 import { HttpTicketProvider } from "./http-provider.js";
+import { LinearTicketProvider } from "./linear-provider.js";
+import { JiraTicketProvider } from "./jira-provider.js";
 import type { ProviderConfig, TicketStateProvider } from "./types.js";
 
 /**
@@ -37,6 +39,12 @@ export function createProvider(
     case "http":
       return new HttpTicketProvider(config);
 
+    case "linear":
+      return new LinearTicketProvider(config);
+
+    case "jira":
+      return new JiraTicketProvider(config);
+
     default:
       // Future: dynamic import for custom providers
       console.warn(`⚠ Unknown ticket provider "${provider}", falling back to "file" provider.`);
@@ -46,5 +54,9 @@ export function createProvider(
 
 export { FileTicketProvider } from "./file-provider.js";
 export { HttpTicketProvider } from "./http-provider.js";
+export { LinearTicketProvider } from "./linear-provider.js";
+export { JiraTicketProvider } from "./jira-provider.js";
 // Barrel exports
 export type { ProviderConfig, TicketStateProvider } from "./types.js";
+export type { LinearProviderConfig } from "./linear-provider.js";
+export type { JiraProviderConfig } from "./jira-provider.js";
