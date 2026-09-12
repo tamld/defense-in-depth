@@ -96,7 +96,7 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const validEvidenceLevels: string[] = Object.values(EvidenceLevel) as string[];
+  const validEvidenceLevels: string[] = Object.values(EvidenceLevel);
   if (typeof payload.evidence !== 'string' || !validEvidenceLevels.includes(payload.evidence)) {
     console.error(`❌ Invalid evidence level: must be one of ${Object.values(EvidenceLevel).join(", ")}`);
     process.exit(1);
@@ -114,7 +114,7 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     category: payload.category!,
     evidence: payload.evidence!,
     confidence: payload.confidence!,
-    sourceTicket: (payload as Record<string, unknown>).ticketId as string ?? "",
+    sourceTicket: String((payload as Record<string, unknown>).ticketId ?? ""),
     wrongApproachPattern: payload.wrongApproachPattern,
     tags: payload.tags,
     searchTerms: payload.searchTerms,
