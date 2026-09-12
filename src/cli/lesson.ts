@@ -295,8 +295,9 @@ async function runScanOutcomes(projectRoot: string, args: string[]): Promise<voi
         wrongApproach: l.wrongApproach,
       }));
   } catch (err: unknown) {
-    const errObj = Object(err) as Record<string, unknown>;
-    const isEnoent = errObj && typeof errObj === "object" && "code" in errObj && errObj.code === "ENOENT";
+    const hasCode = (e: unknown): e is { code: string } =>
+      typeof e === "object" && e !== null && "code" in e && typeof e["code"] === "string";
+    const isEnoent = hasCode(err) && err.code === "ENOENT";
     if (!isEnoent) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`❌ failed to read lessons.jsonl: ${msg}`);
