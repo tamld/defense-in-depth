@@ -66,7 +66,15 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  let payload: Partial<Lesson>;
+  interface LessonPayload extends Partial<Lesson> {
+  ticketId?: string;
+  tags?: string[];
+  searchTerms?: string[];
+  relatedLessons?: string[];
+  relatedFiles?: string[];
+}
+
+  let payload: LessonPayload;
   try {
     payload = JSON.parse(rawJson);
   } catch (err: any) {
@@ -114,7 +122,7 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     category: payload.category!,
     evidence: payload.evidence!,
     confidence: payload.confidence!,
-    sourceTicket: String((payload as Record<string, unknown>).ticketId ?? ""),
+    sourceTicket: String(payload.ticketId ?? ""),
     wrongApproachPattern: payload.wrongApproachPattern,
     tags: payload.tags,
     searchTerms: payload.searchTerms,
@@ -280,16 +288,16 @@ async function runScanOutcomes(projectRoot: string, args: string[]): Promise<voi
     lessons = raw
       .split("\n")
       .filter((l) => l.trim().length > 0)
-      .map((l) => JSON.parse(l) as Lesson)
-      .map((l) => ({
+      .map((l) => JSON.parse(l))
+      .map((l: Lesson) => ({
         id: l.id,
         wrongApproachPattern: l.wrongApproachPattern,
         wrongApproach: l.wrongApproach,
       }));
   } catch (err: unknown) {
-    if (
-      !(err && typeof err === "object" && "code" in err && (err as { code: string }).code === "ENOENT")
-    ) {
+    const errObj = Object(err) as Record<string, unknown>;
+    const isEnoent = errObj && typeof errObj === "object" && "code" in errObj && errObj.code === "ENOENT";
+    if (!isEnoent) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`❌ failed to read lessons.jsonl: ${msg}`);
       process.exit(1);
