@@ -96,15 +96,33 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const validEvidenceLevels = Object.values(EvidenceLevel) as string[];
+  const validEvidenceLevels: string[] = Object.values(EvidenceLevel) as string[];
   if (typeof payload.evidence !== 'string' || !validEvidenceLevels.includes(payload.evidence)) {
     console.error(`❌ Invalid evidence level: must be one of ${Object.values(EvidenceLevel).join(", ")}`);
     process.exit(1);
   }
 
   // Record it (with optional DSPy quality gate)
+  // All required fields validated above, safe to construct
+  // Use bracket notation for optional fields that may not be in Lesson interface
+  const lessonPayload: Omit<Lesson, "id" | "createdAt"> = {
+    title: payload.title!,
+    scenario: payload.scenario!,
+    wrongApproach: payload.wrongApproach!,
+    correctApproach: payload.correctApproach!,
+    insight: payload.insight!,
+    category: payload.category!,
+    evidence: payload.evidence!,
+    confidence: payload.confidence!,
+    sourceTicket: (payload as Record<string, unknown>).ticketId as string ?? "",
+    wrongApproachPattern: payload.wrongApproachPattern,
+    tags: payload.tags,
+    searchTerms: payload.searchTerms,
+    relatedLessons: payload.relatedLessons,
+    relatedFiles: payload.relatedFiles,
+  };
   const result: RecordLessonResult = await recordLesson(
-    payload as Omit<Lesson, "id" | "createdAt">,
+    lessonPayload,
     projectRoot,
     useDspy ? { enabled: true } : undefined,
   );
