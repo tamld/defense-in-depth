@@ -12,20 +12,23 @@ import * as path from "node:path";
 
 export interface BranchProtectionSpec {
   description?: string;
-  branches: Record<string, {
-    required_status_checks?: {
-      strict?: boolean;
-      contexts?: string[];
-    };
-    enforce_admins?: boolean;
-    required_pull_request_reviews?: {
-      required_approving_review_count?: number;
-      dismiss_stale_reviews?: boolean;
-    };
-    required_linear_history?: boolean;
-    allow_force_pushes?: boolean;
-    allow_deletions?: boolean;
-  }>;
+  branches: Record<
+    string,
+    {
+      required_status_checks?: {
+        strict?: boolean;
+        contexts?: string[];
+      };
+      enforce_admins?: boolean;
+      required_pull_request_reviews?: {
+        required_approving_review_count?: number;
+        dismiss_stale_reviews?: boolean;
+      };
+      required_linear_history?: boolean;
+      allow_force_pushes?: boolean;
+      allow_deletions?: boolean;
+    }
+  >;
 }
 
 export interface VerifyServerOptions {
@@ -64,7 +67,9 @@ export async function verifyServer(projectRoot: string, rawArgs: string[] = []):
 
   if (!fs.existsSync(configAbsPath)) {
     console.error(`❌ Missing branch protection specification at '${configRelPath}'.`);
-    console.error("   Create '.github/branch-protection.json' documenting required server-side status checks.");
+    console.error(
+      "   Create '.github/branch-protection.json' documenting required server-side status checks.",
+    );
     return false;
   }
 
@@ -132,11 +137,15 @@ export async function verifyServer(projectRoot: string, rawArgs: string[] = []):
 
       if (!response.ok) {
         if (response.status === 404) {
-          console.error(`❌ Remote branch protection is NOT enabled on GitHub for '${targetBranch}'.`);
+          console.error(
+            `❌ Remote branch protection is NOT enabled on GitHub for '${targetBranch}'.`,
+          );
           console.error("   Enable branch protection in GitHub Repository Settings -> Branches.");
           return false;
         }
-        console.warn(`⚠ GitHub API responded with HTTP ${response.status}. Skipping remote verification.`);
+        console.warn(
+          `⚠ GitHub API responded with HTTP ${response.status}. Skipping remote verification.`,
+        );
         return true;
       }
 
@@ -146,7 +155,9 @@ export async function verifyServer(projectRoot: string, rawArgs: string[] = []):
       const missingChecks = checks.filter((c) => !remoteChecks.includes(c));
 
       if (missingChecks.length > 0) {
-        console.error(`❌ Remote protection is missing required status checks: ${missingChecks.join(", ")}`);
+        console.error(
+          `❌ Remote protection is missing required status checks: ${missingChecks.join(", ")}`,
+        );
         return false;
       }
 
@@ -156,7 +167,9 @@ export async function verifyServer(projectRoot: string, rawArgs: string[] = []):
       console.warn(`⚠ Network error querying GitHub API: ${message}. Local spec check passed.`);
     }
   } else {
-    console.log("\nℹ️  Running in offline mode (set GITHUB_TOKEN & GITHUB_REPOSITORY for live API checks).");
+    console.log(
+      "\nℹ️  Running in offline mode (set GITHUB_TOKEN & GITHUB_REPOSITORY for live API checks).",
+    );
   }
 
   console.log("\n✅ Server-side branch protection verification passed.");

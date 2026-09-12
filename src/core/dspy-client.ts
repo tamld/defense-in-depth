@@ -84,7 +84,7 @@ export async function callDspy(
       return null;
     }
 
-    const data = await response.json() as Partial<DSPyEvalResponse>;
+    const data = (await response.json()) as Partial<DSPyEvalResponse>;
 
     return {
       artifactPath: request.id,
@@ -138,7 +138,9 @@ export async function callDspyRank(
       return null;
     }
 
-    const data = await response.json() as { results?: Array<{ id: string; score: number; feedback?: string }> };
+    const data = (await response.json()) as {
+      results?: Array<{ id: string; score: number; feedback?: string }>;
+    };
     return data.results ?? null;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

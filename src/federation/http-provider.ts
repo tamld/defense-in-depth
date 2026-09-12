@@ -14,9 +14,9 @@
  * This provider uses `globalThis.fetch` (Node 18+), zero external dependencies.
  */
 
-import type { TicketStateProvider, ProviderConfig } from "./types.js";
-import type { TicketRef } from "../core/types.js";
 import { ProviderError } from "../core/errors.js";
+import type { TicketRef } from "../core/types.js";
+import type { ProviderConfig, TicketStateProvider } from "./types.js";
 
 /** Configuration options for HttpTicketProvider */
 export interface HttpProviderConfig extends ProviderConfig {
@@ -33,8 +33,7 @@ export class HttpTicketProvider implements TicketStateProvider {
 
   constructor(config?: HttpProviderConfig) {
     this.endpoint = config?.endpoint ?? "http://localhost:3000/api/tickets";
-    this.timeoutMs =
-      typeof config?.timeout === "number" ? config.timeout : 3000;
+    this.timeoutMs = typeof config?.timeout === "number" ? config.timeout : 3000;
   }
 
   async resolve(ticketId: string): Promise<TicketRef | undefined> {
@@ -78,12 +77,7 @@ export class HttpTicketProvider implements TicketStateProvider {
       const data = raw as Record<string, unknown>;
 
       const ref: TicketRef = {
-        id:
-          typeof data.id === "string"
-            ? data.id
-            : data.id != null
-              ? String(data.id)
-              : ticketId,
+        id: typeof data.id === "string" ? data.id : data.id != null ? String(data.id) : ticketId,
       };
 
       if (data.phase && typeof data.phase === "string") {
@@ -107,8 +101,7 @@ export class HttpTicketProvider implements TicketStateProvider {
       return ref;
     } catch (err) {
       // AbortError = timeout, TypeError = network failure
-      const isTimeout =
-        err instanceof Error && err.name === "AbortError";
+      const isTimeout = err instanceof Error && err.name === "AbortError";
       const reason = isTimeout
         ? `timed out after ${this.timeoutMs}ms`
         : err instanceof Error

@@ -1,7 +1,7 @@
-import type { Lesson } from "../../core/types.js";
-import { scanOutcomes } from "../../core/lesson-outcome.js";
 import * as fs from "fs/promises";
 import * as path from "path";
+import { scanOutcomes } from "../../core/lesson-outcome.js";
+import type { Lesson } from "../../core/types.js";
 import { readFlag } from "./helpers.js";
 
 export async function runScanOutcomes(projectRoot: string, args: string[]): Promise<void> {
@@ -26,7 +26,12 @@ export async function runScanOutcomes(projectRoot: string, args: string[]): Prom
       }));
   } catch (err: unknown) {
     if (
-      !(err && typeof err === "object" && "code" in err && (err as { code: string }).code === "ENOENT")
+      !(
+        err &&
+        typeof err === "object" &&
+        "code" in err &&
+        (err as { code: string }).code === "ENOENT"
+      )
     ) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`❌ failed to read lessons.jsonl: ${msg}`);

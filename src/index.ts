@@ -10,84 +10,76 @@
  *   npx defense-in-depth doctor
  */
 
+export { DEFAULT_CONFIG, loadConfig } from "./core/config-loader.js";
 // ─── Engine + Config ───
 export { DefendEngine } from "./core/engine.js";
-export { loadConfig, DEFAULT_CONFIG } from "./core/config-loader.js";
-
-// ─── Core enums ───
-export { Severity, EvidenceLevel } from "./core/types.js";
-
+export type { DiDErrorCode } from "./core/errors.js";
+// ─── Typed errors (v1.0 — issue #37) ───
+export {
+  ConfigError,
+  DiDError,
+  ErrorCodes,
+  GuardCrashError,
+  ProviderError,
+} from "./core/errors.js";
 // ─── Core types ───
-export type {
-  Guard,
-  GuardMeta,
-  GuardContext,
-  GuardResult,
-  EngineVerdict,
-  EngineRunOptions,
-  Finding,
-  DefendConfig,
-  TicketRef,
-  Lesson,
-  EvaluationScore,
-  GuardF1Metric,
-  DSPyConfig,
-  FeedbackEvent,
-} from "./core/types.js";
-
 // ─── Per-guard configuration types ───
 export type {
-  HollowArtifactConfig,
-  SsotPollutionConfig,
-  RootPollutionConfig,
-  CommitFormatConfig,
   BranchNamingConfig,
-  PhaseGateConfig,
-  TicketIdentityConfig,
-  HitlReviewConfig,
-  FederationGuardConfig,
-  SecretDetectionConfig,
-  FileSizeLimitConfig,
+  CommitFormatConfig,
+  DefendConfig,
   DependencyAuditConfig,
-  NoTypeSafetyBypassConfig,
-  NoSwallowedErrorConfig,
+  DSPyConfig,
+  EngineRunOptions,
+  EngineVerdict,
+  EvaluationScore,
+  FederationGuardConfig,
+  FeedbackEvent,
+  FileSizeLimitConfig,
+  Finding,
+  Guard,
+  GuardContext,
+  GuardF1Metric,
+  GuardMeta,
+  GuardResult,
+  HitlReviewConfig,
+  HollowArtifactConfig,
+  Lesson,
   NoStubReturnConfig,
+  NoSwallowedErrorConfig,
   NoTriviallyTrueTestConfig,
+  NoTypeSafetyBypassConfig,
+  PhaseGateConfig,
+  RootPollutionConfig,
+  SecretDetectionConfig,
   SelfProtectionConfig,
+  SsotPollutionConfig,
+  TicketIdentityConfig,
+  TicketRef,
 } from "./core/types.js";
-
-// ─── Built-in guards ───
-export {
-  hollowArtifactGuard,
-  ssotPollutionGuard,
-  rootPollutionGuard,
-  commitFormatGuard,
-  branchNamingGuard,
-  phaseGateGuard,
-  ticketIdentityGuard,
-  hitlReviewGuard,
-  federationGuard,
-  secretDetectionGuard,
-  fileSizeLimitGuard,
-  dependencyAuditGuard,
-  noTypeSafetyBypassGuard,
-  noSwallowedErrorGuard,
-  noStubReturnGuard,
-  noTriviallyTrueTestGuard,
-  selfProtectionGuard,
-  allBuiltinGuards,
-} from "./guards/index.js";
-
+// ─── Core enums ───
+export { EvidenceLevel, Severity } from "./core/types.js";
 // ─── Federation (v0.3 → v0.6) ───
 export { createProvider, FileTicketProvider, HttpTicketProvider } from "./federation/index.js";
 export type { TicketStateProvider } from "./federation/types.js";
-
-// ─── Typed errors (v1.0 — issue #37) ───
+// ─── Built-in guards ───
 export {
-  DiDError,
-  ConfigError,
-  GuardCrashError,
-  ProviderError,
-  ErrorCodes,
-} from "./core/errors.js";
-export type { DiDErrorCode } from "./core/errors.js";
+  allBuiltinGuards,
+  branchNamingGuard,
+  commitFormatGuard,
+  dependencyAuditGuard,
+  federationGuard,
+  fileSizeLimitGuard,
+  hitlReviewGuard,
+  hollowArtifactGuard,
+  noStubReturnGuard,
+  noSwallowedErrorGuard,
+  noTriviallyTrueTestGuard,
+  noTypeSafetyBypassGuard,
+  phaseGateGuard,
+  rootPollutionGuard,
+  secretDetectionGuard,
+  selfProtectionGuard,
+  ssotPollutionGuard,
+  ticketIdentityGuard,
+} from "./guards/index.js";

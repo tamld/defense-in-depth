@@ -10,24 +10,24 @@
  * Pattern source: internal project pre-push-runner.ts (sequential gate pipeline → verdict)
  */
 
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { createProvider } from "../federation/index.js";
+import type { TicketStateProvider } from "../federation/types.js";
+import { loadConfig } from "./config-loader.js";
+import { callDspy } from "./dspy-client.js";
+import { GuardCrashError } from "./errors.js";
 import type {
+  DefendConfig,
+  EngineRunOptions,
+  EngineVerdict,
   Guard,
   GuardContext,
   GuardResult,
-  EngineVerdict,
-  EngineRunOptions,
-  DefendConfig,
-  TicketRef,
   TicketIdentityConfig,
+  TicketRef,
 } from "./types.js";
 import { Severity } from "./types.js";
-import { loadConfig } from "./config-loader.js";
-import { GuardCrashError } from "./errors.js";
-import { createProvider } from "../federation/index.js";
-import type { TicketStateProvider } from "../federation/types.js";
-import { callDspy } from "./dspy-client.js";
-import * as fs from "node:fs";
-import * as path from "node:path";
 
 export class DefendEngine {
   private guards: Guard[] = [];
@@ -35,10 +35,7 @@ export class DefendEngine {
   private projectRoot: string;
 
   private ticketProviderFactory?:
-    | ((
-        guardConfig: TicketIdentityConfig,
-        projectRoot: string,
-      ) => TicketStateProvider)
+    | ((guardConfig: TicketIdentityConfig, projectRoot: string) => TicketStateProvider)
     | undefined;
 
   /**
@@ -74,7 +71,11 @@ export class DefendEngine {
   }
 
   /** Extract a TicketRef from common contexts */
-  private extractTicketRef(branch?: string, commitMessage?: string, projectRoot?: string): TicketRef | undefined {
+  private extractTicketRef(
+    branch?: string,
+    commitMessage?: string,
+    projectRoot?: string,
+  ): TicketRef | undefined {
     let id: string | undefined;
 
     // 1. Extract ID from branch
@@ -91,7 +92,11 @@ export class DefendEngine {
 
     // 3. If no ID, try project root directory name (generic — works with any naming convention)
     if (!id && projectRoot) {
-      const dirName = projectRoot.replace(/[\\/]+$/, "").split(/[\\/]/).pop() ?? "";
+      const dirName =
+        projectRoot
+          .replace(/[\\/]+$/, "")
+          .split(/[\\/]/)
+          .pop() ?? "";
       const match = dirName.match(/(TK-[0-9A-Z-]+)/i);
       if (match) id = match[1].toUpperCase();
     }
@@ -104,7 +109,7 @@ export class DefendEngine {
     if (branch) {
       const typeMatch = branch.match(/^(feat|fix|chore|docs|refactor)\//i);
       if (typeMatch) {
-         ticketRef.type = typeMatch[1].toLowerCase() as TicketRef["type"];
+        ticketRef.type = typeMatch[1].toLowerCase() as TicketRef["type"];
       }
     }
 
@@ -256,9 +261,7 @@ export class DefendEngine {
     const durationMs = performance.now() - start;
     const failedGuards = results.filter((r) => !r.passed).length;
     const warnedGuards = results.filter(
-      (r) =>
-        r.passed &&
-        r.findings.some((f) => f.severity === Severity.WARN),
+      (r) => r.passed && r.findings.some((f) => f.severity === Severity.WARN),
     ).length;
 
     return {
@@ -292,11 +295,7 @@ export class DefendEngine {
 
     const provider = this.ticketProviderFactory
       ? this.ticketProviderFactory(guardConfig, this.projectRoot)
-      : createProvider(
-          guardConfig.provider,
-          guardConfig.providerConfig,
-          this.projectRoot,
-        );
+      : createProvider(guardConfig.provider, guardConfig.providerConfig, this.projectRoot);
 
     try {
       const timeoutMs =
@@ -307,14 +306,15 @@ export class DefendEngine {
       const enriched = await Promise.race([
         provider.resolve(basicRef.id),
         new Promise<undefined>((_, reject) =>
-          setTimeout(() => reject(new Error(`Resolution timed out after ${timeoutMs}ms`)), timeoutMs),
+          setTimeout(
+            () => reject(new Error(`Resolution timed out after ${timeoutMs}ms`)),
+            timeoutMs,
+          ),
         ),
       ]);
 
       // Merge: provider data enriches basic ref, basic ref provides fallback
-      const ticket: TicketRef = enriched
-        ? { ...basicRef, ...enriched }
-        : basicRef;
+      const ticket: TicketRef = enriched ? { ...basicRef, ...enriched } : basicRef;
 
       // v0.6: Resolve parent ticket state for federation governance
       await this.enrichParentTicket(ticket);
@@ -343,8 +343,9 @@ export class DefendEngine {
     const fedConfig = this.config.guards.federation;
     if (!fedConfig?.enabled) return;
 
-    const blockedPhases = (fedConfig.blockedParentPhases ?? ["BLOCKED", "CANCELLED", "ARCHIVED"])
-      .map(p => p.toUpperCase());
+    const blockedPhases = (
+      fedConfig.blockedParentPhases ?? ["BLOCKED", "CANCELLED", "ARCHIVED"]
+    ).map((p) => p.toUpperCase());
 
     const parentProvider = createProvider(
       fedConfig.provider ?? "file",
@@ -361,7 +362,10 @@ export class DefendEngine {
       const parentRef = await Promise.race([
         parentProvider.resolve(ticket.parentId),
         new Promise<undefined>((_, reject) =>
-          setTimeout(() => reject(new Error(`Parent resolution timed out after ${parentTimeoutMs}ms`)), parentTimeoutMs),
+          setTimeout(
+            () => reject(new Error(`Parent resolution timed out after ${parentTimeoutMs}ms`)),
+            parentTimeoutMs,
+          ),
         ),
       ]);
 
@@ -382,16 +386,14 @@ export class DefendEngine {
   /**
    * Precompute semantic evaluations using DSPy for safe, pure guard context.
    */
-  private async enrichSemanticEvals(
-    stagedFiles: string[],
-  ): Promise<GuardContext["semanticEvals"]> {
+  private async enrichSemanticEvals(stagedFiles: string[]): Promise<GuardContext["semanticEvals"]> {
     const hollowCfg = this.config.guards.hollowArtifact;
     if (!hollowCfg?.useDspy) return undefined;
 
     const dspyEndpoint = hollowCfg.dspyEndpoint ?? "http://localhost:8080/evaluate";
     const dspyTimeout = hollowCfg.dspyTimeoutMs ?? 5000;
     const semanticExts = new Set([".md", ".json", ".js", ".ts", ".html", ".yml", ".yaml", ".txt"]);
-    
+
     // Extensions explicitly configured or default
     const extensions = hollowCfg.extensions ?? [".md", ".json", ".yml", ".yaml"];
 
@@ -425,9 +427,7 @@ export class DefendEngine {
   }
 
   /** Look up a guard's config section by its id */
-  private getGuardConfig(
-    guardId: string,
-  ): { enabled: boolean } | undefined {
+  private getGuardConfig(guardId: string): { enabled: boolean } | undefined {
     const key = guardId as keyof DefendConfig["guards"];
     const cfg = this.config.guards[key];
     return cfg as { enabled: boolean } | undefined;
@@ -438,5 +438,3 @@ export class DefendEngine {
     return this.config;
   }
 }
-
-

@@ -38,18 +38,12 @@ export interface JsonlReadOptions<T> {
 export interface JsonlStore<T> {
   readonly path: string;
   append(record: T): JsonlAppendResult<T>;
-  appendWithWindow(
-    record: T,
-    options: JsonlAppendWindowOptions<T>,
-  ): JsonlAppendResult<T>;
+  appendWithWindow(record: T, options: JsonlAppendWindowOptions<T>): JsonlAppendResult<T>;
   read(options?: JsonlReadOptions<T>): T[];
   exists(id: string): boolean;
 }
 
-export function createJsonlStore<T>(
-  filePath: string,
-  schema: JsonlSchema<T>,
-): JsonlStore<T> {
+export function createJsonlStore<T>(filePath: string, schema: JsonlSchema<T>): JsonlStore<T> {
   let idCache: Set<string> | null = null;
 
   function ensureIdCache(): Set<string> {
@@ -101,14 +95,9 @@ export function createJsonlStore<T>(
     return { written: true, event: record, path: filePath };
   }
 
-  function appendWithWindow(
-    record: T,
-    options: JsonlAppendWindowOptions<T>,
-  ): JsonlAppendResult<T> {
+  function appendWithWindow(record: T, options: JsonlAppendWindowOptions<T>): JsonlAppendResult<T> {
     if (!schema.timestampOf) {
-      throw new Error(
-        "createJsonlStore: appendWithWindow requires schema.timestampOf",
-      );
+      throw new Error("createJsonlStore: appendWithWindow requires schema.timestampOf");
     }
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     const targetId = schema.idOf(record);
@@ -150,9 +139,7 @@ export function createJsonlStore<T>(
   function read(options: JsonlReadOptions<T> = {}): T[] {
     const sinceMs = options.since ? Date.parse(options.since) : undefined;
     if (sinceMs !== undefined && !schema.timestampOf) {
-      throw new Error(
-        "createJsonlStore: read({since}) requires schema.timestampOf",
-      );
+      throw new Error("createJsonlStore: read({since}) requires schema.timestampOf");
     }
     const out: T[] = [];
     for (const r of readAll()) {
@@ -181,17 +168,16 @@ export function createJsonlStore<T>(
 /** Narrow `unknown` to a record with a non-empty string `id`. */
 export function isObjectWithId(raw: unknown): raw is Record<string, unknown> {
   return (
-    typeof raw === "object" && raw !== null && !Array.isArray(raw) &&
+    typeof raw === "object" &&
+    raw !== null &&
+    !Array.isArray(raw) &&
     typeof (raw as { id?: unknown }).id === "string" &&
     (raw as { id: string }).id.length > 0
   );
 }
 
 /** `raw[key]` if it's a string, else null. */
-export function getString(
-  raw: Record<string, unknown>,
-  key: string,
-): string | null {
+export function getString(raw: Record<string, unknown>, key: string): string | null {
   const v = raw[key];
   return typeof v === "string" ? v : null;
 }

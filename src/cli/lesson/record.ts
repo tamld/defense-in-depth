@@ -1,8 +1,8 @@
-import { recordLesson } from "../../core/memory.js";
-import type { RecordLessonResult } from "../../core/memory.js";
-import { EvidenceLevel, type Lesson } from "../../core/types.js";
 import * as fs from "fs/promises";
 import * as path from "path";
+import type { RecordLessonResult } from "../../core/memory.js";
+import { recordLesson } from "../../core/memory.js";
+import { EvidenceLevel, type Lesson } from "../../core/types.js";
 import { printLessonUsage } from "./helpers.js";
 
 export async function runRecord(projectRoot: string, args: string[]): Promise<void> {
@@ -56,14 +56,16 @@ export async function runRecord(projectRoot: string, args: string[]): Promise<vo
     process.exit(1);
   }
 
-  if (typeof payload.confidence !== 'number' || payload.confidence < 0 || payload.confidence > 1) {
+  if (typeof payload.confidence !== "number" || payload.confidence < 0 || payload.confidence > 1) {
     console.error(`❌ Invalid confidence score: must be a number between 0 and 1.`);
     process.exit(1);
   }
 
   const validEvidenceLevels = Object.values(EvidenceLevel) as readonly string[];
   if (typeof payload.evidence !== "string" || !validEvidenceLevels.includes(payload.evidence)) {
-    console.error(`❌ Invalid evidence level: must be one of ${Object.values(EvidenceLevel).join(", ")}`);
+    console.error(
+      `❌ Invalid evidence level: must be one of ${Object.values(EvidenceLevel).join(", ")}`,
+    );
     process.exit(1);
   }
 
@@ -75,11 +77,15 @@ export async function runRecord(projectRoot: string, args: string[]): Promise<vo
   );
 
   if (!result.persisted) {
-    console.error(`🚫 Lesson REJECTED by quality gate (score: ${result.qualityScore?.toFixed(2) ?? "N/A"})`);
+    console.error(
+      `🚫 Lesson REJECTED by quality gate (score: ${result.qualityScore?.toFixed(2) ?? "N/A"})`,
+    );
     if (result.qualityFeedback) {
       console.error(`   💡 Feedback: ${result.qualityFeedback}`);
     }
-    console.error(`   Tip: Make the lesson more specific — describe concrete files, exact errors, and actionable fixes.`);
+    console.error(
+      `   Tip: Make the lesson more specific — describe concrete files, exact errors, and actionable fixes.`,
+    );
     process.exit(1);
   }
 

@@ -1,13 +1,10 @@
 import { recordGrowthMetric } from "../core/memory.js";
-import { GrowthMetric } from "../core/types.js";
+import type { GrowthMetric } from "../core/types.js";
 
 /**
  * Parses and executes 'growth' subcommands.
  */
-export async function handleGrowthCommand(
-  projectRoot: string,
-  args: string[]
-): Promise<void> {
+export async function handleGrowthCommand(projectRoot: string, args: string[]): Promise<void> {
   const subcommand = args[0];
 
   switch (subcommand) {
@@ -54,12 +51,17 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     if (trend === "improving" || trend === "stable" || trend === "degrading") {
       payload.trend = trend as "improving" | "stable" | "degrading";
     } else {
-      console.error(`❌ Unknown trend "${trend}". Acceptable values: improving, stable, degrading.`);
+      console.error(
+        `❌ Unknown trend "${trend}". Acceptable values: improving, stable, degrading.`,
+      );
       process.exit(1);
     }
   }
 
-  const created = await recordGrowthMetric(payload as Omit<GrowthMetric, "measuredAt">, projectRoot);
+  const created = await recordGrowthMetric(
+    payload as Omit<GrowthMetric, "measuredAt">,
+    projectRoot,
+  );
   console.log(`📈 Growth metric [${created.name}] recorded successfully.`);
 }
 

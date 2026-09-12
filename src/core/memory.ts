@@ -1,9 +1,14 @@
+import * as crypto from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import * as crypto from "node:crypto";
-import { Lesson, GrowthMetric } from "./types.js";
-import { callDspy, callDspyRank, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "./dspy-client.js";
+import {
+  callDspy,
+  callDspyRank,
+  DEFAULT_DSPY_ENDPOINT,
+  DEFAULT_DSPY_TIMEOUT_MS,
+} from "./dspy-client.js";
 import { recordRecall } from "./lesson-outcome.js";
+import type { GrowthMetric, Lesson } from "./types.js";
 
 /**
  * Handles operations related to Layer 1 (Memory): lesson recording and growth metrics.
@@ -62,7 +67,7 @@ export interface LessonSearchResult {
 
 /**
  * Ensures the target file exists, creating it if necessary.
- * 
+ *
  * @param filepath - The absolute path of the target file to verify or create
  */
 async function ensureFileExists(filepath: string): Promise<void> {
@@ -76,7 +81,7 @@ async function ensureFileExists(filepath: string): Promise<void> {
 
 /**
  * Appends a JSON string followed by a newline to a file.
- * 
+ *
  * @param filepath - The absolute path of the target file
  * @param data - The JSON object to append
  */
@@ -88,7 +93,7 @@ async function appendJsonl(filepath: string, data: unknown): Promise<void> {
 
 /**
  * Reads all lessons from the JSONL file.
- * 
+ *
  * @param projectRoot - Directory where the lessons.jsonl file resides
  * @returns Array of Lesson objects read from the file
  */
@@ -139,7 +144,7 @@ export async function recordLesson(
     evidence: fragment.evidence,
     confidence: fragment.confidence,
   };
-  
+
   if (fragment.searchTerms) lesson.searchTerms = [...fragment.searchTerms];
   if (fragment.tags) lesson.tags = [...fragment.tags];
   if (fragment.relatedLessons) lesson.relatedLessons = [...fragment.relatedLessons];
@@ -224,7 +229,7 @@ export async function searchLessons(
 
   // v0.5.2: Semantic search via DSPy
   if (dspy?.enabled) {
-    const candidates = lessons.map(l => ({
+    const candidates = lessons.map((l) => ({
       id: l.id,
       content: `${l.title}. ${l.scenario}. ${l.insight}`,
     }));
@@ -241,7 +246,7 @@ export async function searchLessons(
       const results: LessonSearchResult[] = [];
       for (const r of ranked) {
         if (r.score <= 0.3) continue; // Filter irrelevant results
-        const lesson = lessons.find(l => l.id === r.id);
+        const lesson = lessons.find((l) => l.id === r.id);
         if (!lesson) continue;
         results.push({
           lesson,
@@ -269,14 +274,14 @@ export async function searchLessons(
   // Mode 1: String matching (original implementation)
   const lowerQuery = query.toLowerCase();
   const stringResults: LessonSearchResult[] = lessons
-    .filter(lesson => {
+    .filter((lesson) => {
       if (lesson.title.toLowerCase().includes(lowerQuery)) return true;
       if (lesson.insight.toLowerCase().includes(lowerQuery)) return true;
-      if (lesson.searchTerms?.some(t => t.toLowerCase().includes(lowerQuery))) return true;
-      if (lesson.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))) return true;
+      if (lesson.searchTerms?.some((t) => t.toLowerCase().includes(lowerQuery))) return true;
+      if (lesson.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))) return true;
       return false;
     })
-    .map(lesson => ({
+    .map((lesson) => ({
       lesson,
       relevanceScore: null,
       matchMethod: "string" as const,
@@ -332,7 +337,7 @@ function captureRecalls(
  */
 export async function recordGrowthMetric(
   metric: Omit<GrowthMetric, "measuredAt">,
-  projectRoot: string = process.cwd()
+  projectRoot: string = process.cwd(),
 ): Promise<GrowthMetric> {
   const fullMetric: GrowthMetric = {
     measuredAt: new Date().toISOString(),
@@ -340,7 +345,7 @@ export async function recordGrowthMetric(
     value: metric.value,
     unit: metric.unit,
   };
-  
+
   if (metric.source) fullMetric.source = metric.source;
   if (metric.trend) fullMetric.trend = metric.trend;
 

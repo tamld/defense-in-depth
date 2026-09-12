@@ -7,11 +7,11 @@
  */
 
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
 import { Severity } from "../core/types.js";
 
 const DEFAULT_ALLOWED_FILES: string[] = [];
-const DEFAULT_ALLOWED_PATTERNS: string[] = []; 
+const DEFAULT_ALLOWED_PATTERNS: string[] = [];
 
 /**
  * Checks if a file path is located directly at the root (no subdirectories).

@@ -6,12 +6,12 @@
  * Tier 1 — Opt-in (disabled by default), gracefully degrades if npm or network is offline.
  */
 
+import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { execFileSync } from "node:child_process";
 import { performance } from "node:perf_hooks";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 interface AuditSummary {
   vulnerabilities?: Record<string, number | { total: number }>;
@@ -84,9 +84,15 @@ export function createDependencyAuditGuard(options: DependencyAuditOptions = {})
       }
 
       // Check if package.json or lockfile is touched in staged files, or if run on whole project
-      const packageFilesTouched = ctx.stagedFiles.length === 0 || ctx.stagedFiles.some((f) =>
-        f === "package.json" || f.endsWith("lock.yaml") || f.endsWith("package-lock.json") || f.endsWith("yarn.lock")
-      );
+      const packageFilesTouched =
+        ctx.stagedFiles.length === 0 ||
+        ctx.stagedFiles.some(
+          (f) =>
+            f === "package.json" ||
+            f.endsWith("lock.yaml") ||
+            f.endsWith("package-lock.json") ||
+            f.endsWith("yarn.lock"),
+        );
 
       if (!packageFilesTouched) {
         return {

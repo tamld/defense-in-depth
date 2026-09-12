@@ -29,9 +29,7 @@ export function computeF1(
 ): GuardF1Metric {
   const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
   const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
-  const f1 = precision + recall > 0
-    ? 2 * (precision * recall) / (precision + recall)
-    : 0;
+  const f1 = precision + recall > 0 ? (2 * (precision * recall)) / (precision + recall) : 0;
 
   return {
     guardId,

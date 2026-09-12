@@ -7,8 +7,8 @@
  * STRIDE category: Tampering (with the security mechanism itself)
  */
 
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 const DEFAULT_PROTECTED_PATHS = [
   "scripts/check-coverage.mjs",
@@ -22,7 +22,8 @@ const TICKET_REGEX = /(TK-[0-9A-Z-]+|[A-Z]+-[0-9]+|#\d+)/i;
 export const selfProtectionGuard: Guard = {
   id: "selfProtection",
   name: "Self Protection Guard",
-  description: "Protects critical governance, test thresholds, and security configuration files from unauthorized tampering.",
+  description:
+    "Protects critical governance, test thresholds, and security configuration files from unauthorized tampering.",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = Date.now();
@@ -42,9 +43,11 @@ export const selfProtectionGuard: Guard = {
     const protectedList = config?.protectedPaths ?? DEFAULT_PROTECTED_PATHS;
     const hasTicketContext = Boolean(
       (ctx.ticket && ctx.ticket.id) ||
-      (ctx.commitMessage && TICKET_REGEX.test(ctx.commitMessage)) ||
-      (ctx.branch && (TICKET_REGEX.test(ctx.branch) || /^(feat|fix|chore|refactor|test|ci)\//i.test(ctx.branch))) ||
-      (process.env.TICKET_ID && TICKET_REGEX.test(process.env.TICKET_ID))
+        (ctx.commitMessage && TICKET_REGEX.test(ctx.commitMessage)) ||
+        (ctx.branch &&
+          (TICKET_REGEX.test(ctx.branch) ||
+            /^(feat|fix|chore|refactor|test|ci)\//i.test(ctx.branch))) ||
+        (process.env.TICKET_ID && TICKET_REGEX.test(process.env.TICKET_ID)),
     );
 
     for (const stagedRelPath of ctx.stagedFiles) {

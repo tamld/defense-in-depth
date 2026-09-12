@@ -13,6 +13,7 @@
  * `.agents/records/feedback.jsonl` via the same idempotent writer.
  */
 
+import { formatF1Summary } from "../core/f1.js";
 import {
   appendFeedback,
   computeF1FromFeedback,
@@ -21,7 +22,6 @@ import {
   readFeedback,
   scanHistory,
 } from "../core/feedback.js";
-import { formatF1Summary } from "../core/f1.js";
 import type { FeedbackEvent } from "../core/types.js";
 
 const LABELS: Record<string, FeedbackEvent["label"]> = {
@@ -31,10 +31,7 @@ const LABELS: Record<string, FeedbackEvent["label"]> = {
   tn: "TN",
 };
 
-export async function handleFeedbackCommand(
-  projectRoot: string,
-  args: string[],
-): Promise<void> {
+export async function handleFeedbackCommand(projectRoot: string, args: string[]): Promise<void> {
   const sub = args[0];
   switch (sub) {
     case "tp":
@@ -105,9 +102,7 @@ function runWrite(projectRoot: string, sub: string, rest: string[]): void {
       `✅ ${label} recorded for guard "${guard}" (id=${id})\n   path: ${result.path}\n`,
     );
   } else {
-    process.stderr.write(
-      `⚠  feedback event ${id} already recorded — no-op (idempotent).\n`,
-    );
+    process.stderr.write(`⚠  feedback event ${id} already recorded — no-op (idempotent).\n`);
   }
 }
 
@@ -160,9 +155,7 @@ function runScan(projectRoot: string, rest: string[]): void {
       "\n",
   );
   for (const e of result.proposed) {
-    process.stdout.write(
-      `  ${e.label} ${e.guardId.padEnd(18)} via ${e.source}  ${e.note ?? ""}\n`,
-    );
+    process.stdout.write(`  ${e.label} ${e.guardId.padEnd(18)} via ${e.source}  ${e.note ?? ""}\n`);
   }
   if (result.proposed.length === 0) {
     process.stdout.write("  (no feedback inferred)\n");

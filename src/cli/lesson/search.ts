@@ -1,6 +1,6 @@
-import { searchLessons } from "../../core/memory.js";
 import type { LessonSearchResult } from "../../core/memory.js";
-import { readFlag, printLessonUsage } from "./helpers.js";
+import { searchLessons } from "../../core/memory.js";
+import { printLessonUsage, readFlag } from "./helpers.js";
 
 export async function runSearch(projectRoot: string, args: string[]): Promise<void> {
   const useSemantic = args.includes("--semantic");

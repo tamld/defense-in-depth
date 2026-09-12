@@ -8,7 +8,7 @@
  */
 
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
 import { Severity } from "../core/types.js";
 
 /** Default protected path patterns */
@@ -49,8 +49,7 @@ function matchesProtected(filePath: string, pattern: string): boolean {
 export const ssotPollutionGuard: Guard = {
   id: "ssotPollution",
   name: "SSoT Pollution Detector",
-  description:
-    "Prevents governance state files from leaking into feature commits/PRs.",
+  description: "Prevents governance state files from leaking into feature commits/PRs.",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = performance.now();

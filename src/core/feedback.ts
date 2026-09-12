@@ -65,13 +65,25 @@ const feedbackSchema: JsonlSchema<FeedbackEvent> = {
     const executor = getString(raw, "executor");
     const note = getOptionalString(raw, "note");
     if (
-      guardId === null || ticketId === null || findingHash === null ||
-      label === null || source === null || timestamp === null ||
-      executor === null || note === null
-    ) return null;
+      guardId === null ||
+      ticketId === null ||
+      findingHash === null ||
+      label === null ||
+      source === null ||
+      timestamp === null ||
+      executor === null ||
+      note === null
+    )
+      return null;
     const event: FeedbackEvent = {
       id: raw.id as string,
-      guardId, ticketId, findingHash, label, source, timestamp, executor,
+      guardId,
+      ticketId,
+      findingHash,
+      label,
+      source,
+      timestamp,
+      executor,
     };
     if (note !== undefined) event.note = note;
     return event;
@@ -81,10 +93,7 @@ const feedbackSchema: JsonlSchema<FeedbackEvent> = {
 };
 
 function getFeedbackStore(projectRoot: string): JsonlStore<FeedbackEvent> {
-  return createJsonlStore<FeedbackEvent>(
-    path.resolve(projectRoot, FEEDBACK_JSONL),
-    feedbackSchema,
-  );
+  return createJsonlStore<FeedbackEvent>(path.resolve(projectRoot, FEEDBACK_JSONL), feedbackSchema);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -147,10 +156,7 @@ export interface AppendFeedbackResult {
  * (issue #43) so the on-disk semantics + runtime validation match
  * `lesson-outcome.ts` byte-for-byte.
  */
-export function appendFeedback(
-  projectRoot: string,
-  event: FeedbackEvent,
-): AppendFeedbackResult {
+export function appendFeedback(projectRoot: string, event: FeedbackEvent): AppendFeedbackResult {
   const result = getFeedbackStore(projectRoot).append(event);
   return { written: result.written, event: result.event, path: result.path };
 }
@@ -365,10 +371,7 @@ export function scanHistory(
     // something, but we cannot know which one without re-running.
     if (/^revert\b/i.test(commit.subject) || /^Revert "/.test(commit.subject)) {
       const reverted = findRevertedCommit(commit, commits);
-      if (
-        reverted &&
-        commit.timestampMs - reverted.timestampMs <= REVERT_WINDOW_MS
-      ) {
+      if (reverted && commit.timestampMs - reverted.timestampMs <= REVERT_WINDOW_MS) {
         proposed.push(
           buildScraperEvent(
             "unassigned-fn",
@@ -378,7 +381,6 @@ export function scanHistory(
             `[scraper] revert of ${reverted.sha.slice(0, 8)}`,
           ),
         );
-        continue;
       }
     }
 
@@ -446,11 +448,7 @@ function buildScraperEvent(
   };
 }
 
-function readGitLog(
-  projectRoot: string,
-  range: string,
-  max: number,
-): CommitInfo[] {
+function readGitLog(projectRoot: string, range: string, max: number): CommitInfo[] {
   // Use a sentinel record separator that is extremely unlikely to appear
   // inside commit messages.
   const recordSep = "\x1e";
@@ -504,10 +502,7 @@ function sharesAnyFile(a: string[], b: string[]): boolean {
   return b.some((f) => setA.has(f));
 }
 
-function findRevertedCommit(
-  revert: CommitInfo,
-  commits: CommitInfo[],
-): CommitInfo | undefined {
+function findRevertedCommit(revert: CommitInfo, commits: CommitInfo[]): CommitInfo | undefined {
   // git revert messages contain `This reverts commit <sha>.`
   const m = revert.body.match(/This reverts commit ([0-9a-f]{7,40})/i);
   if (!m) return undefined;

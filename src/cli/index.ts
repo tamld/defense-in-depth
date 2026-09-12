@@ -9,15 +9,15 @@
  *   doctor  — Health check: verify config, hooks, and guards
  */
 
-import { init } from "./init.js";
-import { verify } from "./verify.js";
-import { doctor, type DoctorOptions } from "./doctor.js";
-import { handleLessonCommand } from "./lesson/index.js";
-import { handleGrowthCommand } from "./growth.js";
-import { handleFeedbackCommand } from "./feedback.js";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { type DoctorOptions, doctor } from "./doctor.js";
+import { handleFeedbackCommand } from "./feedback.js";
+import { handleGrowthCommand } from "./growth.js";
+import { init } from "./init.js";
+import { handleLessonCommand } from "./lesson/index.js";
+import { verify } from "./verify.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

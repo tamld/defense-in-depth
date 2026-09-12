@@ -1,22 +1,19 @@
-import { recordLesson, searchLessons } from "../core/memory.js";
-import type { RecordLessonResult, LessonSearchResult } from "../core/memory.js";
-import { EvidenceLevel, Lesson, LessonOutcome, RecallEvent } from "../core/types.js";
+import * as fs from "fs/promises";
+import * as path from "path";
 import {
   appendOutcome,
   outcomeEventId,
   readRecalls,
   scanOutcomes,
 } from "../core/lesson-outcome.js";
-import * as fs from "fs/promises";
-import * as path from "path";
+import type { LessonSearchResult, RecordLessonResult } from "../core/memory.js";
+import { recordLesson, searchLessons } from "../core/memory.js";
+import { EvidenceLevel, type Lesson, type LessonOutcome, type RecallEvent } from "../core/types.js";
 
 /**
  * Parses and executes 'lesson' subcommands.
  */
-export async function handleLessonCommand(
-  projectRoot: string,
-  args: string[]
-): Promise<void> {
+export async function handleLessonCommand(projectRoot: string, args: string[]): Promise<void> {
   const subcommand = args[0];
 
   switch (subcommand) {
@@ -54,8 +51,9 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     const filePath = path.resolve(projectRoot, args[fileIdx + 1]);
     try {
       rawJson = await fs.readFile(filePath, "utf-8");
-    } catch (err: any) {
-      console.error(`❌ Failed to read payload file ${filePath}: ${err.message}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`❌ Failed to read payload file ${filePath}: ${msg}`);
       process.exit(1);
     }
   } else if (dataIdx >= 0 && args[dataIdx + 1]) {
@@ -67,18 +65,19 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
   }
 
   interface LessonPayload extends Partial<Lesson> {
-  ticketId?: string;
-  tags?: string[];
-  searchTerms?: string[];
-  relatedLessons?: string[];
-  relatedFiles?: string[];
-}
+    ticketId?: string;
+    tags?: string[];
+    searchTerms?: string[];
+    relatedLessons?: string[];
+    relatedFiles?: string[];
+  }
 
   let payload: LessonPayload;
   try {
     payload = JSON.parse(rawJson);
-  } catch (err: any) {
-    console.error(`❌ Invalid JSON payload: ${err.message}`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`❌ Invalid JSON payload: ${msg}`);
     process.exit(1);
   }
 
@@ -99,14 +98,16 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  if (typeof payload.confidence !== 'number' || payload.confidence < 0 || payload.confidence > 1) {
+  if (typeof payload.confidence !== "number" || payload.confidence < 0 || payload.confidence > 1) {
     console.error(`❌ Invalid confidence score: must be a number between 0 and 1.`);
     process.exit(1);
   }
 
   const validEvidenceLevels: string[] = Object.values(EvidenceLevel);
-  if (typeof payload.evidence !== 'string' || !validEvidenceLevels.includes(payload.evidence)) {
-    console.error(`❌ Invalid evidence level: must be one of ${Object.values(EvidenceLevel).join(", ")}`);
+  if (typeof payload.evidence !== "string" || !validEvidenceLevels.includes(payload.evidence)) {
+    console.error(
+      `❌ Invalid evidence level: must be one of ${Object.values(EvidenceLevel).join(", ")}`,
+    );
     process.exit(1);
   }
 
@@ -136,11 +137,15 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
   );
 
   if (!result.persisted) {
-    console.error(`🚫 Lesson REJECTED by quality gate (score: ${result.qualityScore?.toFixed(2) ?? "N/A"})`);
+    console.error(
+      `🚫 Lesson REJECTED by quality gate (score: ${result.qualityScore?.toFixed(2) ?? "N/A"})`,
+    );
     if (result.qualityFeedback) {
       console.error(`   💡 Feedback: ${result.qualityFeedback}`);
     }
-    console.error(`   Tip: Make the lesson more specific — describe concrete files, exact errors, and actionable fixes.`);
+    console.error(
+      `   Tip: Make the lesson more specific — describe concrete files, exact errors, and actionable fixes.`,
+    );
     process.exit(1);
   }
 
@@ -268,9 +273,7 @@ async function runOutcome(projectRoot: string, args: string[]): Promise<void> {
         `${recall.lessonId} (recall=${recall.id} outcome=${id})\n   path: ${result.path}\n`,
     );
   } else {
-    process.stderr.write(
-      `⚠  outcome ${id} already recorded — no-op (idempotent).\n`,
-    );
+    process.stderr.write(`⚠  outcome ${id} already recorded — no-op (idempotent).\n`);
   }
 }
 

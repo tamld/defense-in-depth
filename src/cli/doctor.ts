@@ -32,10 +32,7 @@ export interface DoctorOptions {
   hintsActionArg?: string;
 }
 
-export async function doctor(
-  projectRoot: string,
-  options: DoctorOptions = {},
-): Promise<void> {
+export async function doctor(projectRoot: string, options: DoctorOptions = {}): Promise<void> {
   // Hint-only subcommands: short-circuit the health check.
   if (options.hintsAction === "dismiss") {
     runHintsDismiss(projectRoot, options.hintsActionArg);
@@ -61,9 +58,7 @@ export async function doctor(
 
   // 2. Config check
   const configNames = ["defense.config.yml", "defend.config.yaml", ".defendrc.yml"];
-  const configFound = configNames.find((name) =>
-    fs.existsSync(path.join(projectRoot, name)),
-  );
+  const configFound = configNames.find((name) => fs.existsSync(path.join(projectRoot, name)));
 
   if (configFound) {
     console.log(`  ✅ Config found: ${configFound}`);
@@ -127,10 +122,7 @@ function runHintsDismiss(projectRoot: string, hintId: string | undefined): void 
   }
   const known = new Set(listAllHints().map((h) => h.id));
   if (!known.has(hintId)) {
-    process.stderr.write(
-      `Unknown hint id: ${hintId}\n` +
-        `Known: ${[...known].join(", ")}\n`,
-    );
+    process.stderr.write(`Unknown hint id: ${hintId}\n` + `Known: ${[...known].join(", ")}\n`);
     process.exit(1);
   }
   dismissHint(projectRoot, hintId);

@@ -15,8 +15,8 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 // DSPy contract schema moved to src/core/dspy-client.ts
 // Re-export for backward compatibility
@@ -44,7 +44,7 @@ const DEFAULT_HOLLOW_PATTERNS = [
  * inside character classes — escape it for safety even outside them).
  */
 function escapeRegExp(s: string): string {
-  return s.replace(/[\\^$.|?*+()[\]{}\-]/g, "\\$&");
+  return s.replace(/[\\^$.|?*+()[\]{}-]/g, "\\$&");
 }
 
 /** Default file extensions to scan */
@@ -57,17 +57,26 @@ const DEFAULT_MIN_CONTENT_LENGTH = 50;
 const DEFAULT_DSPY_TIMEOUT_MS = 5000;
 
 /** Hard-coded whitelist of semantic text extensions safely scannable by DSPy */
-const SEMANTIC_TEXT_EXTS = new Set([".md", ".json", ".js", ".ts", ".html", ".yml", ".yaml", ".txt"]);
+const SEMANTIC_TEXT_EXTS = new Set([
+  ".md",
+  ".json",
+  ".js",
+  ".ts",
+  ".html",
+  ".yml",
+  ".yaml",
+  ".txt",
+]);
 
 /**
  * Strip markdown headers, frontmatter, and whitespace to get "meaningful" content.
  */
 function stripBoilerplate(content: string): string {
   return content
-    .replace(/^---[\s\S]*?---/m, "")       // YAML frontmatter
-    .replace(/^#+\s.*$/gm, "")             // Markdown headers
-    .replace(/^\s*[-*]\s*$/gm, "")         // Empty list items
-    .replace(/^\s*$/gm, "")               // Blank lines
+    .replace(/^---[\s\S]*?---/m, "") // YAML frontmatter
+    .replace(/^#+\s.*$/gm, "") // Markdown headers
+    .replace(/^\s*[-*]\s*$/gm, "") // Empty list items
+    .replace(/^\s*$/gm, "") // Blank lines
     .trim();
 }
 
@@ -99,9 +108,7 @@ export const hollowArtifactGuard: Guard = {
     const useDspy = config?.useDspy === true;
 
     // Filter staged files to only check relevant extensions
-    const filesToCheck = ctx.stagedFiles.filter((f) =>
-      extensions.some((ext) => f.endsWith(ext)),
-    );
+    const filesToCheck = ctx.stagedFiles.filter((f) => extensions.some((ext) => f.endsWith(ext)));
 
     for (const relPath of filesToCheck) {
       const absPath = path.join(ctx.projectRoot, relPath);
@@ -156,7 +163,11 @@ export const hollowArtifactGuard: Guard = {
       const isSemanticText = SEMANTIC_TEXT_EXTS.has(ext);
 
       // Only runs when useDspy is true AND file passed deterministic checks AND file is a safe text type
-      if (useDspy && isSemanticText && !findings.some((f) => f.filePath === relPath && f.severity === Severity.BLOCK)) {
+      if (
+        useDspy &&
+        isSemanticText &&
+        !findings.some((f) => f.filePath === relPath && f.severity === Severity.BLOCK)
+      ) {
         const dspyEval = ctx.semanticEvals?.dspy?.[relPath];
         if (dspyEval && dspyEval.score < 0.5) {
           findings.push({
@@ -180,4 +191,3 @@ export const hollowArtifactGuard: Guard = {
     };
   },
 };
-

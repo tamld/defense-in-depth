@@ -30,10 +30,7 @@ export type HintChannel = "doctor" | "verify-success";
  * Returns the hint that was emitted (if any) so callers can log/test the
  * decision without re-implementing the policy.
  */
-export function emitOneHint(
-  projectRoot: string,
-  channel: HintChannel,
-): Hint | null {
+export function emitOneHint(projectRoot: string, channel: HintChannel): Hint | null {
   if (!isChannelEnabled(projectRoot, channel)) return null;
   if (process.env.NO_HINTS === "1") return null;
   if (process.env.CI === "true") return null;
@@ -55,10 +52,7 @@ export function emitOneHint(
  * Each emitted hint's `lastShownAt` still ticks forward so a subsequent
  * default `did doctor` call respects the cooldown.
  */
-export function emitAllHints(
-  projectRoot: string,
-  channel: HintChannel,
-): Hint[] {
+export function emitAllHints(projectRoot: string, channel: HintChannel): Hint[] {
   if (!isChannelEnabled(projectRoot, channel)) return [];
   if (process.env.NO_HINTS === "1") return [];
   if (process.env.CI === "true") return [];
@@ -84,8 +78,7 @@ export function formatHint(hint: Hint): string {
   const dimOpen = useColor ? "\x1b[2m" : "";
   const dimClose = useColor ? "\x1b[0m" : "";
   const lightbulb = "💡";
-  const footer =
-    `   (Hide: did doctor --hints dismiss ${hint.id} | NO_HINTS=1)`;
+  const footer = `   (Hide: did doctor --hints dismiss ${hint.id} | NO_HINTS=1)`;
   return `${dimOpen}${lightbulb} Tip: ${hint.body}\n${footer}${dimClose}\n`;
 }
 
@@ -94,10 +87,7 @@ export function formatHint(hint: Hint): string {
  * + the built-in default. A missing `hints` block is interpreted as
  * "enabled with default channels".
  */
-export function isChannelEnabled(
-  projectRoot: string,
-  channel: HintChannel,
-): boolean {
+export function isChannelEnabled(projectRoot: string, channel: HintChannel): boolean {
   const config = loadConfig(projectRoot);
   if (config.hints?.enabled === false) return false;
   const channels = config.hints?.channels ?? DEFAULT_HINT_CHANNELS;

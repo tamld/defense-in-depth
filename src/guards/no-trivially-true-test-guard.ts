@@ -12,12 +12,10 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
-const DEFAULT_ALLOWLIST_PATTERNS = [
-  /tests\/fixtures\//,
-];
+const DEFAULT_ALLOWLIST_PATTERNS = [/tests\/fixtures\//];
 
 // Patterns matching trivially true constant assertions
 const TRIVIAL_ASSERTION_PATTERNS = [
@@ -26,11 +24,15 @@ const TRIVIAL_ASSERTION_PATTERNS = [
   /assert\s*\.ok\s*\(\s*(?:true|1)\s*\)/i,
 ];
 
-const ASSERTION_CALL_PATTERN = /\b(?:assert(?:\.[a-zA-Z_$]+|\s*\()|expect\s*\(|t\.assert|t\.equal|t\.strictEqual|t\.ok|t\.deepEqual|t\.throws|t\.doesNotThrow)\b/;
+const ASSERTION_CALL_PATTERN =
+  /\b(?:assert(?:\.[a-zA-Z_$]+|\s*\()|expect\s*\(|t\.assert|t\.equal|t\.strictEqual|t\.ok|t\.deepEqual|t\.throws|t\.doesNotThrow)\b/;
 
-function extractTestBodies(content: string): Array<{ name: string; body: string; lineNum: number }> {
+function extractTestBodies(
+  content: string,
+): Array<{ name: string; body: string; lineNum: number }> {
   const results: Array<{ name: string; body: string; lineNum: number }> = [];
-  const testStartRegex = /(?:\btest|\bit|\bdescribe|\bt\.test)\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*(?:async\s*)?(?:\([^)]*\)|[a-zA-Z_$]+)\s*=>\s*\{/g;
+  const testStartRegex =
+    /(?:\btest|\bit|\bdescribe|\bt\.test)\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*(?:async\s*)?(?:\([^)]*\)|[a-zA-Z_$]+)\s*=>\s*\{/g;
   let match: RegExpExecArray | null;
 
   while ((match = testStartRegex.exec(content)) !== null) {
@@ -77,7 +79,8 @@ function extractTestBodies(content: string): Array<{ name: string; body: string;
 export const noTriviallyTrueTestGuard: Guard = {
   id: "noTriviallyTrueTest",
   name: "No Trivially True Test Guard",
-  description: "Blocks trivially true assertions and test blocks without assertions in staged test files.",
+  description:
+    "Blocks trivially true assertions and test blocks without assertions in staged test files.",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = Date.now();
@@ -108,7 +111,11 @@ export const noTriviallyTrueTestGuard: Guard = {
         continue;
       }
 
-      if (customAllowlist.some((pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath))) {
+      if (
+        customAllowlist.some(
+          (pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath),
+        )
+      ) {
         continue;
       }
 
@@ -120,7 +127,7 @@ export const noTriviallyTrueTestGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch (readErr) {
+      } catch {
         // Ignore unreadable or deleted test files (TK-000)
         continue;
       }

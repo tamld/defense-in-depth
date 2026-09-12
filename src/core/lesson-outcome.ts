@@ -29,13 +29,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
-
-import type { LessonOutcome, RecallEvent } from "./types.js";
-import {
-  callDspy,
-  DEFAULT_DSPY_ENDPOINT,
-  DEFAULT_DSPY_TIMEOUT_MS,
-} from "./dspy-client.js";
+import { callDspy, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "./dspy-client.js";
 import {
   createJsonlStore,
   getOptionalString,
@@ -45,6 +39,7 @@ import {
   type JsonlSchema,
   type JsonlStore,
 } from "./jsonl-store.js";
+import type { LessonOutcome, RecallEvent } from "./types.js";
 
 const RECALLS_JSONL = ".agents/records/lesson-recalls.jsonl";
 const OUTCOMES_JSONL = ".agents/records/lesson-outcomes.jsonl";
@@ -57,9 +52,7 @@ const SCAN_LOOKAHEAD_MS = 30 * 24 * 60 * 60 * 1000;
 // JSONL schemas for recalls + outcomes (issue #43).
 const RECALL_MATCH_METHODS = ["string", "semantic"] as const;
 const RECALL_SOURCES = ["search", "cli-explicit"] as const;
-const OUTCOME_SOURCES = [
-  "cli-explicit", "scanner-pattern-match", "scanner-no-match",
-] as const;
+const OUTCOME_SOURCES = ["cli-explicit", "scanner-pattern-match", "scanner-no-match"] as const;
 
 const recallSchema: JsonlSchema<RecallEvent> = {
   validate(raw: unknown): RecallEvent | null {
@@ -72,13 +65,24 @@ const recallSchema: JsonlSchema<RecallEvent> = {
     const timestamp = getString(raw, "timestamp");
     const executor = getString(raw, "executor");
     if (
-      lessonId === null || ticketId === null || queryHash === null ||
-      matchMethod === null || source === null || timestamp === null ||
+      lessonId === null ||
+      ticketId === null ||
+      queryHash === null ||
+      matchMethod === null ||
+      source === null ||
+      timestamp === null ||
       executor === null
-    ) return null;
+    )
+      return null;
     return {
       id: raw.id as string,
-      lessonId, ticketId, queryHash, matchMethod, source, timestamp, executor,
+      lessonId,
+      ticketId,
+      queryHash,
+      matchMethod,
+      source,
+      timestamp,
+      executor,
     };
   },
   idOf: (e) => e.id,
@@ -96,10 +100,15 @@ const outcomeSchema: JsonlSchema<LessonOutcome> = {
     const matchedPattern = getOptionalString(raw, "matchedPattern");
     const note = getOptionalString(raw, "note");
     if (
-      recallId === null || lessonId === null || source === null ||
-      timestamp === null || executor === null ||
-      matchedPattern === null || note === null
-    ) return null;
+      recallId === null ||
+      lessonId === null ||
+      source === null ||
+      timestamp === null ||
+      executor === null ||
+      matchedPattern === null ||
+      note === null
+    )
+      return null;
     // `helpful: boolean | null` — must be one of the three; absent is invalid.
     const r = raw as Record<string, unknown>;
     if (!("helpful" in r)) return null;
@@ -107,7 +116,12 @@ const outcomeSchema: JsonlSchema<LessonOutcome> = {
     if (helpful !== true && helpful !== false && helpful !== null) return null;
     const event: LessonOutcome = {
       id: raw.id as string,
-      recallId, lessonId, helpful, source, timestamp, executor,
+      recallId,
+      lessonId,
+      helpful,
+      source,
+      timestamp,
+      executor,
     };
     if (matchedPattern !== undefined) event.matchedPattern = matchedPattern;
     if (note !== undefined) event.note = note;
@@ -118,17 +132,11 @@ const outcomeSchema: JsonlSchema<LessonOutcome> = {
 };
 
 function getRecallStore(projectRoot: string): JsonlStore<RecallEvent> {
-  return createJsonlStore<RecallEvent>(
-    path.resolve(projectRoot, RECALLS_JSONL),
-    recallSchema,
-  );
+  return createJsonlStore<RecallEvent>(path.resolve(projectRoot, RECALLS_JSONL), recallSchema);
 }
 
 function getOutcomeStore(projectRoot: string): JsonlStore<LessonOutcome> {
-  return createJsonlStore<LessonOutcome>(
-    path.resolve(projectRoot, OUTCOMES_JSONL),
-    outcomeSchema,
-  );
+  return createJsonlStore<LessonOutcome>(path.resolve(projectRoot, OUTCOMES_JSONL), outcomeSchema);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -165,10 +173,7 @@ export function recallEventId(
  * produces a distinct id and both events stay on the JSONL for audit.
  */
 export function outcomeEventId(recallId: string, label: string): string {
-  return createHash("sha256")
-    .update(`${recallId}|${label}`)
-    .digest("hex")
-    .slice(0, 16);
+  return createHash("sha256").update(`${recallId}|${label}`).digest("hex").slice(0, 16);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -218,8 +223,7 @@ export function appendRecall(
   const windowMs = options.dedupeWindowMs ?? RECALL_DEDUPE_WINDOW_MS;
   const result = getRecallStore(projectRoot).appendWithWindow(event, {
     windowMs,
-    windowKeyOf: (e) =>
-      `${e.lessonId}|${e.ticketId}|${e.queryHash}|${e.matchMethod}`,
+    windowKeyOf: (e) => `${e.lessonId}|${e.ticketId}|${e.queryHash}|${e.matchMethod}`,
   });
   const out: AppendRecallResult = {
     written: result.written,
@@ -235,10 +239,7 @@ export function appendRecall(
  *
  * Idempotent on `id`. Same `(recallId, label)` → no-op.
  */
-export function appendOutcome(
-  projectRoot: string,
-  event: LessonOutcome,
-): AppendOutcomeResult {
+export function appendOutcome(projectRoot: string, event: LessonOutcome): AppendOutcomeResult {
   const result = getOutcomeStore(projectRoot).append(event);
   return { written: result.written, event: result.event, path: result.path };
 }
@@ -255,10 +256,7 @@ export interface ReadRecallsOptions {
   limit?: number;
 }
 
-export function readRecalls(
-  projectRoot: string,
-  options: ReadRecallsOptions = {},
-): RecallEvent[] {
+export function readRecalls(projectRoot: string, options: ReadRecallsOptions = {}): RecallEvent[] {
   return getRecallStore(projectRoot).read({
     since: options.since,
     limit: options.limit,
@@ -369,9 +367,7 @@ export interface EvaluateRecallResult {
  *   2. no pattern → helpful=null, source="scanner-no-match" (we don't
  *      pretend to know).
  */
-export function evaluateRecallAgainstCommits(
-  input: EvaluateRecallInput,
-): EvaluateRecallResult {
+export function evaluateRecallAgainstCommits(input: EvaluateRecallInput): EvaluateRecallResult {
   const pattern = input.lesson.wrongApproachPattern?.trim();
   if (!pattern) {
     return { helpful: null, source: "scanner-no-match" };
@@ -471,9 +467,7 @@ export async function scanOutcomes(
     if (now.getTime() - recallTs > lookback) continue;
 
     const windowEnd = recallTs + lookback;
-    const inWindow = commits.filter(
-      (c) => c.timestampMs >= recallTs && c.timestampMs <= windowEnd,
-    );
+    const inWindow = commits.filter((c) => c.timestampMs >= recallTs && c.timestampMs <= windowEnd);
 
     const lesson = lessonById.get(recall.lessonId) ?? {
       id: recall.lessonId,
@@ -487,11 +481,7 @@ export async function scanOutcomes(
         commits: inWindow,
       });
     } else if (options.dspy?.enabled && dspyAvailable && lesson.wrongApproach) {
-      const fuzzy = await fuzzyMatch(
-        lesson.wrongApproach,
-        inWindow,
-        options.dspy,
-      );
+      const fuzzy = await fuzzyMatch(lesson.wrongApproach, inWindow, options.dspy);
       if (fuzzy === "unavailable") {
         // án lệ L-2026-04-29 — opt-in tier-1 feature degraded → must signal.
         if (!dspyDegraded) {
@@ -595,11 +585,7 @@ async function fuzzyMatch(
 // Git plumbing — read commit diffs in a range
 // ──────────────────────────────────────────────────────────────────────────
 
-function readGitDiffs(
-  projectRoot: string,
-  range: string,
-  max: number,
-): CommitDiff[] {
+function readGitDiffs(projectRoot: string, range: string, max: number): CommitDiff[] {
   const recordSep = "\x1e";
   const fieldSep = "\x1f";
   const format = ["%H", "%ct"].join(fieldSep);
@@ -607,13 +593,7 @@ function readGitDiffs(
   try {
     raw = execFileSync(
       "git",
-      [
-        "log",
-        `--max-count=${max}`,
-        `--format=${recordSep}${format}`,
-        "-p",
-        range,
-      ],
+      ["log", `--max-count=${max}`, `--format=${recordSep}${format}`, "-p", range],
       {
         cwd: projectRoot,
         encoding: "utf-8",

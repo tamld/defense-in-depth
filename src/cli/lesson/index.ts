@@ -1,17 +1,14 @@
-import { runRecord } from "./record.js";
-import { runSearch } from "./search.js";
-import { runOutcome } from "./outcome.js";
-import { runScanOutcomes } from "./scan.js";
-import { runRecalls } from "./recalls.js";
 import { printLessonUsage } from "./helpers.js";
+import { runOutcome } from "./outcome.js";
+import { runRecalls } from "./recalls.js";
+import { runRecord } from "./record.js";
+import { runScanOutcomes } from "./scan.js";
+import { runSearch } from "./search.js";
 
 /**
  * Parses and executes 'lesson' subcommands.
  */
-export async function handleLessonCommand(
-  projectRoot: string,
-  args: string[]
-): Promise<void> {
+export async function handleLessonCommand(projectRoot: string, args: string[]): Promise<void> {
   const subcommand = args[0];
 
   switch (subcommand) {
@@ -37,11 +34,4 @@ export async function handleLessonCommand(
   }
 }
 
-export {
-  runRecord,
-  runSearch,
-  runOutcome,
-  runScanOutcomes,
-  runRecalls,
-  printLessonUsage,
-};
+export { printLessonUsage, runOutcome, runRecalls, runRecord, runScanOutcomes, runSearch };

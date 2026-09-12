@@ -20,7 +20,7 @@
  */
 
 import type { Guard, GuardContext, GuardResult } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 /** Default parent phases that block child execution */
 const DEFAULT_BLOCKED_PHASES = ["BLOCKED", "CANCELLED", "ARCHIVED"];
@@ -28,8 +28,7 @@ const DEFAULT_BLOCKED_PHASES = ["BLOCKED", "CANCELLED", "ARCHIVED"];
 export const federationGuard: Guard = {
   id: "federation",
   name: "Federation Parent-Child Check",
-  description:
-    "Validates child project authorization against parent ticket state",
+  description: "Validates child project authorization against parent ticket state",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = performance.now();
@@ -64,7 +63,7 @@ export const federationGuard: Guard = {
     // Check 2: Parent phase is in blocked list
     if (ctx.ticket.parentPhase) {
       const normalizedPhase = ctx.ticket.parentPhase.toUpperCase();
-      if (blockedPhases.map(p => p.toUpperCase()).includes(normalizedPhase)) {
+      if (blockedPhases.map((p) => p.toUpperCase()).includes(normalizedPhase)) {
         findings.push({
           guardId: this.id,
           severity,
@@ -88,7 +87,10 @@ export const federationGuard: Guard = {
 
     return {
       guardId: this.id,
-      passed: severityLevel === "warn" ? true : findings.filter(f => f.severity === Severity.BLOCK).length === 0,
+      passed:
+        severityLevel === "warn"
+          ? true
+          : findings.filter((f) => f.severity === Severity.BLOCK).length === 0,
       findings,
       durationMs: performance.now() - start,
     };

@@ -37,9 +37,9 @@
  * apply rules, return ordered findings.
  */
 
+import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { execFileSync } from "node:child_process";
 
 import { loadConfig } from "./config-loader.js";
 import { readFeedback } from "./feedback.js";
@@ -106,9 +106,7 @@ export function evaluateHints(opts: EvaluateHintsOptions): Hint[] {
   if (ruleH003(repo)) candidates.push(HINT_CATALOG.H003);
   if (ruleH004(repo)) candidates.push(HINT_CATALOG.H004);
 
-  return candidates.filter((hint) =>
-    isEligible(hint, opts.state, cooldownDays, now),
-  );
+  return candidates.filter((hint) => isEligible(hint, opts.state, cooldownDays, now));
 }
 
 /**
@@ -163,12 +161,7 @@ const HINT_CATALOG = {
 // Eligibility — cooldown + dismissal filter applied to every candidate.
 // ───────────────────────────────────────────────────────────────────────────
 
-function isEligible(
-  hint: Hint,
-  state: HintState,
-  cooldownDays: number,
-  now: Date,
-): boolean {
+function isEligible(hint: Hint, state: HintState, cooldownDays: number, now: Date): boolean {
   const entry = state.shown[hint.id];
   if (!entry) return true;
   if (entry.dismissedAt !== null) return false;
@@ -236,8 +229,9 @@ function ruleH004(repo: RepoState): boolean {
 
 function readRepoState(projectRoot: string): RepoState {
   const config = loadConfig(projectRoot);
-  const configFileExists = ["defense.config.yml", "defend.config.yaml", ".defendrc.yml"]
-    .some((name) => fs.existsSync(path.join(projectRoot, name)));
+  const configFileExists = ["defense.config.yml", "defend.config.yaml", ".defendrc.yml"].some(
+    (name) => fs.existsSync(path.join(projectRoot, name)),
+  );
 
   // "DSPy wired" means the user has explicitly opted in via `useDspy: true`
   // on the hollow-artifact guard. The default merged config carries a

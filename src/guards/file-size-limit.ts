@@ -10,8 +10,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { performance } from "node:perf_hooks";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 const DEFAULT_MAX_SIZE_BYTES = 1024 * 1024; // 1 MB
 
@@ -42,7 +42,9 @@ export const fileSizeLimitGuard: Guard = {
 
     const maxSizeBytes = config?.maxSizeBytes ?? DEFAULT_MAX_SIZE_BYTES;
     const severity = config?.severity === "warn" ? Severity.WARN : Severity.BLOCK;
-    const ignoredExtensions = new Set((config?.ignoredExtensions ?? []).map((e) => e.toLowerCase()));
+    const ignoredExtensions = new Set(
+      (config?.ignoredExtensions ?? []).map((e) => e.toLowerCase()),
+    );
 
     for (const relPath of ctx.stagedFiles) {
       const ext = path.extname(relPath).toLowerCase();

@@ -10,14 +10,12 @@
 import type { Guard, GuardContext, GuardResult } from "../core/types.js";
 import { Severity } from "../core/types.js";
 
-const DEFAULT_PATTERN =
-  /^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\(.*\))?(!)?\:\s.+/;
+const DEFAULT_PATTERN = /^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\(.*\))?(!)?:\s.+/;
 
 export const commitFormatGuard: Guard = {
   id: "commitFormat",
   name: "Commit Format Enforcer",
-  description:
-    "Enforces conventional commit message format (e.g. feat(scope): description).",
+  description: "Enforces conventional commit message format (e.g. feat(scope): description).",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = performance.now();
@@ -32,15 +30,16 @@ export const commitFormatGuard: Guard = {
     }
 
     const config = ctx.config.guards.commitFormat;
-    const pattern = config?.pattern
-      ? new RegExp(config.pattern)
-      : DEFAULT_PATTERN;
+    const pattern = config?.pattern ? new RegExp(config.pattern) : DEFAULT_PATTERN;
 
     // Only check the first line (subject)
     const subject = ctx.commitMessage.split("\n")[0].trim();
 
     // In CI pull_request runs, synthetic merge commits should not be blocked
-    if (subject.startsWith("Merge ") && (process.env.GITHUB_EVENT_NAME === "pull_request" || process.env.CI)) {
+    if (
+      subject.startsWith("Merge ") &&
+      (process.env.GITHUB_EVENT_NAME === "pull_request" || process.env.CI)
+    ) {
       return {
         guardId: "commitFormat",
         passed: true,
@@ -53,8 +52,15 @@ export const commitFormatGuard: Guard = {
 
     if (!matches) {
       const allowedTypes = config?.types ?? [
-        "feat", "fix", "chore", "docs",
-        "refactor", "test", "style", "perf", "ci",
+        "feat",
+        "fix",
+        "chore",
+        "docs",
+        "refactor",
+        "test",
+        "style",
+        "perf",
+        "ci",
       ];
 
       return {

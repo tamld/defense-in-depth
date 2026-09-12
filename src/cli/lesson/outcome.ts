@@ -1,10 +1,6 @@
+import { appendOutcome, outcomeEventId, readRecalls } from "../../core/lesson-outcome.js";
 import type { LessonOutcome, RecallEvent } from "../../core/types.js";
-import {
-  appendOutcome,
-  outcomeEventId,
-  readRecalls,
-} from "../../core/lesson-outcome.js";
-import { readFlag, printLessonUsage } from "./helpers.js";
+import { printLessonUsage, readFlag } from "./helpers.js";
 
 export async function runOutcome(projectRoot: string, args: string[]): Promise<void> {
   const lessonId = args[0];
@@ -74,8 +70,6 @@ export async function runOutcome(projectRoot: string, args: string[]): Promise<v
         `${recall.lessonId} (recall=${recall.id} outcome=${id})\n   path: ${result.path}\n`,
     );
   } else {
-    process.stderr.write(
-      `⚠  outcome ${id} already recorded — no-op (idempotent).\n`,
-    );
+    process.stderr.write(`⚠  outcome ${id} already recorded — no-op (idempotent).\n`);
   }
 }

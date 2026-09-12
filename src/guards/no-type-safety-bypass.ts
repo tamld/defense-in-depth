@@ -3,7 +3,7 @@
  *
  * Blocks patterns that disable or bypass the TypeScript compiler type system:
  *   - 'as any' casts
- *   - '// @ts-ignore' comments
+ *   - '// @ts-expect-error' comments
  *   - '// @ts-nocheck' comments
  *   - '// @ts-expect-error' without an approved ticket/reason escape hatch
  *
@@ -12,8 +12,8 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 const DEFAULT_ALLOWLIST_PATTERNS = [
   /(^|\/)tests?\//,
@@ -29,7 +29,8 @@ const TICKET_ESCAPE_HATCH = /@ts-expect-error\s*[-—:]\s*(TK-[0-9A-Z-]+|[A-Z]+-
 export const noTypeSafetyBypassGuard: Guard = {
   id: "noTypeSafetyBypass",
   name: "No Type Safety Bypass Guard",
-  description: "Blocks 'as any', '@ts-ignore', '@ts-nocheck', and unreferenced '@ts-expect-error' on commit.",
+  description:
+    "Blocks 'as any', '@ts-ignore', '@ts-nocheck', and unreferenced '@ts-expect-error' on commit.",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = Date.now();
@@ -63,7 +64,11 @@ export const noTypeSafetyBypassGuard: Guard = {
       }
 
       // Check custom allowlist
-      if (customAllowlist.some((pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath))) {
+      if (
+        customAllowlist.some(
+          (pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath),
+        )
+      ) {
         continue;
       }
 
@@ -92,7 +97,11 @@ export const noTypeSafetyBypassGuard: Guard = {
         const lineNum = i + 1;
 
         // 1. Check for 'as any' in code (ignore single-line comments and string literals)
-        if (/\bas\s+any\b/.test(lineText) && !trimmed.startsWith("//") && !/["'`].*?\bas\s+any\b.*?["'`]/.test(lineText)) {
+        if (
+          /\bas\s+any\b/.test(lineText) &&
+          !trimmed.startsWith("//") &&
+          !/["'`].*?\bas\s+any\b.*?["'`]/.test(lineText)
+        ) {
           findings.push({
             guardId: "noTypeSafetyBypass",
             severity,
@@ -104,7 +113,7 @@ export const noTypeSafetyBypassGuard: Guard = {
           });
         }
 
-        // 2. Check for @ts-ignore comment directive
+        // 2. Check for @ts-expect-error comment directive
         if (/^\/\/\s*@ts-ignore\b/.test(trimmed)) {
           findings.push({
             guardId: "noTypeSafetyBypass",

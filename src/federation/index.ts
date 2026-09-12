@@ -12,7 +12,7 @@
 
 import { FileTicketProvider } from "./file-provider.js";
 import { HttpTicketProvider } from "./http-provider.js";
-import type { TicketStateProvider, ProviderConfig } from "./types.js";
+import type { ProviderConfig, TicketStateProvider } from "./types.js";
 
 /**
  * Create a TicketStateProvider from config values.
@@ -39,14 +39,12 @@ export function createProvider(
 
     default:
       // Future: dynamic import for custom providers
-      console.warn(
-        `⚠ Unknown ticket provider "${provider}", falling back to "file" provider.`,
-      );
+      console.warn(`⚠ Unknown ticket provider "${provider}", falling back to "file" provider.`);
       return new FileTicketProvider(config);
   }
 }
 
-// Barrel exports
-export type { TicketStateProvider, ProviderConfig } from "./types.js";
 export { FileTicketProvider } from "./file-provider.js";
 export { HttpTicketProvider } from "./http-provider.js";
+// Barrel exports
+export type { ProviderConfig, TicketStateProvider } from "./types.js";

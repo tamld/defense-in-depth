@@ -20,8 +20,8 @@
  */
 
 import * as fs from "node:fs";
-import * as path from "node:path";
 import * as os from "node:os";
+import * as path from "node:path";
 
 import type { HintShownEntry, HintState } from "./types.js";
 
@@ -82,14 +82,8 @@ export function loadHintState(projectRoot: string): HintState {
   // Be defensive: drop any entry that doesn't look like HintShownEntry. A
   // hostile file should never poison the cooldown logic.
   const cleaned: Record<string, HintShownEntry> = {};
-  for (const [hintId, entry] of Object.entries(
-    candidate.shown as Record<string, unknown>,
-  )) {
-    if (
-      typeof entry !== "object" ||
-      entry === null ||
-      Array.isArray(entry)
-    ) {
+  for (const [hintId, entry] of Object.entries(candidate.shown as Record<string, unknown>)) {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
       continue;
     }
     const e = entry as Partial<HintShownEntry>;
@@ -126,11 +120,7 @@ function writeStateAtomic(projectRoot: string, next: HintState): void {
  * `lastShownAt`. If the hint has been dismissed previously, this is a no-op
  * — dismissal is permanent.
  */
-export function recordHintShown(
-  projectRoot: string,
-  hintId: string,
-  now: Date = new Date(),
-): void {
+export function recordHintShown(projectRoot: string, hintId: string, now: Date = new Date()): void {
   const state = loadHintState(projectRoot);
   const existing = state.shown[hintId] ?? {
     lastShownAt: null,
@@ -153,11 +143,7 @@ export function recordHintShown(
  * Permanently dismiss a hint. Subsequent calls to `recordHintShown` for the
  * same id become no-ops, and the hint engine treats it as ineligible.
  */
-export function dismissHint(
-  projectRoot: string,
-  hintId: string,
-  now: Date = new Date(),
-): void {
+export function dismissHint(projectRoot: string, hintId: string, now: Date = new Date()): void {
   const state = loadHintState(projectRoot);
   const existing = state.shown[hintId] ?? {
     lastShownAt: null,

@@ -11,8 +11,8 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 const DEFAULT_ALLOWLIST_PATTERNS = [
   /(^|\/)tests?\//,
@@ -36,7 +36,8 @@ const STUB_ARROW_REGEX = /=>\s*(null|undefined|\(\s*\{\s*\}\s*\)|\[\s*\])\s*;?$/
 export const noStubReturnGuard: Guard = {
   id: "noStubReturn",
   name: "No Stub Return Guard",
-  description: "Blocks placeholder functions whose only body statement returns a stub default or throws TODO.",
+  description:
+    "Blocks placeholder functions whose only body statement returns a stub default or throws TODO.",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = Date.now();
@@ -66,7 +67,11 @@ export const noStubReturnGuard: Guard = {
         continue;
       }
 
-      if (customAllowlist.some((pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath))) {
+      if (
+        customAllowlist.some(
+          (pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath),
+        )
+      ) {
         continue;
       }
 
@@ -85,7 +90,8 @@ export const noStubReturnGuard: Guard = {
 
       // Match function/method block bodies: function/method/constructor(...) { <body> }
       // We look for function definitions followed by a single statement block
-      const funcBlockRegex = /(?:function\s*[\w$]*|\b(?:async\s+)?(?:get\s+|set\s+)?[\w$]+\s*)\([^)]*\)(?:\s*:\s*[^{]+)?\s*\{([^}]*)\}/g;
+      const funcBlockRegex =
+        /(?:function\s*[\w$]*|\b(?:async\s+)?(?:get\s+|set\s+)?[\w$]+\s*)\([^)]*\)(?:\s*:\s*[^{]+)?\s*\{([^}]*)\}/g;
       let match: RegExpExecArray | null;
 
       while ((match = funcBlockRegex.exec(content)) !== null) {
@@ -136,7 +142,12 @@ export const noStubReturnGuard: Guard = {
           }
 
           // Ensure it's not part of a test fixture or complex multi-line expression
-          if (lineText.includes("const ") || lineText.includes("let ") || lineText.includes("var ") || lineText.includes("= (")) {
+          if (
+            lineText.includes("const ") ||
+            lineText.includes("let ") ||
+            lineText.includes("var ") ||
+            lineText.includes("= (")
+          ) {
             findings.push({
               guardId: "noStubReturn",
               severity,

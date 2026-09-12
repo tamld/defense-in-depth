@@ -24,8 +24,7 @@ import { Severity } from "../core/types.js";
 export const ticketIdentityGuard: Guard = {
   id: "ticketIdentity",
   name: "Ticket Identity Check",
-  description:
-    "Warns when a commit message references a different ticket than the branch",
+  description: "Warns when a commit message references a different ticket than the branch",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = performance.now();
@@ -84,4 +83,3 @@ export const ticketIdentityGuard: Guard = {
     };
   },
 };
-

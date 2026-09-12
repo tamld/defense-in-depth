@@ -11,8 +11,8 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 const DEFAULT_ALLOWLIST_PATTERNS = [
   /(^|\/)tests?\//,
@@ -58,7 +58,11 @@ export const noSwallowedErrorGuard: Guard = {
         continue;
       }
 
-      if (customAllowlist.some((pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath))) {
+      if (
+        customAllowlist.some(
+          (pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath),
+        )
+      ) {
         continue;
       }
 
@@ -70,7 +74,7 @@ export const noSwallowedErrorGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch (readErr) {
+      } catch {
         // Ignore file read error on inaccessible files (TK-000)
         continue;
       }

@@ -8,8 +8,8 @@
  * stays byte-for-byte compatible.
  */
 
-export * from "./types/guard.js";
-export * from "./types/engine.js";
 export * from "./types/config.js";
-export * from "./types/metrics.js";
+export * from "./types/engine.js";
+export * from "./types/guard.js";
 export * from "./types/hints.js";
+export * from "./types/metrics.js";

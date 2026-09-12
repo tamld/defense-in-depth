@@ -18,8 +18,7 @@ const EXEMPT_BRANCHES = new Set(["main", "master", "develop", "staging", "HEAD"]
 export const branchNamingGuard: Guard = {
   id: "branchNaming",
   name: "Branch Naming Enforcer",
-  description:
-    "Enforces branch naming conventions (e.g. feat/my-feature). Disabled by default.",
+  description: "Enforces branch naming conventions (e.g. feat/my-feature). Disabled by default.",
 
   async check(ctx: GuardContext): Promise<GuardResult> {
     const start = performance.now();
@@ -44,9 +43,7 @@ export const branchNamingGuard: Guard = {
     }
 
     const config = ctx.config.guards.branchNaming;
-    const pattern = config?.pattern
-      ? new RegExp(config.pattern)
-      : DEFAULT_PATTERN;
+    const pattern = config?.pattern ? new RegExp(config.pattern) : DEFAULT_PATTERN;
 
     if (!pattern.test(ctx.branch)) {
       return {

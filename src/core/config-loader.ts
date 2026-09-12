@@ -10,8 +10,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as yaml from "yaml";
-import type { DefendConfig } from "./types.js";
 import { ConfigError } from "./errors.js";
+import type { DefendConfig } from "./types.js";
 
 const DEFAULT_CONFIG: DefendConfig = {
   version: "1.0",
@@ -19,14 +19,7 @@ const DEFAULT_CONFIG: DefendConfig = {
     hollowArtifact: {
       enabled: true,
       extensions: [".md", ".json", ".yml", ".yaml"],
-      patterns: [
-        "TODO",
-        "TBD",
-        "FILL IN HERE",
-        "<Empty>",
-        "[Insert Here]",
-        "PLACEHOLDER",
-      ],
+      patterns: ["TODO", "TBD", "FILL IN HERE", "<Empty>", "[Insert Here]", "PLACEHOLDER"],
       minContentLength: 50,
       useDspy: false,
       dspyEndpoint: "http://localhost:8080/evaluate",
@@ -34,11 +27,7 @@ const DEFAULT_CONFIG: DefendConfig = {
     },
     ssotPollution: {
       enabled: true,
-      protectedPaths: [
-        ".agents/**",
-        "**/flow_state.yml",
-        "**/backlog.yml",
-      ],
+      protectedPaths: [".agents/**", "**/flow_state.yml", "**/backlog.yml"],
     },
     rootPollution: {
       enabled: true,
@@ -69,12 +58,8 @@ const DEFAULT_CONFIG: DefendConfig = {
     },
     commitFormat: {
       enabled: true,
-      pattern:
-        "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\([^)]*\\))?(!)?:\\s.+",
-      types: [
-        "feat", "fix", "chore", "docs",
-        "refactor", "test", "style", "perf", "ci",
-      ],
+      pattern: "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\([^)]*\\))?(!)?:\\s.+",
+      types: ["feat", "fix", "chore", "docs", "refactor", "test", "style", "perf", "ci"],
     },
     branchNaming: {
       enabled: false,
@@ -94,11 +79,7 @@ const DEFAULT_CONFIG: DefendConfig = {
   },
 };
 
-const CONFIG_FILE_NAMES = [
-  "defense.config.yml",
-  "defend.config.yaml",
-  ".defendrc.yml",
-];
+const CONFIG_FILE_NAMES = ["defense.config.yml", "defend.config.yaml", ".defendrc.yml"];
 
 /**
  * Load configuration from defense.config.yml or return defaults.
@@ -132,10 +113,9 @@ export function loadConfig(projectRoot: string): DefendConfig {
         );
       }
       if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-        throw new ConfigError(
-          `Invalid ${name}: top-level value must be a YAML mapping`,
-          { configPath },
-        );
+        throw new ConfigError(`Invalid ${name}: top-level value must be a YAML mapping`, {
+          configPath,
+        });
       }
       validateConfigSchema(parsed, configPath);
       return deepMerge(DEFAULT_CONFIG, parsed as Partial<DefendConfig>);
@@ -187,13 +167,19 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
     }
   }
 
-  if (obj.version !== undefined && typeof obj.version !== "string" && typeof obj.version !== "number") {
+  if (
+    obj.version !== undefined &&
+    typeof obj.version !== "string" &&
+    typeof obj.version !== "number"
+  ) {
     throw new ConfigError('Configuration "version" must be a string or number', { configPath });
   }
 
   if (obj.guards !== undefined) {
     if (typeof obj.guards !== "object" || obj.guards === null || Array.isArray(obj.guards)) {
-      throw new ConfigError('"guards" must be an object mapping guard IDs to configurations', { configPath });
+      throw new ConfigError('"guards" must be an object mapping guard IDs to configurations', {
+        configPath,
+      });
     }
 
     const guardsObj = obj.guards as Record<string, unknown>;
@@ -207,7 +193,9 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
       }
 
       if (typeof guardVal !== "object" || guardVal === null || Array.isArray(guardVal)) {
-        throw new ConfigError(`Configuration for guard "${guardName}" must be an object`, { configPath });
+        throw new ConfigError(`Configuration for guard "${guardName}" must be an object`, {
+          configPath,
+        });
       }
 
       const g = guardVal as Record<string, unknown>;
@@ -217,7 +205,9 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
       }
 
       if (g.severity !== undefined && g.severity !== "warn" && g.severity !== "block") {
-        throw new ConfigError(`guards.${guardName}.severity must be "warn" or "block"`, { configPath });
+        throw new ConfigError(`guards.${guardName}.severity must be "warn" or "block"`, {
+          configPath,
+        });
       }
 
       // Check numeric bounds
@@ -229,7 +219,9 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
 
       for (const [field, val] of nonNegativeNumbers) {
         if (val !== undefined && (typeof val !== "number" || Number.isNaN(val) || val < 0)) {
-          throw new ConfigError(`guards.${guardName}.${field} must be a non-negative number`, { configPath });
+          throw new ConfigError(`guards.${guardName}.${field} must be a non-negative number`, {
+            configPath,
+          });
         }
       }
 
@@ -252,7 +244,9 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
       for (const [field, val] of stringArrays) {
         if (val !== undefined) {
           if (!Array.isArray(val) || !val.every((item) => typeof item === "string")) {
-            throw new ConfigError(`guards.${guardName}.${field} must be an array of strings`, { configPath });
+            throw new ConfigError(`guards.${guardName}.${field} must be an array of strings`, {
+              configPath,
+            });
           }
         }
       }
@@ -269,13 +263,21 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
       throw new ConfigError("hints.enabled must be a boolean", { configPath });
     }
 
-    if (hints.cooldownDays !== undefined && (typeof hints.cooldownDays !== "number" || hints.cooldownDays < 0)) {
+    if (
+      hints.cooldownDays !== undefined &&
+      (typeof hints.cooldownDays !== "number" || hints.cooldownDays < 0)
+    ) {
       throw new ConfigError("hints.cooldownDays must be a non-negative number", { configPath });
     }
 
     if (hints.channels !== undefined) {
-      if (!Array.isArray(hints.channels) || !hints.channels.every((c) => c === "doctor" || c === "verify-success")) {
-        throw new ConfigError('hints.channels must be an array of "doctor" or "verify-success"', { configPath });
+      if (
+        !Array.isArray(hints.channels) ||
+        !hints.channels.every((c) => c === "doctor" || c === "verify-success")
+      ) {
+        throw new ConfigError('hints.channels must be an array of "doctor" or "verify-success"', {
+          configPath,
+        });
       }
     }
   }
@@ -284,21 +286,14 @@ export function validateConfigSchema(parsed: unknown, configPath: string): void 
 /**
  * Deep merge: user config overrides defaults, preserving unset fields.
  */
-function deepMerge<T extends object>(
-  defaults: T,
-  overrides: Partial<T>,
-): T {
+function deepMerge<T extends object>(defaults: T, overrides: Partial<T>): T {
   const result = { ...defaults };
 
   for (const key of Object.keys(overrides) as Array<keyof T>) {
     const val = overrides[key];
     if (val === undefined) continue;
 
-    if (
-      typeof val === "object" &&
-      val !== null &&
-      !Array.isArray(val)
-    ) {
+    if (typeof val === "object" && val !== null && !Array.isArray(val)) {
       result[key] = deepMerge(
         (result[key] ?? {}) as Record<string, unknown> as typeof val,
         val as Partial<typeof val>,

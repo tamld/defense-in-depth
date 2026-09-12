@@ -60,10 +60,7 @@ export class DiDError extends Error {
 export class ConfigError extends DiDError {
   readonly configPath?: string;
 
-  constructor(
-    message: string,
-    options: { configPath?: string; cause?: unknown } = {},
-  ) {
+  constructor(message: string, options: { configPath?: string; cause?: unknown } = {}) {
     super(message, ErrorCodes.CONFIG_INVALID, options.cause);
     if (options.configPath !== undefined) this.configPath = options.configPath;
   }

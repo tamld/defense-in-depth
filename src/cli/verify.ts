@@ -11,17 +11,14 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { DefendEngine } from "../core/engine.js";
 import { loadConfig } from "../core/config-loader.js";
-import { allBuiltinGuards } from "../guards/index.js";
-import { Severity } from "../core/types.js";
+import { DefendEngine } from "../core/engine.js";
 import type { DefendConfig } from "../core/types.js";
+import { Severity } from "../core/types.js";
+import { allBuiltinGuards } from "../guards/index.js";
 import { emitOneHint } from "./hints-emit.js";
 
-export async function verify(
-  projectRoot: string,
-  args: string[],
-): Promise<void> {
+export async function verify(projectRoot: string, args: string[]): Promise<void> {
   const hookMode = args.includes("--hook");
   const hook = hookMode ? args[args.indexOf("--hook") + 1] : undefined;
   const dryRunDspy = args.includes("--dry-run-dspy");
@@ -54,9 +51,7 @@ export async function verify(
     if (config.guards.hollowArtifact) {
       config.guards.hollowArtifact.useDspy = false;
     }
-    process.stderr.write(
-      "⚠  --dry-run-dspy: DSPy semantic evaluation skipped\n",
-    );
+    process.stderr.write("⚠  --dry-run-dspy: DSPy semantic evaluation skipped\n");
   }
 
   // Build engine with all guards
@@ -89,11 +84,7 @@ export async function verify(
       console.log(`  ${icon} ${name}`);
       for (const f of result.findings) {
         const sevIcon =
-          f.severity === Severity.BLOCK
-            ? "🚫"
-            : f.severity === Severity.WARN
-              ? "⚠️ "
-              : "✅";
+          f.severity === Severity.BLOCK ? "🚫" : f.severity === Severity.WARN ? "⚠️ " : "✅";
         console.log(`     ${sevIcon} ${f.message}`);
         if (f.fix) {
           console.log(`        💡 Fix: ${f.fix}`);
@@ -144,12 +135,14 @@ export async function verify(
 
 function getStagedFiles(root: string): string[] {
   try {
-    const output = execFileSync(
-      "git",
-      ["diff", "--cached", "--name-only", "--diff-filter=ACMR"],
-      { encoding: "utf-8", cwd: root },
-    );
-    return output.split("\n").map((l) => l.trim()).filter(Boolean);
+    const output = execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACMR"], {
+      encoding: "utf-8",
+      cwd: root,
+    });
+    return output
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
   } catch (err) {
     // TK-000: fallback when git diff fails or directory is not a git repository
     return [];
@@ -158,11 +151,10 @@ function getStagedFiles(root: string): string[] {
 
 function getBranch(root: string): string | undefined {
   try {
-    return execFileSync(
-      "git",
-      ["rev-parse", "--abbrev-ref", "HEAD"],
-      { encoding: "utf-8", cwd: root },
-    ).trim();
+    return execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+      encoding: "utf-8",
+      cwd: root,
+    }).trim();
   } catch (err) {
     // TK-000: fallback when git branch query fails
     return undefined;
@@ -171,20 +163,21 @@ function getBranch(root: string): string | undefined {
 
 function getLastCommitMessage(root: string): string | undefined {
   try {
-    let msg = execFileSync(
-      "git",
-      ["log", "-1", "--format=%s"],
-      { encoding: "utf-8", cwd: root },
-    ).trim();
+    let msg = execFileSync("git", ["log", "-1", "--format=%s"], {
+      encoding: "utf-8",
+      cwd: root,
+    }).trim();
 
     // If inside a GitHub Actions pull_request synthetic merge commit, inspect the PR head commit (HEAD^2)
-    if (msg.startsWith("Merge ") && (process.env.GITHUB_EVENT_NAME === "pull_request" || process.env.CI)) {
+    if (
+      msg.startsWith("Merge ") &&
+      (process.env.GITHUB_EVENT_NAME === "pull_request" || process.env.CI)
+    ) {
       try {
-        const prMsg = execFileSync(
-          "git",
-          ["log", "-1", "--format=%s", "HEAD^2"],
-          { encoding: "utf-8", cwd: root },
-        ).trim();
+        const prMsg = execFileSync("git", ["log", "-1", "--format=%s", "HEAD^2"], {
+          encoding: "utf-8",
+          cwd: root,
+        }).trim();
         if (prMsg) {
           msg = prMsg;
         }

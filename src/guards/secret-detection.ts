@@ -10,8 +10,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { performance } from "node:perf_hooks";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
-import { Severity, EvidenceLevel } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
+import { EvidenceLevel, Severity } from "../core/types.js";
 
 interface SecretPattern {
   name: string;
@@ -37,7 +37,7 @@ const SECRET_PATTERNS: SecretPattern[] = [
   },
   {
     name: "OpenAI / Anthropic API Key",
-    regex: /\b(sk-[a-zA-Z0-9]{20,T3BlbkFJ[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9_\-]{20,})\b/,
+    regex: /\b(sk-[a-zA-Z0-9]{20,T3BlbkFJ[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9_-]{20,})\b/,
     severity: Severity.BLOCK,
   },
   {
@@ -47,7 +47,8 @@ const SECRET_PATTERNS: SecretPattern[] = [
   },
   {
     name: "Generic Secret Assignment",
-    regex: /(?:password|passwd|secret|api_key|apikey|access_token|auth_token)\s*[:=]\s*['"][a-zA-Z0-9_\-.~!@#$%^&*]{16,}['"]/i,
+    regex:
+      /(?:password|passwd|secret|api_key|apikey|access_token|auth_token)\s*[:=]\s*['"][a-zA-Z0-9_\-.~!@#$%^&*]{16,}['"]/i,
     severity: Severity.WARN,
   },
 ];

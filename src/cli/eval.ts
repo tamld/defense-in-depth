@@ -1,9 +1,9 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { loadConfig } from "../core/config-loader.js";
-import { hollowArtifactGuard } from "../guards/hollow-artifact.js";
 import { callDspy, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "../core/dspy-client.js";
 import type { GuardContext } from "../core/types.js";
+import { hollowArtifactGuard } from "../guards/hollow-artifact.js";
 
 /**
  * CLI: eval command (v0.5)
@@ -45,7 +45,7 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
   const config = loadConfig(projectRoot);
   if (config.guards.hollowArtifact) {
     config.guards.hollowArtifact.useDspy = true;
-    
+
     // Ensure the target file's extension is in the allowed extensions list
     const ext = path.extname(relPath).toLowerCase();
     if (ext) {
@@ -62,10 +62,8 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
   // but never populated `ctx.semanticEvals`, so the guard's DSPy branch was
   // silently dead code. We also need the null-vs-value distinction here to
   // decide whether to emit the "DSPy unavailable" banner after the run.
-  const dspyEndpoint =
-    config.guards.hollowArtifact?.dspyEndpoint ?? DEFAULT_DSPY_ENDPOINT;
-  const dspyTimeoutMs =
-    config.guards.hollowArtifact?.dspyTimeoutMs ?? DEFAULT_DSPY_TIMEOUT_MS;
+  const dspyEndpoint = config.guards.hollowArtifact?.dspyEndpoint ?? DEFAULT_DSPY_ENDPOINT;
+  const dspyTimeoutMs = config.guards.hollowArtifact?.dspyTimeoutMs ?? DEFAULT_DSPY_TIMEOUT_MS;
 
   let fileContent = "";
   try {
@@ -92,9 +90,7 @@ export async function evalCommand(projectRoot: string, args: string[]): Promise<
     config,
     semanticEvals: {
       dspy: {
-        [relPath]: dspyEval
-          ? { score: dspyEval.score, feedback: dspyEval.feedback }
-          : null,
+        [relPath]: dspyEval ? { score: dspyEval.score, feedback: dspyEval.feedback } : null,
       },
     },
   };

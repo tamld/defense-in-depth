@@ -12,7 +12,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Guard, GuardContext, GuardResult, Finding } from "../core/types.js";
+import type { Finding, Guard, GuardContext, GuardResult } from "../core/types.js";
 import { Severity } from "../core/types.js";
 
 const DEFAULT_SOURCE_PATTERNS = ["src/", "lib/", "app/"];
@@ -44,9 +44,7 @@ export const phaseGateGuard: Guard = {
     const sourcePatterns = config?.sourcePatterns ?? DEFAULT_SOURCE_PATTERNS;
 
     // Check if any staged files are source code
-    const sourceFiles = ctx.stagedFiles.filter((f) =>
-      isSourceFile(f, sourcePatterns),
-    );
+    const sourceFiles = ctx.stagedFiles.filter((f) => isSourceFile(f, sourcePatterns));
 
     if (sourceFiles.length === 0) {
       // No source files staged — gate passes (planner mode OK)

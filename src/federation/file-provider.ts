@@ -27,9 +27,9 @@ import { constants } from "node:fs";
 import { access, readFile } from "node:fs/promises";
 import * as path from "node:path";
 import * as yaml from "yaml";
-import type { TicketStateProvider } from "./types.js";
-import type { TicketRef } from "../core/types.js";
 import { ProviderError } from "../core/errors.js";
+import type { TicketRef } from "../core/types.js";
+import type { TicketStateProvider } from "./types.js";
 
 /** Configuration options for FileTicketProvider */
 export interface FileProviderConfig {
@@ -63,7 +63,12 @@ export class FileTicketProvider implements TicketStateProvider {
 
       // Build enriched TicketRef from frontmatter
       const ref: TicketRef = {
-        id: typeof frontmatter.id === "string" ? frontmatter.id : (frontmatter.id != null ? String(frontmatter.id) : ticketId),
+        id:
+          typeof frontmatter.id === "string"
+            ? frontmatter.id
+            : frontmatter.id != null
+              ? String(frontmatter.id)
+              : ticketId,
       };
 
       if (frontmatter.phase && typeof frontmatter.phase === "string") {
@@ -79,9 +84,10 @@ export class FileTicketProvider implements TicketStateProvider {
 
       // v0.6: Extract parentId for federation governance
       if (frontmatter.parentId) {
-        ref.parentId = typeof frontmatter.parentId === "string"
-          ? frontmatter.parentId
-          : String(frontmatter.parentId);
+        ref.parentId =
+          typeof frontmatter.parentId === "string"
+            ? frontmatter.parentId
+            : String(frontmatter.parentId);
       }
 
       return ref;
@@ -107,9 +113,7 @@ export class FileTicketProvider implements TicketStateProvider {
    * Parse YAML frontmatter from file content.
    * Frontmatter is enclosed between --- markers at the start of the file.
    */
-  private parseFrontmatter(
-    content: string,
-  ): Record<string, unknown> | undefined {
+  private parseFrontmatter(content: string): Record<string, unknown> | undefined {
     const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (!match?.[1]) {
       return undefined;

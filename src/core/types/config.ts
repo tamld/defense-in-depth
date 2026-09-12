@@ -73,7 +73,7 @@ export interface TicketIdentityConfig {
   /** Regex pattern for valid ticket IDs (default: TK-[0-9A-Z-]+) */
   tkidPattern?: string;
   /** Severity: 'warn' (advisory, v0.3 default) or 'block' (enforcement) */
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   /** Provider type: "file" (default) | custom module path (future) */
   provider?: string;
   /** Provider-specific configuration (passed directly to the provider constructor) */
@@ -92,7 +92,7 @@ export interface FederationGuardConfig {
   /** Parent project's ticket resolution endpoint (for HttpTicketProvider) */
   parentEndpoint?: string;
   /** Severity: 'warn' (advisory) or 'block' (enforcement, default) */
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   /** Parent phases that BLOCK child execution (default: BLOCKED, CANCELLED, ARCHIVED) */
   blockedParentPhases?: string[];
   /** Provider type for resolving parent state: 'http' | 'file' (default: 'file') */
@@ -112,7 +112,7 @@ export interface FileSizeLimitConfig {
   /** Maximum file size in bytes before blocking (default: 1048576 = 1 MB) */
   maxSizeBytes?: number;
   /** Severity: 'warn' or 'block' (default: 'block') */
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   /** File extensions to exempt from size checks (e.g. [".mp4", ".zip"]) */
   ignoredExtensions?: string[];
 }
@@ -121,36 +121,36 @@ export interface DependencyAuditConfig {
   /** Opt-in switch for running npm audit during verification (default: false) */
   enabled: boolean;
   /** Severity: 'warn' or 'block' on high/critical vulnerabilities (default: 'block') */
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
 }
 
 export interface NoTypeSafetyBypassConfig {
   enabled: boolean;
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   allowlistPaths?: string[];
 }
 
 export interface NoSwallowedErrorConfig {
   enabled: boolean;
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   allowlistPaths?: string[];
 }
 
 export interface NoStubReturnConfig {
   enabled: boolean;
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   allowlistPaths?: string[];
 }
 
 export interface NoTriviallyTrueTestConfig {
   enabled: boolean;
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   allowlistPaths?: string[];
 }
 
 export interface SelfProtectionConfig {
   enabled: boolean;
-  severity?: 'warn' | 'block';
+  severity?: "warn" | "block";
   protectedPaths?: string[];
 }
 
