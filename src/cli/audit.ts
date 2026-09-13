@@ -8,10 +8,10 @@
  *   defense-in-depth audit <target-path> [--output json|text] [--export-lessons <path>]
  */
 
-import { verify } from "./verify.js";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { resolve, dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Severity } from "../core/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -270,8 +270,8 @@ async function findScannableFiles(targetPath: string, options: AuditOptions): Pr
     try {
       const matches = await glob(pattern, { cwd: targetPath, absolute: true, ignore: patterns.filter(p => p.startsWith("!")).map(p => p.slice(1)) });
       files.push(...matches);
-    } catch {
-      // Ignore glob errors
+    } catch (_err) {
+      continue;
     }
   }
   return [...new Set(files)];
@@ -317,8 +317,8 @@ async function extractCodePatterns(targetPath: string, options: AuditOptions): P
           }
         }
       }
-    } catch {
-      // Skip unreadable files
+    } catch (_err) {
+      continue;
     }
   }
 
@@ -332,12 +332,15 @@ async function extractCodePatterns(targetPath: string, options: AuditOptions): P
  */
 async function extractCommitPatterns(targetPath: string): Promise<CommitPattern[]> {
   try {
-    const { execSync } = await import("child_process");
-    const log = execSync("git log --oneline --grep='fix\\|refactor\\|hack\\|workaround\\|revert' -n 200", {
-      cwd: targetPath,
-      encoding: "utf-8",
-      timeout: 5000,
-    });
+    const log = execFileSync(
+      "git",
+      ["log", "--oneline", "--grep=fix\\|refactor\\|hack\\|workaround\\|revert", "-n", "200"],
+      {
+        cwd: targetPath,
+        encoding: "utf-8",
+        timeout: 5000,
+      }
+    );
 
     const lines = log.trim().split("\n").filter(Boolean);
     const patternMap = new Map<string, CommitPattern>();
@@ -386,7 +389,9 @@ async function checkConfigDrift(targetPath: string): Promise<ConfigDrift[]> {
         }
       }
     }
-  } catch {}
+  } catch (err) {
+    drifts.push({ file: "package.json", expected: {}, actual: {}, driftType: "missing" });
+  }
 
   // Check tsconfig.json
   try {
@@ -405,7 +410,9 @@ async function checkConfigDrift(targetPath: string): Promise<ConfigDrift[]> {
         }
       }
     }
-  } catch {}
+  } catch (err) {
+    drifts.push({ file: "tsconfig.json", expected: {}, actual: {}, driftType: "missing" });
+  }
 
   return drifts;
 }
@@ -420,7 +427,7 @@ async function scanFileSizes(targetPath: string): Promise<FileSizeInfo[]> {
 
   for (const file of files) {
     try {
-      const stats = await import("fs").then(fs => fs.statSync(file));
+      const stats = await import("node:fs").then(fs => fs.statSync(file));
       const sizeKB = stats.size / 1024;
       if (sizeKB > 100) {
         largeFiles.push({
@@ -430,7 +437,9 @@ async function scanFileSizes(targetPath: string): Promise<FileSizeInfo[]> {
           category: sizeKB > 1000 ? "huge" : "large",
         });
       }
-    } catch {}
+    } catch (_err) {
+      continue;
+    }
   }
 
   return largeFiles.sort((a, b) => b.sizeBytes - a.sizeBytes).slice(0, 20);
