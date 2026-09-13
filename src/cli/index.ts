@@ -17,6 +17,7 @@ import { handleFeedbackCommand } from "./feedback.js";
 import { handleGrowthCommand } from "./growth.js";
 import { init } from "./init.js";
 import { handleLessonCommand } from "./lesson/index.js";
+import { auditCommand } from "./audit.js";
 import { verify } from "./verify.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -71,6 +72,10 @@ async function main(): Promise<void> {
       break;
     }
 
+    case "audit":
+      await auditCommand(process.cwd(), args.slice(1));
+      break;
+
     case "--help":
     case "-h":
     case undefined:
@@ -101,6 +106,7 @@ Commands:
   verify         Run all guards against staged files or a path
   verify:server  Verify server-side branch protection on GitHub matches baseline (v0.8)
   doctor         Health check — verify config, hooks, and guard status
+  audit          Read-only pattern extraction from a target project (v1.0)
   lesson    Manage lessons (án lệ) in the local memory (v0.4)
   growth    Manage growth metrics checking the system's learning velocity (v0.4)
   feedback  Record TP/FP/FN/TN labels for guards (v0.7, F1 input pipeline)
@@ -130,6 +136,8 @@ Examples:
   npx defense-in-depth verify --files src/app.ts docs/plan.md
   npx defense-in-depth verify --dry-run-dspy
   npx defense-in-depth doctor
+  npx defense-in-depth audit ../my-project
+  npx defense-in-depth audit ../my-project --export-lessons .agents/records/audit-lessons.jsonl
 
 Learn more: https://github.com/tamld/defense-in-depth
 `);

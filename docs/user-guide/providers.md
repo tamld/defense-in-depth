@@ -104,7 +104,7 @@ guards:
       email: "user@company.com"                      # Required for Basic auth
       apiToken: "ATATT3x..."                         # Required for Basic auth
       # OR use bearerToken for OAuth:
-      # bearerToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      # bearerToken: "YOUR_OAUTH_BEARER_TOKEN_HERE"
   federation:
     enabled: true
     provider: jira
