@@ -29,7 +29,7 @@ test("F1 Score Computation", async (t) => {
   await t.test("realistic scenario: mixed results", async () => {
     // 80 TP, 10 FP, 5 FN → P=0.889, R=0.941, F1=0.914
     const metric = computeF1("hollowArtifact", "2026-04/2026-04", 200, 80, 10, 5);
-    assert.ok(metric.precision > 0.88 && metric.precision < 0.90, `Precision ${metric.precision}`);
+    assert.ok(metric.precision > 0.88 && metric.precision < 0.9, `Precision ${metric.precision}`);
     assert.ok(metric.recall > 0.93 && metric.recall < 0.95, `Recall ${metric.recall}`);
     assert.ok(metric.f1 > 0.91 && metric.f1 < 0.92, `F1 ${metric.f1}`);
   });

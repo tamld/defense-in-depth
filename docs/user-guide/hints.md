@@ -87,6 +87,37 @@ layers:
 CI log cleanliness is a fourth layer baked in: `CI=true` short-circuits
 emission entirely, so build logs stay clean regardless of repo state.
 
+## Lesson Injection (v1.1+)
+
+When a guard fails, relevant lessons from cross-project memory are automatically surfaced:
+
+### In `verify` (inline, compact)
+
+```
+❌ Hollow Artifact Detector
+   🚫 TODO found in src/auth.ts
+
+💡 Relevant lessons from past failures:
+  📚 L-abc123 Recurring TODO pattern (74 occurrences) [defense-in-depth]
+     → Replace TODO with proper implementation or ticket reference
+```
+
+### In `doctor --hints all` (rich, with scores)
+
+```
+🧠 Injected Lessons (from cross-project memory):
+  📚 L-abc123 Recurring CONSOLE-LOG pattern (190 occurrences) [aegis]
+     → Use structured logger instead of console.log
+     Match: wrongApproachPattern: console-log, tag: console-log, category: process (score: 0.87)
+```
+
+### How it works
+
+- Matches `guardId` + `wrongApproachPattern` + `tags` + file path
+- Scores 0-1: pattern match (0.4) + tag overlap (0.25) + file relation (0.25) + category (0.05) + evidence + confidence + recency
+- Top 3 lessons shown
+- Evidence-weighted: RUNTIME > INFER > HYPO
+
 ## See also
 
 - `docs/dev-guide/architecture.md` — how the hint engine plugs into the

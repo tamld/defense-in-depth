@@ -164,8 +164,14 @@ describe("ticketIdentityGuard", () => {
       assert.equal(result.findings.length, 2, "Should have 2 findings");
       // One for cross-ticket, one for phase
       const messages = result.findings.map((f) => f.message);
-      assert.ok(messages.some((m) => m.includes("TK-999")), "Should flag foreign ticket");
-      assert.ok(messages.some((m) => m.includes("DONE")), "Should flag stale phase");
+      assert.ok(
+        messages.some((m) => m.includes("TK-999")),
+        "Should flag foreign ticket",
+      );
+      assert.ok(
+        messages.some((m) => m.includes("DONE")),
+        "Should flag stale phase",
+      );
     });
   });
 });

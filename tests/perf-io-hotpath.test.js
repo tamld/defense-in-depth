@@ -33,7 +33,10 @@ describe("Performance & Hot-path I/O (Tech Debt T3 - #45)", () => {
       const dupDuration = performance.now() - dupStart;
 
       assert.equal(dupRes.written, false);
-      assert.ok(dupDuration < 50, `Duplicate check took ${dupDuration.toFixed(2)}ms (expected < 50ms)`);
+      assert.ok(
+        dupDuration < 50,
+        `Duplicate check took ${dupDuration.toFixed(2)}ms (expected < 50ms)`,
+      );
 
       // exists() check should be instant O(1)
       assert.equal(store.exists("EVT-500"), true);

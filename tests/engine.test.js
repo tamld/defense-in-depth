@@ -159,8 +159,11 @@ describe("DefendEngine — extractTicketRef", () => {
         },
       }),
     );
-    await engine.run({ files: [], branch: "feat/no-id-here",
-      commitMessage: "fix: addresses TK-456" });
+    await engine.run({
+      files: [],
+      branch: "feat/no-id-here",
+      commitMessage: "fix: addresses TK-456",
+    });
     assert.equal(captured?.id, "TK-456");
   });
 
@@ -175,8 +178,7 @@ describe("DefendEngine — extractTicketRef", () => {
         },
       }),
     );
-    await engine.run({ files: [], branch: "feat/TK-100",
-      commitMessage: "fix: TK-200" });
+    await engine.run({ files: [], branch: "feat/TK-100", commitMessage: "fix: TK-200" });
     assert.equal(captured?.id, "TK-100");
   });
 
@@ -364,10 +366,7 @@ describe("DefendEngine — provider failure (enrichTicketRef)", () => {
       return { ok: true, status: 200, json: async () => ({}) };
     };
 
-    const engine = new DefendEngine(
-      "/tmp",
-      makeConfig({ ticketIdentity: { enabled: false } }),
-    );
+    const engine = new DefendEngine("/tmp", makeConfig({ ticketIdentity: { enabled: false } }));
 
     let observed;
     engine.use(
@@ -487,10 +486,7 @@ describe("DefendEngine — parent provider failure (enrichParentTicket)", () => 
 
 describe("DefendEngine — disabled / unknown guard config", () => {
   it("skips a guard when its config has enabled=false", async () => {
-    const engine = new DefendEngine(
-      "/tmp",
-      makeConfig({ commitFormat: { enabled: false } }),
-    );
+    const engine = new DefendEngine("/tmp", makeConfig({ commitFormat: { enabled: false } }));
     let ran = false;
     engine.use(
       stubGuard("commitFormat", {
@@ -528,15 +524,11 @@ describe("DefendEngine — verdict aggregation", () => {
       stubGuard("p", { passed: true, findings: [] }),
       stubGuard("w", {
         passed: true,
-        findings: [
-          { guardId: "w", severity: Severity.WARN, message: "minor" },
-        ],
+        findings: [{ guardId: "w", severity: Severity.WARN, message: "minor" }],
       }),
       stubGuard("f", {
         passed: false,
-        findings: [
-          { guardId: "f", severity: Severity.BLOCK, message: "bad" },
-        ],
+        findings: [{ guardId: "f", severity: Severity.BLOCK, message: "bad" }],
       }),
     ]);
     const verdict = await engine.run({ files: [] });

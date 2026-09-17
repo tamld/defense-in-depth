@@ -1,5 +1,5 @@
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import {
   appendOutcome,
   outcomeEventId,
@@ -115,14 +115,14 @@ async function runRecord(projectRoot: string, args: string[]): Promise<void> {
   // All required fields validated above, safe to construct
   // Use bracket notation for optional fields that may not be in Lesson interface
   const lessonPayload: Omit<Lesson, "id" | "createdAt"> = {
-    title: payload.title!,
-    scenario: payload.scenario!,
-    wrongApproach: payload.wrongApproach!,
-    correctApproach: payload.correctApproach!,
-    insight: payload.insight!,
-    category: payload.category!,
-    evidence: payload.evidence!,
-    confidence: payload.confidence!,
+    title: payload.title as string,
+    scenario: payload.scenario as string,
+    wrongApproach: payload.wrongApproach as string,
+    correctApproach: payload.correctApproach as string,
+    insight: payload.insight as string,
+    category: payload.category as "arch" | "code" | "process" | "tool",
+    evidence: payload.evidence as EvidenceLevel,
+    confidence: payload.confidence as number,
     sourceTicket: String(payload.ticketId ?? ""),
     wrongApproachPattern: payload.wrongApproachPattern,
     tags: payload.tags,
@@ -299,7 +299,7 @@ async function runScanOutcomes(projectRoot: string, args: string[]): Promise<voi
       }));
   } catch (err: unknown) {
     const hasCode = (e: unknown): e is { code: string } =>
-      typeof e === "object" && e !== null && "code" in e && typeof e["code"] === "string";
+      typeof e === "object" && e !== null && "code" in e && typeof e.code === "string";
     const isEnoent = hasCode(err) && err.code === "ENOENT";
     if (!isEnoent) {
       const msg = err instanceof Error ? err.message : String(err);

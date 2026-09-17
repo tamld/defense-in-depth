@@ -39,13 +39,7 @@ describe("branchNamingGuard — default pattern", () => {
     });
   }
 
-  for (const branch of [
-    "refactor/x",
-    "test/x",
-    "perf/x",
-    "ci/x",
-    "style/x",
-  ]) {
+  for (const branch of ["refactor/x", "test/x", "perf/x", "ci/x", "style/x"]) {
     it(`blocks types not in the default 4: ${branch}`, async () => {
       const result = await branchNamingGuard.check(ctxWith(branch));
       assert.equal(result.passed, false);
@@ -142,18 +136,13 @@ describe("branchNamingGuard — custom pattern", () => {
 
   it("empty-string pattern is treated as 'unset' and falls back to the default", async () => {
     // `config?.pattern` is falsy for "" → guard uses DEFAULT_PATTERN, not new RegExp("").
-    const result = await branchNamingGuard.check(
-      ctxWith("anything-goes", { pattern: "" }),
-    );
+    const result = await branchNamingGuard.check(ctxWith("anything-goes", { pattern: "" }));
     assert.equal(result.passed, false);
   });
 
   it("invalid regex in config surfaces as SyntaxError to the caller", async () => {
     await assert.rejects(
-      () =>
-        branchNamingGuard.check(
-          ctxWith("feat/x", { pattern: "([unterminated" }),
-        ),
+      () => branchNamingGuard.check(ctxWith("feat/x", { pattern: "([unterminated" })),
       SyntaxError,
     );
   });

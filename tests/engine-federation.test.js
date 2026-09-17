@@ -83,7 +83,9 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
             if (signal) {
               signal.addEventListener("abort", () => {
                 clearTimeout(timer);
-                reject(signal.reason ?? new DOMException("The operation was aborted.", "AbortError"));
+                reject(
+                  signal.reason ?? new DOMException("The operation was aborted.", "AbortError"),
+                );
               });
             }
           });
@@ -138,7 +140,11 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
     // Federation guard is skipped by engine because enabled: false
     const fedGuardResult = result.results.find((r) => r.guardId === "federation");
     // When federation.enabled=false, getGuardConfig returns {enabled:false} and the guard is SKIPPED
-    assert.equal(fedGuardResult, undefined, "Federation guard should be completely skipped when disabled");
+    assert.equal(
+      fedGuardResult,
+      undefined,
+      "Federation guard should be completely skipped when disabled",
+    );
   });
 
   // ─── Test 2: FE.01–03: Full pipeline, parent phase unblocked ───
@@ -146,7 +152,7 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
   it("FE.01 & FE.02: enriches parent and FE.03: injects authorized=true for unblocked phase", async () => {
     setupMockFetch(
       { id: "TK-CHILD", phase: "EXECUTING", parentId: "TK-PARENT" },
-      { id: "TK-PARENT", phase: "EXECUTING" } // EXECUTING is NOT in blockedParentPhases
+      { id: "TK-PARENT", phase: "EXECUTING" }, // EXECUTING is NOT in blockedParentPhases
     );
 
     const engine = new DefendEngine(dummyRoot, createMockConfig(true)).use(federationGuard);
@@ -165,7 +171,7 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
   it("FE.03: blocks when parent phase is in blockedParentPhases", async () => {
     setupMockFetch(
       { id: "TK-CHILD", phase: "EXECUTING", parentId: "TK-PARENT" },
-      { id: "TK-PARENT", phase: "BLOCKED" } // BLOCKED IS in blockedParentPhases
+      { id: "TK-PARENT", phase: "BLOCKED" }, // BLOCKED IS in blockedParentPhases
     );
 
     const engine = new DefendEngine(dummyRoot, createMockConfig(true)).use(federationGuard);
@@ -178,17 +184,14 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
     assert.equal(fedGuardResult.passed, false, "Should BLOCK when parent is in blocked phase");
     assert.ok(
       fedGuardResult.findings.some((f) => f.message.includes("BLOCKED")),
-      "Should mention BLOCKED in finding message"
+      "Should mention BLOCKED in finding message",
     );
   });
 
   // ─── Test 4: FE.04: Parent 404 → graceful degradation (WARN) ───
 
   it("FE.04: degrades gracefully to WARN when parent fetch returns 404", async () => {
-    setupMockFetch(
-      { id: "TK-CHILD", phase: "EXECUTING", parentId: "TK-PARENT" },
-      "404"
-    );
+    setupMockFetch({ id: "TK-CHILD", phase: "EXECUTING", parentId: "TK-PARENT" }, "404");
 
     const engine = new DefendEngine(dummyRoot, createMockConfig(true)).use(federationGuard);
     const result = await engine.run({ files: ["src/index.ts"], branch: "feat/TK-CHILD" });
@@ -201,17 +204,14 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
     assert.equal(fedGuardResult.passed, true, "Should pass (WARN only, not BLOCK)");
     assert.ok(
       fedGuardResult.findings.some((f) => f.severity === Severity.WARN),
-      "Should have WARN finding for unresolved parent"
+      "Should have WARN finding for unresolved parent",
     );
   });
 
   // ─── Test 5: FE.04: Parent network error → graceful degradation ───
 
   it("FE.04: degrades gracefully to WARN on network error", async () => {
-    setupMockFetch(
-      { id: "TK-CHILD", phase: "EXECUTING", parentId: "TK-PARENT" },
-      "NETWORK_ERROR"
-    );
+    setupMockFetch({ id: "TK-CHILD", phase: "EXECUTING", parentId: "TK-PARENT" }, "NETWORK_ERROR");
 
     const engine = new DefendEngine(dummyRoot, createMockConfig(true)).use(federationGuard);
     const result = await engine.run({ files: ["src/index.ts"], branch: "feat/TK-CHILD" });
@@ -222,7 +222,7 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
     assert.equal(fedGuardResult.passed, true, "Should pass (graceful degradation)");
     assert.ok(
       fedGuardResult.findings.some((f) => f.severity === Severity.WARN),
-      "Should have WARN finding for network failure"
+      "Should have WARN finding for network failure",
     );
   });
 
@@ -232,7 +232,7 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
     setupMockFetch(
       { id: "TK-CHILD", phase: "EXECUTING", parentId: "TK-PARENT" },
       { id: "TK-PARENT", phase: "EXECUTING" },
-      2000 // parent takes 2 seconds
+      2000, // parent takes 2 seconds
     );
 
     // Federation timeout is 50ms (parent takes 2s → will timeout)
@@ -246,7 +246,7 @@ describe("DefendEngine: Federation Orchestration (FE.01-04)", () => {
     assert.equal(fedGuardResult.passed, true, "Should pass (timeout = graceful degradation)");
     assert.ok(
       fedGuardResult.findings.some((f) => f.severity === Severity.WARN),
-      "Should have WARN finding for timeout"
+      "Should have WARN finding for timeout",
     );
   });
 });

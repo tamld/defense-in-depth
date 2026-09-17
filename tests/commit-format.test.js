@@ -80,16 +80,12 @@ describe("commitFormatGuard — multi-line handling", () => {
   });
 
   it("blocks when first line is invalid even if a later line matches", async () => {
-    const result = await commitFormatGuard.check(
-      ctxWith("invalid header\n\nfeat: hidden in body"),
-    );
+    const result = await commitFormatGuard.check(ctxWith("invalid header\n\nfeat: hidden in body"));
     assert.equal(result.passed, false);
   });
 
   it("blocks whitespace-only first line", async () => {
-    const result = await commitFormatGuard.check(
-      ctxWith("   \n\nfeat: real subject in line 2"),
-    );
+    const result = await commitFormatGuard.check(ctxWith("   \n\nfeat: real subject in line 2"));
     assert.equal(result.passed, false);
   });
 });
@@ -108,25 +104,19 @@ describe("commitFormatGuard — missing commit message", () => {
 
 describe("commitFormatGuard — custom config", () => {
   it("custom pattern accepts non-conventional formats when explicitly allowed", async () => {
-    const result = await commitFormatGuard.check(
-      ctxWith("WIP foo bar", { pattern: "^WIP\\s.+" }),
-    );
+    const result = await commitFormatGuard.check(ctxWith("WIP foo bar", { pattern: "^WIP\\s.+" }));
     assert.equal(result.passed, true);
   });
 
   it("empty pattern '' falls back to DEFAULT_PATTERN (truthy guard semantics)", async () => {
-    const result = await commitFormatGuard.check(
-      ctxWith("anything", { pattern: "" }),
-    );
+    const result = await commitFormatGuard.check(ctxWith("anything", { pattern: "" }));
     // "anything" does not match the default; should block.
     assert.equal(result.passed, false);
   });
 
   it("custom types list is echoed in the block message but does NOT change validation", async () => {
     // Per source: types affects only the failure message; pattern still drives validation.
-    const result = await commitFormatGuard.check(
-      ctxWith("wip: hack", { types: ["wip", "exp"] }),
-    );
+    const result = await commitFormatGuard.check(ctxWith("wip: hack", { types: ["wip", "exp"] }));
     assert.equal(result.passed, false);
     assert.ok(result.findings[0].message.includes("wip"));
     assert.ok(result.findings[0].message.includes("exp"));

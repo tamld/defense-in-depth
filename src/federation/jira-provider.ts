@@ -36,15 +36,15 @@ export interface JiraProviderConfig extends ProviderConfig {
 /** Jira status category mapping to our phase */
 const JIRA_STATUS_TO_PHASE: Record<string, string> = {
   "To Do": "BACKLOG",
-  "Backlog": "BACKLOG",
+  Backlog: "BACKLOG",
   "Selected for Development": "PLANNING",
   "In Progress": "EXECUTING",
   "In Review": "REVIEW",
-  "Done": "COMPLETED",
-  "Closed": "COMPLETED",
-  "Canceled": "CANCELLED",
-  "Cancelled": "CANCELLED",
-  "Blocked": "BLOCKED",
+  Done: "COMPLETED",
+  Closed: "COMPLETED",
+  Canceled: "CANCELLED",
+  Cancelled: "CANCELLED",
+  Blocked: "BLOCKED",
   "On Hold": "BLOCKED",
 };
 
@@ -67,7 +67,9 @@ export class JiraTicketProvider implements TicketStateProvider {
       console.warn(`⚠ JiraTicketProvider: baseUrl not configured, provider will fail`);
     }
     if (!this.bearerToken && (!this.email || !this.apiToken)) {
-      console.warn(`⚠ JiraTicketProvider: No authentication configured (email+apiToken or bearerToken), provider will fail`);
+      console.warn(
+        `⚠ JiraTicketProvider: No authentication configured (email+apiToken or bearerToken), provider will fail`,
+      );
     }
   }
 
@@ -94,8 +96,8 @@ export class JiraTicketProvider implements TicketStateProvider {
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "Accept": "application/json",
-          "Authorization": this.getAuthHeader(),
+          Accept: "application/json",
+          Authorization: this.getAuthHeader(),
         },
         signal: controller.signal,
       });
@@ -152,7 +154,10 @@ export class JiraTicketProvider implements TicketStateProvider {
 
         // Extract issue type
         const issuetype = fields.issuetype as Record<string, unknown> | undefined;
-        const issueType = issuetype && typeof issuetype.name === "string" ? issuetype.name.toLowerCase() : undefined;
+        const issueType =
+          issuetype && typeof issuetype.name === "string"
+            ? issuetype.name.toLowerCase()
+            : undefined;
 
         const ref: TicketRef = {
           id: typeof data.key === "string" ? data.key : ticketId,
