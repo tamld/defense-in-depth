@@ -36,7 +36,11 @@ test("subpath exports — package self-referencing (issue #36)", async (t) => {
     assert.strictEqual(typeof root.DEFAULT_CONFIG, "object", "DEFAULT_CONFIG value export");
     assert.strictEqual(typeof root.Severity, "object", "Severity enum value export");
     assert.strictEqual(typeof root.EvidenceLevel, "object", "EvidenceLevel enum value export");
-    assert.strictEqual(typeof root.hollowArtifactGuard, "object", "hollowArtifactGuard value export");
+    assert.strictEqual(
+      typeof root.hollowArtifactGuard,
+      "object",
+      "hollowArtifactGuard value export",
+    );
     assert.strictEqual(typeof root.allBuiltinGuards, "object", "allBuiltinGuards array");
     assert.ok(Array.isArray(root.allBuiltinGuards), "allBuiltinGuards is an array");
   });
@@ -45,7 +49,11 @@ test("subpath exports — package self-referencing (issue #36)", async (t) => {
     const types = await import("defense-in-depth/types");
     // Value-level (enum runtime objects)
     assert.strictEqual(typeof types.Severity, "object", "Severity is exported as an enum object");
-    assert.strictEqual(typeof types.EvidenceLevel, "object", "EvidenceLevel is exported as an enum object");
+    assert.strictEqual(
+      typeof types.EvidenceLevel,
+      "object",
+      "EvidenceLevel is exported as an enum object",
+    );
     // Sanity-check enum values (per src/core/types.ts current shape)
     assert.strictEqual(types.Severity.PASS, "pass");
     assert.strictEqual(types.Severity.WARN, "warn");
@@ -78,11 +86,7 @@ test("subpath exports — package self-referencing (issue #36)", async (t) => {
       "selfProtectionGuard",
     ];
     for (const name of expected) {
-      assert.strictEqual(
-        typeof guards[name],
-        "object",
-        `guards barrel must export ${name}`,
-      );
+      assert.strictEqual(typeof guards[name], "object", `guards barrel must export ${name}`);
       assert.strictEqual(
         typeof guards[name].check,
         "function",
@@ -101,8 +105,16 @@ test("subpath exports — package self-referencing (issue #36)", async (t) => {
   await t.test("'defense-in-depth/federation' exposes provider factory + impls", async () => {
     const federation = await import("defense-in-depth/federation");
     assert.strictEqual(typeof federation.createProvider, "function", "createProvider factory");
-    assert.strictEqual(typeof federation.FileTicketProvider, "function", "FileTicketProvider class");
-    assert.strictEqual(typeof federation.HttpTicketProvider, "function", "HttpTicketProvider class");
+    assert.strictEqual(
+      typeof federation.FileTicketProvider,
+      "function",
+      "FileTicketProvider class",
+    );
+    assert.strictEqual(
+      typeof federation.HttpTicketProvider,
+      "function",
+      "HttpTicketProvider class",
+    );
 
     // Smoke-call: createProvider() with no args must default to the file provider.
     const provider = federation.createProvider(undefined, undefined, "/tmp");

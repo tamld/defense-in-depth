@@ -160,8 +160,7 @@ describe("verify — DSPy-unavailable banner (Site #2)", () => {
     // matches the eval.ts contract and avoids stderr noise in CI logs.
     const r = runCli(["verify", "--files", "docs/clean.md", "docs/clean2.md"]);
 
-    const matches =
-      r.stderr.match(/DSPy unavailable: semantic evaluation skipped/g) ?? [];
+    const matches = r.stderr.match(/DSPy unavailable: semantic evaluation skipped/g) ?? [];
     assert.equal(
       matches.length,
       1,

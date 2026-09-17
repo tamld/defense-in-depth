@@ -197,9 +197,7 @@ describe("DefendEngine lifecycle — dispose() runs after check()", () => {
     const findings = verdict.results.flatMap((r) => r.findings);
     assert.ok(
       findings.some(
-        (f) =>
-          f.severity === Severity.BLOCK &&
-          /Guard init crashed:.*boom in init/.test(f.message),
+        (f) => f.severity === Severity.BLOCK && /Guard init crashed:.*boom in init/.test(f.message),
       ),
       `expected a "Guard init crashed: …" BLOCK finding, got: ${JSON.stringify(findings)}`,
     );
@@ -262,11 +260,7 @@ describe("DefendEngine lifecycle — priority ordering", () => {
     const first = recordingGuard("first", log, { priority: 5 });
     const second = recordingGuard("second", log, { priority: 5 });
     const third = recordingGuard("third", log, { priority: 5 });
-    const engine = new DefendEngine(mkRoot(), makeConfig()).useAll([
-      first,
-      second,
-      third,
-    ]);
+    const engine = new DefendEngine(mkRoot(), makeConfig()).useAll([first, second, third]);
 
     await engine.run({ files: [] });
 
@@ -281,12 +275,7 @@ describe("DefendEngine lifecycle — priority ordering", () => {
 
     await engine.run({ files: [] });
 
-    assert.deepStrictEqual(log, [
-      "high:init",
-      "high:check",
-      "low:init",
-      "low:check",
-    ]);
+    assert.deepStrictEqual(log, ["high:init", "high:check", "low:init", "low:check"]);
   });
 });
 

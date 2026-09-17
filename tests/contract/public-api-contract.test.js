@@ -42,22 +42,7 @@ import {
   Severity,
   EvidenceLevel,
   hollowArtifactGuard,
-  ssotPollutionGuard,
-  rootPollutionGuard,
   commitFormatGuard,
-  branchNamingGuard,
-  phaseGateGuard,
-  ticketIdentityGuard,
-  hitlReviewGuard,
-  federationGuard,
-  secretDetectionGuard,
-  fileSizeLimitGuard,
-  dependencyAuditGuard,
-  noTypeSafetyBypassGuard,
-  noSwallowedErrorGuard,
-  noStubReturnGuard,
-  noTriviallyTrueTestGuard,
-  selfProtectionGuard,
   allBuiltinGuards,
   createProvider,
   FileTicketProvider,
@@ -115,8 +100,7 @@ describe("CONTRACT — EngineVerdict object shape from engine.run()", () => {
   it("returns the documented shape: passed | totalGuards | passedGuards | failedGuards | warnedGuards | results | durationMs", async () => {
     // Breaking this = MAJOR. The fields below are the only guarantees
     // consumers (CI scripts, hooks, dashboards) can rely on.
-    const engine = new DefendEngine(mkProjectRoot(), DEFAULT_CONFIG)
-      .use(commitFormatGuard);
+    const engine = new DefendEngine(mkProjectRoot(), DEFAULT_CONFIG).use(commitFormatGuard);
     const verdict = await engine.run({ files: [], commitMessage: "feat: contract test" });
 
     assert.strictEqual(typeof verdict, "object");
@@ -215,19 +199,16 @@ describe("CONTRACT — Guard interface shape (every built-in)", () => {
       assert.strictEqual(typeof guard.name, "string", `Guard.name on ${guard.id}`);
       assert.ok(guard.name.length > 0, `Guard.name must be non-empty on ${guard.id}`);
 
-      assert.strictEqual(
-        typeof guard.description,
-        "string",
-        `Guard.description on ${guard.id}`,
-      );
-      assert.ok(
-        guard.description.length > 0,
-        `Guard.description must be non-empty on ${guard.id}`,
-      );
+      assert.strictEqual(typeof guard.description, "string", `Guard.description on ${guard.id}`);
+      assert.ok(guard.description.length > 0, `Guard.description must be non-empty on ${guard.id}`);
 
       assert.strictEqual(typeof guard.check, "function", `Guard.check on ${guard.id}`);
       // Guard.check must take a single ctx argument per the contract.
-      assert.strictEqual(guard.check.length, 1, `Guard.check must accept exactly 1 argument on ${guard.id}`);
+      assert.strictEqual(
+        guard.check.length,
+        1,
+        `Guard.check must accept exactly 1 argument on ${guard.id}`,
+      );
     });
   }
 
@@ -297,10 +278,7 @@ describe("CONTRACT — loadConfig & DEFAULT_CONFIG shape", () => {
       "phaseGate",
       "ticketIdentity",
     ]) {
-      assert.ok(
-        expectedKey in cfg.guards,
-        `cfg.guards.${expectedKey} must be present in defaults`,
-      );
+      assert.ok(expectedKey in cfg.guards, `cfg.guards.${expectedKey} must be present in defaults`);
     }
     for (const optInKey of ["hitlReview", "federation"]) {
       assert.ok(
@@ -325,10 +303,7 @@ describe("CONTRACT — loadConfig & DEFAULT_CONFIG shape", () => {
 describe("CONTRACT — federation provider factory & TicketStateProvider shape", () => {
   it("createProvider(undefined) returns a FileTicketProvider instance (default)", () => {
     const p = createProvider(undefined, undefined, mkProjectRoot());
-    assert.ok(
-      p instanceof FileTicketProvider,
-      "default provider must be FileTicketProvider",
-    );
+    assert.ok(p instanceof FileTicketProvider, "default provider must be FileTicketProvider");
   });
 
   it("createProvider('file') returns a FileTicketProvider instance", () => {
@@ -373,7 +348,11 @@ describe("CONTRACT — federation provider factory & TicketStateProvider shape",
 
       // dispose is optional. If present, must be a function.
       if ("dispose" in p && p.dispose !== undefined) {
-        assert.strictEqual(typeof p.dispose, "function", "provider.dispose: function (when present)");
+        assert.strictEqual(
+          typeof p.dispose,
+          "function",
+          "provider.dispose: function (when present)",
+        );
       }
     }
   });

@@ -65,16 +65,7 @@ function commit(file, content, message) {
   spawnSync("git", ["add", file], { cwd: tmp, env: { ...process.env, ...GIT_ENV } });
   spawnSync(
     "git",
-    [
-      "-c",
-      "user.name=test",
-      "-c",
-      "user.email=test@example.com",
-      "commit",
-      "-q",
-      "-m",
-      message,
-    ],
+    ["-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", message],
     { cwd: tmp, env: { ...process.env, ...GIT_ENV } },
   );
 }
@@ -126,7 +117,7 @@ function seed({ lessonExtra = {}, recallTs = new Date(Date.now() - 5000) } = {})
     createdAt: new Date().toISOString(),
     ...lessonExtra,
   };
-  fs.writeFileSync(path.join(tmp, LESSONS_PATH), JSON.stringify(lesson) + "\n");
+  fs.writeFileSync(path.join(tmp, LESSONS_PATH), `${JSON.stringify(lesson)}\n`);
 
   const queryHash = hashQuery("build");
   const recall = {
@@ -140,7 +131,7 @@ function seed({ lessonExtra = {}, recallTs = new Date(Date.now() - 5000) } = {})
     executor: "human",
   };
   fs.mkdirSync(path.join(tmp, ".agents/records"), { recursive: true });
-  fs.writeFileSync(path.join(tmp, RECALLS_PATH), JSON.stringify(recall) + "\n");
+  fs.writeFileSync(path.join(tmp, RECALLS_PATH), `${JSON.stringify(recall)}\n`);
   return { lesson, recall };
 }
 

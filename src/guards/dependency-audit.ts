@@ -138,7 +138,7 @@ export function createDependencyAuditGuard(options: DependencyAuditOptions = {})
           }
         }
 
-        if (!stdout || !stdout.trim().startsWith("{")) {
+        if (!stdout?.trim().startsWith("{")) {
           return {
             guardId: "dependencyAudit",
             passed: true,

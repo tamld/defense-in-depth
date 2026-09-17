@@ -42,7 +42,7 @@ export const selfProtectionGuard: Guard = {
     const severity = config?.severity === "warn" ? Severity.WARN : Severity.BLOCK;
     const protectedList = config?.protectedPaths ?? DEFAULT_PROTECTED_PATHS;
     const hasTicketContext = Boolean(
-      (ctx.ticket && ctx.ticket.id) ||
+      ctx.ticket?.id ||
         (ctx.commitMessage && TICKET_REGEX.test(ctx.commitMessage)) ||
         (ctx.branch &&
           (TICKET_REGEX.test(ctx.branch) ||

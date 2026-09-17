@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mkdtemp, rm, writeFile, mkdir } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { noTypeSafetyBypassGuard } from "../../dist/guards/no-type-safety-bypass.js";
@@ -69,7 +69,10 @@ test("noTypeSafetyBypassGuard — blocks bypass patterns", async (t) => {
   await t.test("blocks '@ts-ignore' directive", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "service.ts"), "// @ts-ignore — temporary fix\nconst a: number = 'str';\n");
+      await writeFile(
+        path.join(root, "service.ts"),
+        "// @ts-ignore — temporary fix\nconst a: number = 'str';\n",
+      );
       const result = await noTypeSafetyBypassGuard.check({
         stagedFiles: ["service.ts"],
         projectRoot: root,
@@ -101,7 +104,10 @@ test("noTypeSafetyBypassGuard — blocks bypass patterns", async (t) => {
   await t.test("blocks unreferenced '@ts-expect-error'", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "check.ts"), "// @ts-expect-error\nconst x: number = 'abc';\n");
+      await writeFile(
+        path.join(root, "check.ts"),
+        "// @ts-expect-error\nconst x: number = 'abc';\n",
+      );
       const result = await noTypeSafetyBypassGuard.check({
         stagedFiles: ["check.ts"],
         projectRoot: root,
@@ -197,4 +203,3 @@ test("noTypeSafetyBypassGuard — allowlists & escape hatches", async (t) => {
     }
   });
 });
-
