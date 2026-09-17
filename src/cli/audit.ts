@@ -98,9 +98,6 @@ export interface SuggestedLesson {
 const PACKAGE_JSON = JSON.parse(readFileSync(resolve(__dirname, "../../package.json"), "utf-8"));
 const VERSION = PACKAGE_JSON.version;
 
-/**
- * Main audit entry point
- */
 export async function auditCommand(projectRoot: string, args: string[]): Promise<void> {
   const options = parseAuditOptions(args);
 
@@ -133,17 +130,20 @@ export async function auditCommand(projectRoot: string, args: string[]): Promise
   if (options.exportLessonsPath) {
     const exportPath = resolve(projectRoot, options.exportLessonsPath);
     ensureDir(dirname(exportPath));
-    writeFileSync(exportPath, result.suggestedLessons.map(l => JSON.stringify(l)).join("\n") + "\n", "utf-8");
-    console.log(`\n📚 Exported ${result.suggestedLessons.length} suggested lessons to: ${exportPath}`);
+    writeFileSync(
+      exportPath,
+      `${result.suggestedLessons.map((l) => JSON.stringify(l)).join("\n")}\n`,
+      "utf-8",
+    );
+    console.log(
+      `\n📚 Exported ${result.suggestedLessons.length} suggested lessons to: ${exportPath}`,
+    );
   }
 
   console.log("\n✅ Audit complete. No modifications made to target project.");
 }
 
-/**
- * Run full audit on target project
- */
-async function runAudit(targetPath: string, options: AuditOptions): Promise<AuditResult> {
+export async function runAudit(targetPath: string, options: AuditOptions): Promise<AuditResult> {
   const startTime = Date.now();
 
   // 1. Run verify (read-only, no hooks)
@@ -168,9 +168,15 @@ async function runAudit(targetPath: string, options: AuditOptions): Promise<Audi
 
   // 6. Generate suggested lessons
   console.log("  → Generating suggested lessons...");
-  const suggestedLessons = generateSuggestedLessons(verifyResult, codePatterns, commitPatterns, configDrift, fileSizes);
+  const suggestedLessons = generateSuggestedLessons(
+    verifyResult,
+    codePatterns,
+    commitPatterns,
+    configDrift,
+    fileSizes,
+  );
 
-  const durationMs = Date.now() - startTime;
+  const _durationMs = Date.now() - startTime;
 
   return {
     targetPath,
@@ -193,20 +199,17 @@ async function runAudit(targetPath: string, options: AuditOptions): Promise<Audi
   };
 }
 
-/**
- * Run verify in read-only mode (no hooks, no writes)
- */
-async function runVerifyReadOnly(targetPath: string, options: AuditOptions): Promise<{
+export async function runVerifyReadOnly(
+  targetPath: string,
+  options: AuditOptions,
+): Promise<{
   findings: AuditFinding[];
   filesScanned: number;
 }> {
-  // Import verify dynamically to avoid circular deps
-  const { verify } = await import("./verify.js");
-
   // Capture console output
-  const findings: AuditFinding[] = [];
-  const originalLog = console.log;
-  const originalError = console.error;
+  const _findings: AuditFinding[] = [];
+  const _originalLog = console.log;
+  const _originalError = console.error;
 
   try {
     // We need to capture verify output. Since verify writes to console,
@@ -226,7 +229,12 @@ async function runVerifyReadOnly(targetPath: string, options: AuditOptions): Pro
     const auditFindings: AuditFinding[] = [];
     for (const guardResult of result.results) {
       for (const finding of guardResult.findings) {
-        const severity = finding.severity === Severity.BLOCK ? "BLOCK" : finding.severity === Severity.WARN ? "WARN" : "PASS";
+        const severity =
+          finding.severity === Severity.BLOCK
+            ? "BLOCK"
+            : finding.severity === Severity.WARN
+              ? "WARN"
+              : "PASS";
         auditFindings.push({
           guardId: guardResult.guardId,
           severity,
@@ -243,44 +251,50 @@ async function runVerifyReadOnly(targetPath: string, options: AuditOptions): Pro
     console.error(`⚠ Audit verify failed: ${err instanceof Error ? err.message : String(err)}`);
     return { findings: [], filesScanned: 0 };
   } finally {
-    console.log = originalLog;
-    console.error = originalError;
+    console.log = _originalLog;
+    console.error = _originalError;
   }
 }
 
-/**
- * Find scannable files in target project
- */
-async function findScannableFiles(targetPath: string, options: AuditOptions): Promise<string[]> {
+export async function findScannableFiles(
+  targetPath: string,
+  options: AuditOptions,
+): Promise<string[]> {
   const { glob } = await import("glob");
-  const patterns = options.includePatterns?.length ? options.includePatterns : [
-    "**/*.{ts,tsx,js,jsx,json,yaml,yml,md,py,go,rs,java,kt,swift,cs,php,rb,sh,sql,html,css,scss,vue,svelte}",
-    "!**/node_modules/**",
-    "!**/dist/**",
-    "!**/build/**",
-    "!**/.git/**",
-    "!**/coverage/**",
-    "!**/.next/**",
-    "!**/.turbo/**",
-  ];
+  const patterns = options.includePatterns?.length
+    ? options.includePatterns
+    : [
+        "**/*.{ts,tsx,js,jsx,json,yaml,yml,md,py,go,rs,java,kt,swift,cs,php,rb,sh,sql,html,css,scss,vue,svelte}",
+        "!**/node_modules/**",
+        "!**/dist/**",
+        "!**/build/**",
+        "!**/.git/**",
+        "!**/coverage/**",
+        "!**/.next/**",
+        "!**/.turbo/**",
+      ];
 
   const files: string[] = [];
   for (const pattern of patterns) {
     if (pattern.startsWith("!")) continue;
     try {
-      const matches = await glob(pattern, { cwd: targetPath, absolute: true, ignore: patterns.filter(p => p.startsWith("!")).map(p => p.slice(1)) });
+      const matches = await glob(pattern, {
+        cwd: targetPath,
+        absolute: true,
+        ignore: patterns.filter((p) => p.startsWith("!")).map((p) => p.slice(1)),
+      });
       files.push(...matches);
-    } catch (_err) {
-      continue;
+} catch (err) {
+      console.error(`⚠  glob pattern failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
+
   return [...new Set(files)];
 }
-
-/**
- * Extract code patterns (TODO, FIXME, HACK, etc.)
- */
-async function extractCodePatterns(targetPath: string, options: AuditOptions): Promise<CodePattern[]> {
+export async function extractCodePatterns(
+  targetPath: string,
+  options: AuditOptions,
+): Promise<CodePattern[]> {
   const files = await findScannableFiles(targetPath, options);
   const patternMap = new Map<string, CodePattern>();
 
@@ -297,7 +311,7 @@ async function extractCodePatterns(targetPath: string, options: AuditOptions): P
   for (const file of files) {
     try {
       const content = readFileSync(file, "utf-8");
-      const relFile = file.replace(targetPath + "/", "");
+      const relFile = file.replace(`${targetPath}/`, "");
 
       for (const { regex, category } of patternCategories) {
         const matches = content.match(regex);
@@ -317,8 +331,8 @@ async function extractCodePatterns(targetPath: string, options: AuditOptions): P
           }
         }
       }
-    } catch (_err) {
-      continue;
+    } catch (err) {
+      console.error(`⚠  file read failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -327,10 +341,7 @@ async function extractCodePatterns(targetPath: string, options: AuditOptions): P
     .slice(0, 50);
 }
 
-/**
- * Extract commit patterns from git history
- */
-async function extractCommitPatterns(targetPath: string): Promise<CommitPattern[]> {
+export async function extractCommitPatterns(targetPath: string): Promise<CommitPattern[]> {
   try {
     const log = execFileSync(
       "git",
@@ -339,7 +350,7 @@ async function extractCommitPatterns(targetPath: string): Promise<CommitPattern[
         cwd: targetPath,
         encoding: "utf-8",
         timeout: 5000,
-      }
+      },
     );
 
     const lines = log.trim().split("\n").filter(Boolean);
@@ -364,15 +375,13 @@ async function extractCommitPatterns(targetPath: string): Promise<CommitPattern[
     }
 
     return Array.from(patternMap.values()).sort((a, b) => b.count - a.count);
-  } catch {
+  } catch (err) {
+    console.error(`⚠  git log failed: ${err instanceof Error ? err.message : String(err)}`);
     return [];
   }
 }
 
-/**
- * Check config drift against defaults
- */
-async function checkConfigDrift(targetPath: string): Promise<ConfigDrift[]> {
+export async function checkConfigDrift(targetPath: string): Promise<ConfigDrift[]> {
   const drifts: ConfigDrift[] = [];
 
   // Check package.json
@@ -383,13 +392,23 @@ async function checkConfigDrift(targetPath: string): Promise<ConfigDrift[]> {
       const expected = { type: "module", engines: { node: ">=18" } };
       for (const [key, expVal] of Object.entries(expected)) {
         if (!(key in pkg)) {
-          drifts.push({ file: "package.json", expected: { [key]: expVal }, actual: {}, driftType: "missing" });
+          drifts.push({
+            file: "package.json",
+            expected: { [key]: expVal },
+            actual: {},
+            driftType: "missing",
+          });
         } else if (JSON.stringify(pkg[key]) !== JSON.stringify(expVal)) {
-          drifts.push({ file: "package.json", expected: { [key]: expVal }, actual: { [key]: pkg[key] }, driftType: "different" });
+          drifts.push({
+            file: "package.json",
+            expected: { [key]: expVal },
+            actual: { [key]: pkg[key] },
+            driftType: "different",
+          });
         }
       }
     }
-  } catch (err) {
+  } catch (_err) {
     drifts.push({ file: "package.json", expected: {}, actual: {}, driftType: "missing" });
   }
 
@@ -410,50 +429,44 @@ async function checkConfigDrift(targetPath: string): Promise<ConfigDrift[]> {
         }
       }
     }
-  } catch (err) {
+  } catch (_err) {
     drifts.push({ file: "tsconfig.json", expected: {}, actual: {}, driftType: "missing" });
   }
 
   return drifts;
 }
 
-/**
- * Scan for large files (potential hollow artifacts)
- */
-async function scanFileSizes(targetPath: string): Promise<FileSizeInfo[]> {
+export async function scanFileSizes(targetPath: string): Promise<FileSizeInfo[]> {
   const { glob } = await import("glob");
   const files = await glob("**/*", { cwd: targetPath, absolute: true, nodir: true });
   const largeFiles: FileSizeInfo[] = [];
 
   for (const file of files) {
     try {
-      const stats = await import("node:fs").then(fs => fs.statSync(file));
+      const stats = await import("node:fs").then((fs) => fs.statSync(file));
       const sizeKB = stats.size / 1024;
       if (sizeKB > 100) {
         largeFiles.push({
-          file: file.replace(targetPath + "/", ""),
+          file: file.replace(`${targetPath}/`, ""),
           sizeBytes: stats.size,
           sizeKB: Math.round(sizeKB),
           category: sizeKB > 1000 ? "huge" : "large",
         });
       }
-    } catch (_err) {
-      continue;
+    } catch (err) {
+      console.error(`⚠  stat failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
   return largeFiles.sort((a, b) => b.sizeBytes - a.sizeBytes).slice(0, 20);
 }
 
-/**
- * Generate suggested lessons from audit findings
- */
-function generateSuggestedLessons(
+export function generateSuggestedLessons(
   verifyResult: { findings: AuditFinding[] },
   codePatterns: CodePattern[],
-  commitPatterns: CommitPattern[],
+  _commitPatterns: CommitPattern[],
   configDrift: ConfigDrift[],
-  fileSizes: FileSizeInfo[]
+  fileSizes: FileSizeInfo[],
 ): SuggestedLesson[] {
   const lessons: SuggestedLesson[] = [];
 
@@ -463,7 +476,8 @@ function generateSuggestedLessons(
       lessons.push({
         title: `Guard ${finding.guardId}: ${finding.message}`,
         wrongApproach: `Code triggered ${finding.guardId}: ${finding.message}`,
-        correctApproach: finding.fix || `Follow ${finding.guardId} guidelines to avoid this pattern`,
+        correctApproach:
+          finding.fix || `Follow ${finding.guardId} guidelines to avoid this pattern`,
         insight: `Guard ${finding.guardId} catches this pattern automatically. Ensure code passes pre-commit.`,
         category: "code",
         evidence: "RUNTIME",
@@ -527,20 +541,26 @@ function generateSuggestedLessons(
 }
 
 function countBySeverity(findings: AuditFinding[]): Record<string, number> {
-  return findings.reduce((acc, f) => {
-    acc[f.severity] = (acc[f.severity] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  return findings.reduce(
+    (acc, f) => {
+      acc[f.severity] = (acc[f.severity] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 }
 
 function countByGuard(findings: AuditFinding[]): Record<string, number> {
-  return findings.reduce((acc, f) => {
-    acc[f.guardId] = (acc[f.guardId] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  return findings.reduce(
+    (acc, f) => {
+      acc[f.guardId] = (acc[f.guardId] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 }
 
-function parseAuditOptions(args: string[]): AuditOptions {
+export function parseAuditOptions(args: string[]): AuditOptions {
   const options: AuditOptions = {
     targetPath: "",
     outputFormat: "text",
@@ -566,7 +586,7 @@ function ensureDir(dir: string): void {
   }
 }
 
-function printAuditUsage(): void {
+export function printAuditUsage(): void {
   console.log(`
 🔍 defense-in-depth audit — Read-only pattern extraction
 
@@ -584,7 +604,7 @@ Examples:
 `);
 }
 
-function printAuditSummary(result: AuditResult): void {
+export function printAuditSummary(result: AuditResult): void {
   console.log(`
 📊 Audit Summary for: ${result.targetPath}
    Files scanned: ${result.summary.filesScanned}
@@ -593,18 +613,33 @@ function printAuditSummary(result: AuditResult): void {
    By guard: ${JSON.stringify(result.summary.findingsByGuard)}
 
 📋 Top Code Patterns:
-${result.patterns.codePatterns.slice(0, 10).map(p => `   ${p.category}: ${p.count} (${p.files.length} files)`).join("\n") || "   (none)"}
+${
+  result.patterns.codePatterns
+    .slice(0, 10)
+    .map((p) => `   ${p.category}: ${p.count} (${p.files.length} files)`)
+    .join("\n") || "   (none)"
+}
 
 📝 Commit Patterns:
-${result.patterns.commitPatterns.map(p => `   ${p.category}: ${p.count}`).join("\n") || "   (none)"}
+${result.patterns.commitPatterns.map((p) => `   ${p.category}: ${p.count}`).join("\n") || "   (none)"}
 
 ⚙️ Config Drift:
-${result.patterns.configDrift.map(d => `   ${d.file}: ${d.driftType}`).join("\n") || "   (none)"}
+${result.patterns.configDrift.map((d) => `   ${d.file}: ${d.driftType}`).join("\n") || "   (none)"}
 
 📦 Large Files:
-${result.patterns.fileSizes.slice(0, 5).map(f => `   ${f.file}: ${f.sizeKB} KB (${f.category})`).join("\n") || "   (none)"}
+${
+  result.patterns.fileSizes
+    .slice(0, 5)
+    .map((f) => `   ${f.file}: ${f.sizeKB} KB (${f.category})`)
+    .join("\n") || "   (none)"
+}
 
 💡 Suggested Lessons: ${result.suggestedLessons.length}
-${result.suggestedLessons.slice(0, 5).map(l => `   - ${l.title} [${l.category}]`).join("\n") || "   (none)"}
+${
+  result.suggestedLessons
+    .slice(0, 5)
+    .map((l) => `   - ${l.title} [${l.category}]`)
+    .join("\n") || "   (none)"
+}
 `);
 }

@@ -54,7 +54,7 @@ const DEFAULT_EXTENSIONS = [".md", ".json", ".yml", ".yaml"];
 const DEFAULT_MIN_CONTENT_LENGTH = 50;
 
 /** Default DSPy timeout */
-const DEFAULT_DSPY_TIMEOUT_MS = 5000;
+const _DEFAULT_DSPY_TIMEOUT_MS = 5000;
 
 /** Hard-coded whitelist of semantic text extensions safely scannable by DSPy */
 const SEMANTIC_TEXT_EXTS = new Set([

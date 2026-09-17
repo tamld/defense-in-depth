@@ -63,28 +63,15 @@ function commit(file, content, message) {
   git(["add", file]);
   // -c flags scope identity to this single command without mutating
   // user-level git config (which is forbidden in this environment).
-  git([
-    "-c",
-    "user.name=test",
-    "-c",
-    "user.email=test@example.com",
-    "commit",
-    "-q",
-    "-m",
-    message,
-  ]);
+  git(["-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", message]);
 }
 
 function runScan(args = []) {
-  return spawnSync(
-    process.execPath,
-    [CLI_PATH, "feedback", "scan-history", ...args],
-    {
-      cwd: tmp,
-      encoding: "utf-8",
-      env: { ...process.env, NO_COLOR: "1" },
-    },
-  );
+  return spawnSync(process.execPath, [CLI_PATH, "feedback", "scan-history", ...args], {
+    cwd: tmp,
+    encoding: "utf-8",
+    env: { ...process.env, NO_COLOR: "1" },
+  });
 }
 
 function readJsonl() {
@@ -100,7 +87,11 @@ function readJsonl() {
 describe("feedback scraper — R1 fix-up rule", () => {
   it("fix(scope): touching the same files as a recent feat commit infers TP", () => {
     commit("src/foo.ts", "export const x = 1;\n", "feat(foo): add x");
-    commit("src/foo.ts", "export const x = 1;\nexport const y = 2;\n", "fix(foo): handle empty case");
+    commit(
+      "src/foo.ts",
+      "export const x = 1;\nexport const y = 2;\n",
+      "fix(foo): handle empty case",
+    );
     const r = runScan(["--max", "10"]);
     assert.equal(r.status, 0, `stderr=${r.stderr}`);
     const events = readJsonl();
@@ -114,7 +105,8 @@ describe("feedback scraper — R1 fix-up rule", () => {
 
 describe("feedback scraper — R3 override rule", () => {
   it("commit body containing [guard-override:hollowArtifact] infers FP", () => {
-    const message = "feat(x): intentional placeholder\n\nWill be fleshed out next sprint.\n[guard-override:hollowArtifact]\n";
+    const message =
+      "feat(x): intentional placeholder\n\nWill be fleshed out next sprint.\n[guard-override:hollowArtifact]\n";
     commit("docs/plan.md", "TODO: write plan", message);
     const r = runScan(["--max", "10"]);
     assert.equal(r.status, 0, `stderr=${r.stderr}`);
@@ -140,7 +132,11 @@ describe("feedback scraper — negative control", () => {
 describe("feedback scraper — idempotency", () => {
   it("re-running scan-history produces no new lines (deterministic id)", () => {
     commit("src/foo.ts", "export const x = 1;\n", "feat(foo): add x");
-    commit("src/foo.ts", "export const x = 1;\nexport const y = 2;\n", "fix(foo): handle empty case");
+    commit(
+      "src/foo.ts",
+      "export const x = 1;\nexport const y = 2;\n",
+      "fix(foo): handle empty case",
+    );
     const first = runScan(["--max", "10"]);
     assert.equal(first.status, 0);
     const before = readJsonl().length;
@@ -155,7 +151,11 @@ describe("feedback scraper — idempotency", () => {
 describe("feedback scraper — --dry-run", () => {
   it("--dry-run reports proposed events but writes nothing to disk", () => {
     commit("src/foo.ts", "export const x = 1;\n", "feat(foo): add x");
-    commit("src/foo.ts", "export const x = 1;\nexport const y = 2;\n", "fix(foo): handle empty case");
+    commit(
+      "src/foo.ts",
+      "export const x = 1;\nexport const y = 2;\n",
+      "fix(foo): handle empty case",
+    );
     const r = runScan(["--max", "10", "--dry-run"]);
     assert.equal(r.status, 0, `stderr=${r.stderr}`);
     assert.match(r.stdout, /dry-run/);

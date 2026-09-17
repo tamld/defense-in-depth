@@ -42,9 +42,7 @@ function ctxIn(stagedFiles, hollowConfig, semanticEvals) {
     config: {
       version: "1.0",
       guards: {
-        hollowArtifact: hollowConfig
-          ? { enabled: true, ...hollowConfig }
-          : { enabled: true },
+        hollowArtifact: hollowConfig ? { enabled: true, ...hollowConfig } : { enabled: true },
       },
     },
     ...(semanticEvals ? { semanticEvals } : {}),
@@ -91,10 +89,7 @@ describe("hollowArtifactGuard — pattern-evasion limitations (PINNED)", () => {
   });
 
   it("DOES catch 'TODO' inside line comments", async () => {
-    write(
-      "a.md",
-      `${SUBSTANTIVE}\n\n\`\`\`js\n// TODO: implement\n\`\`\`\n`,
-    );
+    write("a.md", `${SUBSTANTIVE}\n\n\`\`\`js\n// TODO: implement\n\`\`\`\n`);
     const result = await hollowArtifactGuard.check(ctxIn(["a.md"]));
     assert.equal(result.passed, false);
   });
@@ -152,17 +147,13 @@ describe("hollowArtifactGuard — custom pattern configuration", () => {
     // the same typo, list each one as its own entry instead of relying on
     // regex alternation.
     write("a.md", `${SUBSTANTIVE}\n\nT0DO fix later`);
-    const result = await hollowArtifactGuard.check(
-      ctxIn(["a.md"], { patterns: ["T0DO", "TΟDO"] }),
-    );
+    const result = await hollowArtifactGuard.check(ctxIn(["a.md"], { patterns: ["T0DO", "TΟDO"] }));
     assert.equal(result.passed, false);
   });
 
   it("PINNED FOOTGUN: empty patterns: [] disables ALL pattern checks (no fallback to defaults)", async () => {
     write("a.md", `${SUBSTANTIVE}\n\nTODO: would normally be caught`);
-    const result = await hollowArtifactGuard.check(
-      ctxIn(["a.md"], { patterns: [] }),
-    );
+    const result = await hollowArtifactGuard.check(ctxIn(["a.md"], { patterns: [] }));
     assert.equal(
       result.passed,
       true,
@@ -187,18 +178,13 @@ describe("hollowArtifactGuard — header/frontmatter stripping", () => {
     assert.equal(result.passed, false);
     assert.ok(
       result.findings.some(
-        (f) =>
-          f.severity === Severity.BLOCK &&
-          f.message.includes("only headers/frontmatter"),
+        (f) => f.severity === Severity.BLOCK && f.message.includes("only headers/frontmatter"),
       ),
     );
   });
 
   it("blocks file with ONLY YAML frontmatter (no body)", async () => {
-    write(
-      "a.md",
-      "---\nname: x\nstatus: draft\n---\n",
-    );
+    write("a.md", "---\nname: x\nstatus: draft\n---\n");
     const result = await hollowArtifactGuard.check(ctxIn(["a.md"]));
     assert.equal(result.passed, false);
   });
@@ -213,7 +199,7 @@ describe("hollowArtifactGuard — header/frontmatter stripping", () => {
 describe("hollowArtifactGuard — minContentLength tuning", () => {
   it("just under default 50 chars after stripping → WARN (no BLOCK)", async () => {
     // Body is 49 chars after stripping the header:
-    write("a.md", "# T\n\n" + "x".repeat(49));
+    write("a.md", `# T\n\n${"x".repeat(49)}`);
     const result = await hollowArtifactGuard.check(ctxIn(["a.md"]));
     const warns = result.findings.filter((f) => f.severity === Severity.WARN);
     assert.equal(warns.length, 1);
@@ -221,16 +207,14 @@ describe("hollowArtifactGuard — minContentLength tuning", () => {
   });
 
   it("at default 50 chars after stripping → no length finding", async () => {
-    write("a.md", "# T\n\n" + "x".repeat(50));
+    write("a.md", `# T\n\n${"x".repeat(50)}`);
     const result = await hollowArtifactGuard.check(ctxIn(["a.md"]));
     assert.equal(result.findings.length, 0);
   });
 
   it("custom minContentLength=10 lowers the bar", async () => {
-    write("a.md", "# T\n\n" + "x".repeat(20));
-    const result = await hollowArtifactGuard.check(
-      ctxIn(["a.md"], { minContentLength: 10 }),
-    );
+    write("a.md", `# T\n\n${"x".repeat(20)}`);
+    const result = await hollowArtifactGuard.check(ctxIn(["a.md"], { minContentLength: 10 }));
     assert.equal(result.findings.length, 0);
   });
 });
@@ -273,9 +257,7 @@ describe("hollowArtifactGuard — multi-file aggregation", () => {
     write("a.md", `${SUBSTANTIVE}\n\nTODO`);
     write("b.md", `${SUBSTANTIVE}\n\nTBD`);
     write("c.md", SUBSTANTIVE);
-    const result = await hollowArtifactGuard.check(
-      ctxIn(["a.md", "b.md", "c.md"]),
-    );
+    const result = await hollowArtifactGuard.check(ctxIn(["a.md", "b.md", "c.md"]));
     const blocks = result.findings.filter((f) => f.severity === Severity.BLOCK);
     assert.equal(blocks.length, 2);
     const offenders = blocks.map((f) => f.filePath).sort();
@@ -311,11 +293,7 @@ describe("hollowArtifactGuard — DSPy adversarial paths", () => {
   it("DSPy is SKIPPED when a BLOCK pattern already fires (no double-flag)", async () => {
     write("a.md", `${SUBSTANTIVE}\n\nTODO`);
     const result = await hollowArtifactGuard.check(
-      ctxIn(
-        ["a.md"],
-        { useDspy: true },
-        { dspy: { "a.md": { score: 0.1, feedback: "garbage" } } },
-      ),
+      ctxIn(["a.md"], { useDspy: true }, { dspy: { "a.md": { score: 0.1, feedback: "garbage" } } }),
     );
     // Exactly one BLOCK from the pattern; no DSPy WARN added.
     const blocks = result.findings.filter((f) => f.severity === Severity.BLOCK);

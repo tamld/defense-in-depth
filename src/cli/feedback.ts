@@ -134,7 +134,7 @@ function runF1(projectRoot: string, rest: string[]): void {
     process.exit(1);
   }
   const metric = computeF1FromFeedback(projectRoot, guard, period);
-  process.stdout.write(formatF1Summary(metric) + "\n");
+  process.stdout.write(`${formatF1Summary(metric)}\n`);
 }
 
 function runScan(projectRoot: string, rest: string[]): void {

@@ -69,7 +69,7 @@ beforeEach(() => {
   // Seed the lessons file the searchLessons() reader expects.
   fs.writeFileSync(
     path.join(tmp, "lessons.jsonl"),
-    SAMPLE_LESSONS.map((l) => JSON.stringify(l)).join("\n") + "\n",
+    `${SAMPLE_LESSONS.map((l) => JSON.stringify(l)).join("\n")}\n`,
   );
   stderrCapture = [];
   // Capture stderr (but still forward) so assertions can grep the captured

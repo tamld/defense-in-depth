@@ -23,9 +23,7 @@ function ctxIn(projectRoot, stagedFiles, phaseGateConfig) {
     config: {
       version: "1.0",
       guards: {
-        phaseGate: phaseGateConfig
-          ? { enabled: true, ...phaseGateConfig }
-          : { enabled: true },
+        phaseGate: phaseGateConfig ? { enabled: true, ...phaseGateConfig } : { enabled: true },
       },
     },
   };
@@ -67,10 +65,7 @@ describe("phaseGateGuard — source files staged + plan present", () => {
 
   beforeEach(() => {
     tmp = fs.mkdtempSync(path.join(os.tmpdir(), "did-pgate-"));
-    fs.writeFileSync(
-      path.join(tmp, "implementation_plan.md"),
-      "# Plan\n\nSteps...\n",
-    );
+    fs.writeFileSync(path.join(tmp, "implementation_plan.md"), "# Plan\n\nSteps...\n");
   });
   afterEach(() => {
     fs.rmSync(tmp, { recursive: true, force: true });
@@ -172,9 +167,7 @@ describe("phaseGateGuard — custom config", () => {
 
   it("respects custom planFile", async () => {
     fs.writeFileSync(path.join(tmp, "PLAN.md"), "# Plan\n");
-    const result = await phaseGateGuard.check(
-      ctxIn(tmp, ["src/foo.ts"], { planFile: "PLAN.md" }),
-    );
+    const result = await phaseGateGuard.check(ctxIn(tmp, ["src/foo.ts"], { planFile: "PLAN.md" }));
     assert.equal(result.passed, true);
   });
 

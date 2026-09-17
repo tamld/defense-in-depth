@@ -89,12 +89,12 @@ test("hollow-artifact regex-escape (issue #59)", async (t) => {
       // its individual letters or via the spaces in `"FILL IN HERE"`,
       // `"<Empty>"`, or `"[Insert Here]"`.
       const samples = {
-        "english-the.md": "# Doc\n\nthe quick brown fox jumps. " + SUBSTANTIVE_FILLER,
-        "english-i-am.md": "# Doc\n\nI am writing prose here. " + SUBSTANTIVE_FILLER,
-        "english-insert.md": "# Doc\n\nWe insert rows into the table. " + SUBSTANTIVE_FILLER,
-        "english-here.md": "# Doc\n\nLook here for the answer. " + SUBSTANTIVE_FILLER,
-        "english-fill.md": "# Doc\n\nFill the form completely. " + SUBSTANTIVE_FILLER,
-        "english-empty.md": "# Doc\n\nThe container is not empty. " + SUBSTANTIVE_FILLER,
+        "english-the.md": `# Doc\n\nthe quick brown fox jumps. ${SUBSTANTIVE_FILLER}`,
+        "english-i-am.md": `# Doc\n\nI am writing prose here. ${SUBSTANTIVE_FILLER}`,
+        "english-insert.md": `# Doc\n\nWe insert rows into the table. ${SUBSTANTIVE_FILLER}`,
+        "english-here.md": `# Doc\n\nLook here for the answer. ${SUBSTANTIVE_FILLER}`,
+        "english-fill.md": `# Doc\n\nFill the form completely. ${SUBSTANTIVE_FILLER}`,
+        "english-empty.md": `# Doc\n\nThe container is not empty. ${SUBSTANTIVE_FILLER}`,
       };
       for (const [name, content] of Object.entries(samples)) {
         writeFile(dir, name, content);
@@ -125,12 +125,12 @@ test("hollow-artifact regex-escape (issue #59)", async (t) => {
     // Build one file per pattern. If any fires, the literal-substring
     // contract is preserved after the escape change.
     const patternFixtures = {
-      "todo.md": "# Doc\n\nTODO: implement this. " + SUBSTANTIVE_FILLER,
-      "tbd.md": "# Doc\n\nNotes: TBD. " + SUBSTANTIVE_FILLER,
-      "fill-in-here.md": "# Doc\n\nFILL IN HERE — author's note. " + SUBSTANTIVE_FILLER,
-      "empty-marker.md": "# Doc\n\nStatus marker: <Empty>. " + SUBSTANTIVE_FILLER,
-      "insert-here.md": "# Doc\n\nValue: [Insert Here] — owner. " + SUBSTANTIVE_FILLER,
-      "placeholder.md": "# Doc\n\nThis is a PLACEHOLDER for the real text. " + SUBSTANTIVE_FILLER,
+      "todo.md": `# Doc\n\nTODO: implement this. ${SUBSTANTIVE_FILLER}`,
+      "tbd.md": `# Doc\n\nNotes: TBD. ${SUBSTANTIVE_FILLER}`,
+      "fill-in-here.md": `# Doc\n\nFILL IN HERE — author's note. ${SUBSTANTIVE_FILLER}`,
+      "empty-marker.md": `# Doc\n\nStatus marker: <Empty>. ${SUBSTANTIVE_FILLER}`,
+      "insert-here.md": `# Doc\n\nValue: [Insert Here] — owner. ${SUBSTANTIVE_FILLER}`,
+      "placeholder.md": `# Doc\n\nThis is a PLACEHOLDER for the real text. ${SUBSTANTIVE_FILLER}`,
     };
 
     for (const [name, content] of Object.entries(patternFixtures)) {
@@ -156,8 +156,8 @@ test("hollow-artifact regex-escape (issue #59)", async (t) => {
   await t.test("case-insensitive flag survives escaping", async () => {
     const { dir, cleanup } = tempWorkspace();
     try {
-      writeFile(dir, "lower.md", "# Doc\n\ntodo: lowercase variant. " + SUBSTANTIVE_FILLER);
-      writeFile(dir, "mixed.md", "# Doc\n\nFiLl In HeRe mixed-case. " + SUBSTANTIVE_FILLER);
+      writeFile(dir, "lower.md", `# Doc\n\ntodo: lowercase variant. ${SUBSTANTIVE_FILLER}`);
+      writeFile(dir, "mixed.md", `# Doc\n\nFiLl In HeRe mixed-case. ${SUBSTANTIVE_FILLER}`);
 
       const ctx = ctxWithDefaults(dir, ["lower.md", "mixed.md"]);
       const result = await hollowArtifactGuard.check(ctx);
@@ -180,8 +180,16 @@ test("hollow-artifact regex-escape (issue #59)", async (t) => {
       // anywhere in any file — virtually every doc.
       // Post-fix: `"a|b"` is escaped to `/a\|b/i` and only matches the
       // literal three-char sequence `a|b`.
-      writeFile(dir, "harmless.md", "# Doc\n\nThis has the letters a and b but no pipe. " + SUBSTANTIVE_FILLER);
-      writeFile(dir, "literal.md", "# Doc\n\nThis intentionally contains a|b as a literal. " + SUBSTANTIVE_FILLER);
+      writeFile(
+        dir,
+        "harmless.md",
+        `# Doc\n\nThis has the letters a and b but no pipe. ${SUBSTANTIVE_FILLER}`,
+      );
+      writeFile(
+        dir,
+        "literal.md",
+        `# Doc\n\nThis intentionally contains a|b as a literal. ${SUBSTANTIVE_FILLER}`,
+      );
 
       const ctx = {
         projectRoot: dir,
@@ -226,8 +234,8 @@ test("hollow-artifact regex-escape (issue #59)", async (t) => {
     // user who picks a placeholder syntax with brackets.
     const { dir, cleanup } = tempWorkspace();
     try {
-      writeFile(dir, "english.md", "# Doc\n\nthe sun is hot today. " + SUBSTANTIVE_FILLER);
-      writeFile(dir, "literal.md", "# Doc\n\nValue: [Insert Here] for real. " + SUBSTANTIVE_FILLER);
+      writeFile(dir, "english.md", `# Doc\n\nthe sun is hot today. ${SUBSTANTIVE_FILLER}`);
+      writeFile(dir, "literal.md", `# Doc\n\nValue: [Insert Here] for real. ${SUBSTANTIVE_FILLER}`);
 
       const ctx = {
         projectRoot: dir,
@@ -258,10 +266,7 @@ test("hollow-artifact regex-escape (issue #59)", async (t) => {
       const literalBlocked = result.findings.find(
         (f) => f.filePath === "literal.md" && f.message.startsWith("Hollow content detected"),
       );
-      assert.ok(
-        literalBlocked,
-        "'[Insert Here]' MUST still match its literal form.",
-      );
+      assert.ok(literalBlocked, "'[Insert Here]' MUST still match its literal form.");
     } finally {
       cleanup();
     }

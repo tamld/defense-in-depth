@@ -27,7 +27,6 @@
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import * as fs from "node:fs";
 import * as path from "node:path";
 import { callDspy, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "./dspy-client.js";
 import {

@@ -49,7 +49,10 @@ test("noStubReturnGuard — blocks hollow placeholder functions", async (t) => {
   await t.test("blocks function returning null", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "api.ts"), "function fetchUser(id: string) {\n  return null;\n}\n");
+      await writeFile(
+        path.join(root, "api.ts"),
+        "function fetchUser(id: string) {\n  return null;\n}\n",
+      );
       const result = await noStubReturnGuard.check({
         stagedFiles: ["api.ts"],
         projectRoot: root,
@@ -146,4 +149,3 @@ test("noStubReturnGuard — allows real logic & ticket annotations", async (t) =
     }
   });
 });
-

@@ -27,10 +27,14 @@ async function runSilentVerifyServer(root, args = []) {
 describe("verifyServer", () => {
   it("parseVerifyServerArgs — flag extraction", () => {
     const args = [
-      "--token", "ghp_12345",
-      "--repo", "owner/repo",
-      "--branch", "main",
-      "--config", "custom.json",
+      "--token",
+      "ghp_12345",
+      "--repo",
+      "owner/repo",
+      "--branch",
+      "main",
+      "--config",
+      "custom.json",
       "--offline",
     ];
     const parsed = parseVerifyServerArgs(args);
@@ -68,7 +72,10 @@ describe("verifyServer", () => {
       const root = await makeTmpDir();
       try {
         await mkdir(path.join(root, ".github"), { recursive: true });
-        await writeFile(path.join(root, ".github", "branch-protection.json"), JSON.stringify({ branches: {} }));
+        await writeFile(
+          path.join(root, ".github", "branch-protection.json"),
+          JSON.stringify({ branches: {} }),
+        );
         const ok = await runSilentVerifyServer(root, ["--offline"]);
         assert.equal(ok, false);
       } finally {
@@ -172,7 +179,12 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok = await runSilentVerifyServer(root, [
+          "--token",
+          "fake-token",
+          "--repo",
+          "owner/repo",
+        ]);
         assert.equal(ok, false);
       } finally {
         globalThis.fetch = originalFetch;
@@ -205,7 +217,12 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok = await runSilentVerifyServer(root, [
+          "--token",
+          "fake-token",
+          "--repo",
+          "owner/repo",
+        ]);
         assert.equal(ok, false);
       } finally {
         globalThis.fetch = originalFetch;
@@ -238,7 +255,12 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok = await runSilentVerifyServer(root, [
+          "--token",
+          "fake-token",
+          "--repo",
+          "owner/repo",
+        ]);
         assert.equal(ok, true);
       } finally {
         globalThis.fetch = originalFetch;
@@ -268,13 +290,23 @@ describe("verifyServer", () => {
             },
           }),
         );
-        const ok1 = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok1 = await runSilentVerifyServer(root, [
+          "--token",
+          "fake-token",
+          "--repo",
+          "owner/repo",
+        ]);
         assert.equal(ok1, true);
 
         globalThis.fetch = async () => {
           throw new Error("DNS resolution failure");
         };
-        const ok2 = await runSilentVerifyServer(root, ["--token", "fake-token", "--repo", "owner/repo"]);
+        const ok2 = await runSilentVerifyServer(root, [
+          "--token",
+          "fake-token",
+          "--repo",
+          "owner/repo",
+        ]);
         assert.equal(ok2, true);
       } finally {
         globalThis.fetch = originalFetch;

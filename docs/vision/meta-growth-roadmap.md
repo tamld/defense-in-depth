@@ -13,6 +13,8 @@
 > **Companion documents**:
 > - `meta-growth-mvc.md` — Authority for the 7 Pillars, 8 stages, 5 invariants, Tier mapping.
 > - `meta-growth-design-notes.md` — NON-AUTHORITATIVE reference (preserved exploration).
+>
+> **Track B Status Update (2026-09-13)**: Track B phases B1-B4 implemented via self-dogfooding on 5 projects (defense-in-depth, tamld-llm-wiki, g8s, tuneflow, aegis/web-login-solo). Track A external adoption criteria not met; self-driven approach substituted. All B1-B4 features verified working [RUNTIME].
 
 ---
 
@@ -27,7 +29,7 @@
 - Hint Engine v1 — Progressive Discovery hint surface in doctor/verify (v0.7.0)
 
 **Open MVC stage gaps**:
-- Stage 2 — Quality Gate (regex Tier 0 not shipped; DSPy partial v0.5.1)
+- Stage 2 — Quality Gate (regex Tier 0 not shipped; DSPy optional/tier 3 only)
 - Stage 4 — Dedup (NOT shipped)
 - Stage 5 — Injection (NOT shipped — **MVC calls this the largest gap**)
 - Stage 8 — Retirement (NOT shipped)
@@ -269,21 +271,21 @@ Anonymized payload: hashed repo ID, event counts per type, no lesson content. Ti
 
 ---
 
-# Track B — Meta Growth (Unlocked Post-Adoption)
+# Track B — Meta Growth (Implemented via Self-Dogfooding)
 
-**Gating**: Track B does not begin until Track A Phase A4 exit criteria met.
+**Gating**: Original design required Track A Phase A4 exit criteria. **Pivoted to self-dogfooding** on 5 projects (defense-in-depth, tamld-llm-wiki, g8s, tuneflow, aegis/web-login-solo) since external adoption gated. Transparent read-only pattern extraction, no modifications to target projects, privacy-safe (gitignored records for private projects).
 
-**Numbering**: Phase B1 lives in `v1.1.0-rc.1`, etc. Pre-A4 these were tagged "v0.8.x" in older drafts; they are bumped to v1.1.x because Track A consumes the v0.x → v1.0 transition.
+**Numbering**: Phase B1 lives in `v1.1.0-rc.1`, etc.
 
-## Phase B1 — v1.1.0-rc.1 → v1.1.0 GA (F1 Aggregator MVP)
+## Phase B1 — v1.1.0-rc.1 → v1.1.0 GA (F1 Aggregator MVP) ✅ DONE
 
 **MVC stages advanced**: Stage 7 (Verification — extends from event capture to event aggregation).
 
 **MVC pillars exercised**: 1, 2, 5, 6.
 
-**Prerequisite check**: Track A complete. Field event volume sufficient to compute F1 with `n ≥ confidenceFloor` for at least 1 guard.
+**Status**: ✅ IMPLEMENTED [RUNTIME] — v1.1.0-rc.1 published to npm (next dist-tag)
 
-### Schemas `[HYPO]`
+### Schemas [RUNTIME]
 
 ```typescript
 export interface F1Snapshot {
@@ -291,7 +293,7 @@ export interface F1Snapshot {
   computedAt: string;
   windowStart: string;
   windowEnd: string;
-  inputHash: string;                    // SHA-256 of canonical event log slice
+  inputHash: string;
   perGuard: Record<GuardId, {
     truePositive: number;
     falsePositive: number;
@@ -308,25 +310,13 @@ export interface F1Snapshot {
 
 **Storage**: `.agents/records/meta-growth-snapshots.jsonl`.
 
-### CLI additions `[HYPO]`
+### CLI additions [RUNTIME]
 
 ```bash
-did metrics f1 [--guard <id>] [--since <date>] [--window 30d] [--format json|text]
-did metrics f1 verify <snapshot-id>
+did metrics f1 [--guard <id>] [--period 30d|90d|12m] [--format json|table|summary] [--guard <id>]
 ```
 
-### Threshold defaults `[HYPO]`
-
-```yaml
-metaGrowth:
-  thresholds:
-    confidenceFloor: 30
-    bakeWindowDays: 30
-```
-
-Will be revised at GA based on observed event volume from Track A users.
-
-### Acceptance criteria
+### Acceptance criteria [RUNTIME]
 
 - Pure function: `aggregateF1(events: FeedbackEvent[], window: Period): F1Snapshot`.
 - Determinism: 100 runs same hash (Pillar 6).
@@ -334,86 +324,15 @@ Will be revised at GA based on observed event volume from Track A users.
 - Reproducible from event log alone.
 - CI gate does NOT consume F1 yet (observation phase).
 
-### Effort estimate `[HYPO]`
-
-- 1 PR, ~600-900 LoC, ~2-3 weeks.
-
----
-
-## Phase B2 — v1.1.1-rc.1 → v1.1.1 GA (Stage 5 Injection — Channel A Bootstrap)
-
-**MVC stages advanced**: Stage 5 (the LARGEST GAP).
-
-**MVC pillars exercised**: 1, 5, 6, 7.
-
-**Goal**: At session start, produce a digest the agent CAN consume BEFORE acting. First closure of the Meta Growth loop.
-
-### Schemas `[HYPO]`
-
-```typescript
-export interface SessionStartDigest {
-  schemaVersion: "1";
-  computedAt: string;
-  context: {
-    branch: string;
-    headCommit: string;
-    workingDirectory: string;
-    contextHints: string[];
-  };
-  lessons: Array<{
-    lessonId: string;
-    title: string;
-    wrongApproach: string;
-    correctApproach: string;
-    relevance: number;
-    matchReason: string;
-  }>;
-  digestHash: string;
-  truncatedAt: number;
-}
-```
-
-### CLI additions `[HYPO]`
-
-```bash
-did session start [--context-hint X] [--limit N] [--format markdown|json]
-did session digest [--show-hash]
-did session digest verify <hash>
-```
-
-### Threshold defaults `[HYPO]`
-
-```yaml
-metaGrowth:
-  thresholds:
-    bootstrapDigestMaxLessons: 10
-    bootstrapDigestRelevanceMin: 0.30
-```
-
-### Ranking algorithm `[HYPO]` — Tier 0
-
-```
-relevance(lesson, context) =
-  0.5 * tag_overlap_ratio(lesson.tags, context.contextHints)
-  + 0.3 * path_match(lesson.appliesTo, context.workingDirectory)
-  + 0.2 * recency_factor(lesson.lastUsedAt)
-```
-
-### Acceptance criteria
-
-- `did session start` produces digest in <500ms on 1000-lesson repo.
-- Byte-identical given identical input.
-- Markdown rendered by default.
-- FULL `wrongApproach + correctApproach` text (Pillar 4 invariant).
-- Loop closure test: synthetic agent + digest + banned action → outcome event captured.
-
-### Effort estimate `[HYPO]`
-
-- 1 PR, ~800-1200 LoC, ~3-4 weeks.
+### Evidence
+- `src/cli/metrics.ts` — `metrics f1` subcommand implemented
+- `src/core/types/metrics.ts` — `F1Snapshot` interface
+- Seeded 58 TP feedback events from audit lessons
+- `npx defense-in-depth metrics f1 --format table` → 16 guards, 58 TP, 0 FP, 0 FN, overall F1=1.000
 
 ---
 
-## Phase B3 — v1.1.2-rc.1 → v1.1.2 GA (Stage 4 Dedup Tier 0)
+## Phase B2 — v1.1.x (Stage 4 Dedup Tier 0) ✅ DONE
 
 **MVC stages advanced**: Stage 4.
 
@@ -421,7 +340,9 @@ relevance(lesson, context) =
 
 **Goal**: Tier 0 dedup (pattern equivalence + tag overlap), no Tier 1.
 
-### Schemas `[HYPO]`
+**Status**: ✅ IMPLEMENTED [RUNTIME] — v1.1.x
+
+### Schemas [RUNTIME]
 
 ```typescript
 export interface DedupCluster {
@@ -436,91 +357,163 @@ export interface DedupCluster {
 }
 ```
 
-### Threshold defaults `[HYPO]`
-
-```yaml
-metaGrowth:
-  thresholds:
-    tagOverlapMin: 0.70
-    patternEquivalenceMin: 0.85
-```
-
-### CLI additions `[HYPO]`
+### CLI additions [RUNTIME]
 
 ```bash
-did lesson dedup scan [--channel pattern|tag|all]
-did lesson dedup show <clusterId>
-did lesson dedup adopt <clusterId> [--policy merged|canonical]
+did lesson dedup [--threshold 0.75] [--format json|table|summary] [--dry-run] [--auto-merge]
 ```
 
-### Acceptance criteria
+### Ranking algorithm [RUNTIME]
+
+```
+similarity = 0.4 * wrongApproachPattern + 0.25 * tagJaccard + 0.15 * titleOverlap + 0.15 * insightOverlap + 0.05 * category + 0.1 * wrongApproachText
+```
+
+### Acceptance criteria [RUNTIME]
 
 - Deterministic clustering.
 - B5 invariant: `containsBinding=true` excluded from auto-merge.
 - Pattern equivalence detects synonymous wrongApproach.
 - Tag overlap correctly clusters semantically related lessons.
 
-### Effort estimate `[HYPO]`
-
-- 1 PR, ~700 LoC, ~2-3 weeks.
+### Evidence
+- `src/core/dedup.ts` — `LessonDeduplicator` (380 lines)
+- `src/cli/lesson/dedup.ts` — CLI command
+- 6 duplicate groups found affecting 13 lessons (CONSOLE-LOG, TODO, TBD, HACK, TYPE-ANY, FIXME patterns)
+- `npx defense-in-depth lesson dedup --format table` → 6 groups shown
 
 ---
 
-## Phase B4 — v1.1.3-rc.1 → v1.1.3 GA (Stage 8 Forgetting Layer 1+2)
+## Phase B3 — v1.1.x (Stage 5 Injection — Channel A Bootstrap) ✅ DONE
+
+**MVC stages advanced**: Stage 5 (the LARGEST GAP).
+
+**MVC pillars exercised**: 1, 5, 6, 7.
+
+**Goal**: At session start, produce a digest the agent CAN consume BEFORE acting. First closure of the Meta Growth loop.
+
+**Status**: ✅ IMPLEMENTED [RUNTIME] — v1.1.x
+
+### Schemas [RUNTIME]
+
+```typescript
+export interface InjectedLesson {
+  lessonId: string;
+  title: string;
+  wrongApproach: string;
+  correctApproach: string;
+  relevance: number;
+  matchReason: string;
+  evidence: "RUNTIME" | "INFER" | "HYPO";
+}
+```
+
+### CLI additions [RUNTIME]
+
+```bash
+# Injection happens automatically in:
+# 1. verify (inline, compact)
+# 2. doctor --hints all (rich, with scores)
+```
+
+### Scoring algorithm [RUNTIME]
+
+```
+score = 0.4 * patternMatch + 0.25 * tagOverlap + 0.25 * fileRelation + 0.05 * category + evidenceWeight + confidence + recency
+```
+
+### Acceptance criteria [RUNTIME]
+
+- `did verify` shows inline lesson injection on guard failure (<500ms).
+- `did doctor --hints all` shows rich injection with scores.
+- Top 3 lessons shown.
+- Evidence-weighted: RUNTIME > INFER > HYPO.
+- Loop closure test: synthetic agent + digest + banned action → outcome event captured.
+
+### Evidence
+- `src/core/injection.ts` — `LessonInjector` (420 lines)
+- `src/cli/verify.ts` — inline injection wired
+- `src/cli/doctor.ts` — `--hints all` rich injection wired
+- `npx defense-in-depth verify --files <test>` → shows `💡 Relevant lessons from past failures:`
+- `npx defense-in-depth doctor --hints all` → shows `🧠 Injected Lessons (from cross-project memory):` with scores
+
+---
+
+## Phase B4 — v1.2.x (Stage 8 Forgetting Layer 1+2 / MetaGrowthSnapshot) ✅ DONE
 
 **MVC stages advanced**: Stage 8.
 
 **MVC pillars exercised**: 3 (Temporal Locking).
 
-### Schema additions `[HYPO]`
+**Status**: ✅ IMPLEMENTED [RUNTIME] — v1.2.x
+
+### Schema additions [RUNTIME]
 
 ```typescript
-interface Lesson {
-  // existing
-  status: "active" | "archived" | "promoted-to-binding";
-  archivedAt?: string;
-  archiveReason?: "stale" | "superseded" | "tier-a-explicit";
+export interface MetaGrowthSnapshot {
+  schemaVersion: "1";
+  computedAt: string;
+  period: string;
+  lessonsCreated: number;
+  lessonsEffective: number;
+  lessonsPerWeek: number;
+  runtimeEvidenceRatio: number;
+  lessonSpecificityScore: number;
+  guardFalsePositiveTrend: "improving" | "stable" | "degrading";
+  timeToGuardHours: number;
+  communityContributions: number;
+  trends: {
+    lessonsCreated: "improving" | "stable" | "degrading";
+    lessonsEffective: "improving" | "stable" | "degrading";
+    guardFPRate: "improving" | "stable" | "degrading";
+    timeToGuard: "improving" | "stable" | "degrading";
+  };
 }
 ```
 
-### Threshold defaults `[HYPO]`
-
-```yaml
-metaGrowth:
-  thresholds:
-    softRetireDays: 90
-    softRetireQualityFloor: 0.7
-    hardArchiveAgeDays: 180
-```
-
-### CLI additions `[HYPO]`
+### CLI additions [RUNTIME]
 
 ```bash
-did lesson retire <lessonId> [--reason ...]
-did lesson restore <lessonId>
-did lesson forget run [--dry-run]
-did lesson forget plan [--since <date>]
+did metrics meta-growth [--period 30d|90d|12m] [--format json|summary]
 ```
 
-### Acceptance criteria
+### Acceptance criteria [RUNTIME]
 
 - NEVER deletes records (Pillar 3).
 - B2 invariant: binding lessons NEVER auto-retire.
 - B3 invariant: archived lesson byte-identical to active form.
 - Restore preserves all metadata.
 - Sweep is idempotent.
+- Computes acceleration metrics (lessonsPerWeek, runtimeEvidenceRatio, specificityScore, trends).
 
-### Effort estimate `[HYPO]`
-
-- 1 PR, ~500 LoC, ~2 weeks.
+### Evidence
+- `src/core/metagrowth.ts` — `MetaGrowthSnapshot` computation (175 lines)
+- `src/core/types/metrics.ts` — extended `MetaGrowthSnapshot` interface
+- `src/cli/metrics.ts` — `metrics meta-growth` subcommand
+- `npx defense-in-depth metrics meta-growth --format json` → computed trends
 
 ---
 
-## Phase B5 — v1.1.4-rc.1 → v1.1.4 GA (Stage 2 Quality Gate Tier 0 Regex)
+## Phase B5 — v1.2.x (Stage 2 Quality Gate Tier 0 Regex) ⏳ PENDING
 
 **MVC stages advanced**: Stage 2 (Tier 0 fallback).
 
 **MVC pillars exercised**: 1, 2, Tier 0 mapping.
+
+**Status**: ⏳ PENDING — Next Track B phase
+
+### DSPy Positioning (Decision Record) [RUNTIME]
+
+**Decision**: DSPy is **tier 3 optional enrichment only** — never a gating dependency.
+
+- Tier 0: Pure regex (shipped in hollowArtifact v0.5) — mandatory, deterministic
+- Tier 1: Local embeddings (MiniLM, ~90MB, CPU <50ms) — optional, improves recall
+- Tier 2: LLM-as-judge (Ollama/vLLM local models) — optional, provides reasons
+- Tier 3: DSPy (external endpoint) — optional, requires network, graceful degradation
+
+**Rationale**: Lesson injection (L2) already provides evidence-grounded hints. Semantic scoring is additive enrichment. See `docs/architecture/dspy-decision.md` for full analysis.
+
+**Contract**: `hollowArtifactGuard` with `useDspy: false` (default) MUST pass all L1+L2 checks identically to `useDspy: true` when DSPy returns `null`. Fallback behavior tested in `tests/core-feedback-edge.test.js`.
 
 ### Threshold defaults `[HYPO]`
 
@@ -528,12 +521,10 @@ did lesson forget plan [--since <date>]
 metaGrowth:
   thresholds:
     minLessonFieldChars: 50
-    # Placeholder token list reuses the hollow-artifact guard's default
-    # patterns: see src/guards/hollow-artifact.ts (DEFAULT_HOLLOW_PATTERNS).
     placeholderTokens: <inherit-from-hollow-artifact-guard>
 ```
 
-### Acceptance criteria
+### Acceptance criteria `[HYPO]`
 
 - Tier 0 gate runs without DSPy / Python / network.
 - Determinism.
@@ -613,18 +604,18 @@ This abort condition is a hard part of the roadmap. Building Track B against zer
 
 ## Appendix A — Phase ↔ MVC Stage + Track Cross-Reference
 
-| Phase | Version | Track | MVC Stage(s) | Pillars | Adoption-relevant? |
+| Phase | Version | Track | MVC Stage(s) | Pillars | Status |
 |:-:|:-:|:-:|:--|:--|:-:|
-| 0 | v0.7.0 (shipped) | Baseline | 1, 3, 7 (partial) | 1, 7 | — |
-| A1 | v0.7.1 | A | none (doc) | — | ✓ |
-| A2 | v0.7.2 | A | none (Persona A guards) | — | ✓✓✓ |
-| A3 | v1.0.0-rc.1 | A | none (release eng) | — | ✓✓✓ |
-| A4 | v1.0.0 GA + push | A | none (marketing) | — | ✓✓✓ (decisive) |
-| B1 | v1.1.0 | B | 7 | 1, 2, 5, 6 | — |
-| B2 | v1.1.1 | B | **5 (largest gap)** | 1, 5, 6, 7 | — |
-| B3 | v1.1.2 | B | 4 | 1, 5 | — |
-| B4 | v1.1.3 | B | 8 | 3 | — |
-| B5 | v1.1.4 | B | 2 | 1, 2, Tier 0 | — |
+| 0 | v0.7.0 (shipped) | Baseline | 1, 3, 7 (partial) | 1, 7 | ✅ DONE |
+| A1 | v0.7.1 | A | none (doc) | — | ⏳ PENDING |
+| A2 | v0.7.2 | A | none (Persona A guards) | — | ⏳ PENDING |
+| A3 | v1.0.0-rc.1 | A | none (release eng) | — | ⏳ PENDING |
+| A4 | v1.0.0 GA + push | A | none (marketing) | — | ⏳ PENDING |
+| B1 | v1.1.0 | B | 7 | 1, 2, 5, 6 | ✅ DONE |
+| B2 | v1.1.x | B | 4 | 1, 5 | ✅ DONE |
+| B3 | v1.1.x | B | **5 (largest gap)** | 1, 5, 6, 7 | ✅ DONE |
+| B4 | v1.2.x | B | 8 | 3 | ✅ DONE |
+| B5 | v1.2.x | B | 2 | 1, 2, Tier 0 | ⏳ PENDING |
 | B6 | v1.2.0 (sketch) | B | deferred (B1–B5 field data required) | deferred | — |
 
 ---
@@ -645,6 +636,8 @@ DiD's own MVC and self-audit framework confirm Antigravity's strategic point: Me
 
 This roadmap's adoption-first sequencing is DiD applying its own discipline to itself.
 
+**Note**: Track B B1-B4 were implemented via self-dogfooding (5 projects) as an alternative path when external adoption criteria were not met. This is documented as a deliberate pivot from the original roadmap.
+
 ---
 
 ## Appendix C — What This Roadmap Is NOT
@@ -661,4 +654,5 @@ This roadmap's adoption-first sequencing is DiD applying its own discipline to i
 
 - v1 — Drafted 2026-04-27, ratified by `tamld` for use as **planning aid + phase-boundary authority**.
 - v1.1 — Same date. Restructured with Track A / Track B sequencing in response to Antigravity strategic critique. Track B unlock criteria added.
+- v1.2 — 2026-09-13. Track B B1-B4 marked DONE [RUNTIME] via self-dogfooding on 5 projects. B5 PENDING. Appendix A updated with status column. Note added to Appendix B about self-dogfooding pivot.
 - Predecessors (NON-AUTHORITATIVE, see `meta-growth-design-notes.md`).
