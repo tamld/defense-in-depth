@@ -52,3 +52,4 @@ defense.config.yml
 .agents/state/
 .agents/records/*.jsonl
 .sisyphus/
+.omo/
