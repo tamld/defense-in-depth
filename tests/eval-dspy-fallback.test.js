@@ -135,11 +135,7 @@ describe("eval <file> — DSPy-unavailable banner", () => {
     const r = runCli(["eval", "docs/clean.md"]);
 
     const matches = r.stderr.match(/DSPy unavailable: semantic evaluation skipped/g) ?? [];
-    assert.equal(
-      matches.length,
-      1,
-      `banner must appear exactly once; stderr:\n${r.stderr}`,
-    );
+    assert.equal(matches.length, 1, `banner must appear exactly once; stderr:\n${r.stderr}`);
   });
 
   it("exit code reflects the guard verdict (PASS for substantive content)", () => {

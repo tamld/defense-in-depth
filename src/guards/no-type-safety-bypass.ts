@@ -80,7 +80,7 @@ export const noTypeSafetyBypassGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch (readErr) {
+      } catch (_readErr) {
         // Ignore file read failure on deleted/inaccessible files (TK-000)
         continue;
       }

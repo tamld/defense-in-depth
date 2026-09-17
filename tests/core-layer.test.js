@@ -1,12 +1,12 @@
 // Executor: Sisyphus (OhMyOpenCode)
 // [PROVEN] Core-layer defensive branches per plans/coverage-95/SRS.md FR-2.2–FR-2.6.
-import assert from 'node:assert/strict';
-import { test } from 'node:test';
-import { mkdtemp, rm, writeFile, mkdir } from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { loadHintState } from '../dist/core/hint-state.js';
-import { searchLessons, recordLesson } from '../dist/core/memory.js';
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { mkdtemp, rm, writeFile, mkdir } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { loadHintState } from "../dist/core/hint-state.js";
+import { searchLessons, recordLesson } from "../dist/core/memory.js";
 import {
   recordRecall,
   evaluateRecallAgainstCommits,
@@ -14,19 +14,19 @@ import {
   readOutcomes,
   appendOutcome,
   hashQuery,
-} from '../dist/core/lesson-outcome.js';
-import { computeF1FromFeedback, readCursor } from '../dist/core/feedback.js';
-import { createDspyStub } from './helpers/dspy-stub.js';
+} from "../dist/core/lesson-outcome.js";
+import { computeF1FromFeedback, readCursor } from "../dist/core/feedback.js";
+import { createDspyStub } from "./helpers/dspy-stub.js";
 
 function makeRoot(prefix) {
   return mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
-const HINT_STATE_REL = '.agents/state/hints-shown.json';
+const HINT_STATE_REL = ".agents/state/hints-shown.json";
 
-test('hint-state tolerates hostile state files without throwing', async (t) => {
-  await t.test('missing state file returns empty state', async () => {
-    const root = await makeRoot('did-hint-missing-');
+test("hint-state tolerates hostile state files without throwing", async (t) => {
+  await t.test("missing state file returns empty state", async () => {
+    const root = await makeRoot("did-hint-missing-");
     try {
       const s = loadHintState(root);
       assert.equal(s.version, 1);
@@ -36,11 +36,11 @@ test('hint-state tolerates hostile state files without throwing', async (t) => {
     }
   });
 
-  await t.test('corrupt JSON returns empty state', async () => {
-    const root = await makeRoot('did-hint-corrupt-');
+  await t.test("corrupt JSON returns empty state", async () => {
+    const root = await makeRoot("did-hint-corrupt-");
     try {
-      await mkdir(path.join(root, '.agents', 'state'), { recursive: true });
-      await writeFile(path.join(root, HINT_STATE_REL), '{not json at all', 'utf8');
+      await mkdir(path.join(root, ".agents", "state"), { recursive: true });
+      await writeFile(path.join(root, HINT_STATE_REL), "{not json at all", "utf8");
       const s = loadHintState(root);
       assert.deepEqual(s.shown, {});
     } finally {
@@ -48,14 +48,14 @@ test('hint-state tolerates hostile state files without throwing', async (t) => {
     }
   });
 
-  await t.test('wrong schema version returns empty state', async () => {
-    const root = await makeRoot('did-hint-version-');
+  await t.test("wrong schema version returns empty state", async () => {
+    const root = await makeRoot("did-hint-version-");
     try {
-      await mkdir(path.join(root, '.agents', 'state'), { recursive: true });
+      await mkdir(path.join(root, ".agents", "state"), { recursive: true });
       await writeFile(
         path.join(root, HINT_STATE_REL),
         JSON.stringify({ version: 99, shown: { h1: {} } }),
-        'utf8',
+        "utf8",
       );
       const s = loadHintState(root);
       assert.equal(s.version, 1);
@@ -65,14 +65,14 @@ test('hint-state tolerates hostile state files without throwing', async (t) => {
     }
   });
 
-  await t.test('array-shaped shown map returns empty state', async () => {
-    const root = await makeRoot('did-hint-array-');
+  await t.test("array-shaped shown map returns empty state", async () => {
+    const root = await makeRoot("did-hint-array-");
     try {
-      await mkdir(path.join(root, '.agents', 'state'), { recursive: true });
+      await mkdir(path.join(root, ".agents", "state"), { recursive: true });
       await writeFile(
         path.join(root, HINT_STATE_REL),
-        JSON.stringify({ version: 1, shown: ['not', 'an', 'object'] }),
-        'utf8',
+        JSON.stringify({ version: 1, shown: ["not", "an", "object"] }),
+        "utf8",
       );
       const s = loadHintState(root);
       assert.deepEqual(s.shown, {});
@@ -81,14 +81,14 @@ test('hint-state tolerates hostile state files without throwing', async (t) => {
     }
   });
 
-  await t.test('hostile entries are dropped during cleaning', async () => {
-    const root = await makeRoot('did-hint-hostile-');
+  await t.test("hostile entries are dropped during cleaning", async () => {
+    const root = await makeRoot("did-hint-hostile-");
     try {
-      await mkdir(path.join(root, '.agents', 'state'), { recursive: true });
+      await mkdir(path.join(root, ".agents", "state"), { recursive: true });
       await writeFile(
         path.join(root, HINT_STATE_REL),
-        JSON.stringify({ version: 1, shown: { a: 42, b: 'plain-string', c: null } }),
-        'utf8',
+        JSON.stringify({ version: 1, shown: { a: 42, b: "plain-string", c: null } }),
+        "utf8",
       );
       const s = loadHintState(root);
       assert.deepEqual(s.shown, {});
@@ -99,60 +99,57 @@ test('hint-state tolerates hostile state files without throwing', async (t) => {
 });
 
 const VALID_LESSON = {
-  title: 'pnpm lockfile drift breaks matrix',
-  scenario: 'cache provider mismatch after migration',
-  wrongApproach: 'keep npm cache with pnpm lockfile',
-  correctApproach: 'pin packageManager and align cache',
-  insight: 'toolchain contracts move together',
-  category: 'toolchain',
-  evidence: 'CODE',
+  title: "pnpm lockfile drift breaks matrix",
+  scenario: "cache provider mismatch after migration",
+  wrongApproach: "keep npm cache with pnpm lockfile",
+  correctApproach: "pin packageManager and align cache",
+  insight: "toolchain contracts move together",
+  category: "toolchain",
+  evidence: "CODE",
   confidence: 0.9,
 };
 
-test('memory reader is ENOENT-tolerant and recall failures never break search', async (t) => {
-  await t.test('search on project without lessons.jsonl returns empty', async () => {
-    const root = await makeRoot('did-mem-empty-');
+test("memory reader is ENOENT-tolerant and recall failures never break search", async (t) => {
+  await t.test("search on project without lessons.jsonl returns empty", async () => {
+    const root = await makeRoot("did-mem-empty-");
     try {
-      const results = await searchLessons('anything', root);
+      const results = await searchLessons("anything", root);
       assert.deepEqual(results, []);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
   });
 
-  await t.test('corrupt lessons.jsonl line surfaces an error instead of hiding it', async () => {
-    const root = await makeRoot('did-mem-corrupt-');
+  await t.test("corrupt lessons.jsonl line surfaces an error instead of hiding it", async () => {
+    const root = await makeRoot("did-mem-corrupt-");
     try {
-      await writeFile(path.join(root, 'lessons.jsonl'), '{broken json\n', 'utf8');
-      await assert.rejects(() => searchLessons('anything', root));
+      await writeFile(path.join(root, "lessons.jsonl"), "{broken json\n", "utf8");
+      await assert.rejects(() => searchLessons("anything", root));
     } finally {
       await rm(root, { recursive: true, force: true });
     }
   });
 
-  await t.test('recall storage failure degrades gracefully with stderr warning', async () => {
+  await t.test("recall storage failure degrades gracefully with stderr warning", async () => {
     // F-001 RESOLVED [RUNTIME probe 2026-08-24, fresh dist]: the earlier crash
     // report was a false positive from a stale dist/ — captureRecalls' isolated
     // try/catch (present since #27) degrades to a stderr warn and search still
     // returns results.
-    const root = await makeRoot('did-mem-recallfail-');
+    const root = await makeRoot("did-mem-recallfail-");
     const origErrWrite = process.stderr.write.bind(process.stderr);
     const chunks = [];
     try {
       await recordLesson(VALID_LESSON, root);
-      await mkdir(path.join(root, '.agents'), { recursive: true });
-      await writeFile(path.join(root, '.agents', 'records'), 'blocker', 'utf8');
+      await mkdir(path.join(root, ".agents"), { recursive: true });
+      await writeFile(path.join(root, ".agents", "records"), "blocker", "utf8");
       process.stderr.write = (chunk) => {
         chunks.push(String(chunk));
         return true;
       };
-      const results = await searchLessons('lockfile', root);
+      const results = await searchLessons("lockfile", root);
       process.stderr.write = origErrWrite;
-      assert.ok(results.length >= 1, 'search still returns results');
-      assert.ok(
-        chunks.join('').includes('[recall] failed'),
-        'stderr warning expected',
-      );
+      assert.ok(results.length >= 1, "search still returns results");
+      assert.ok(chunks.join("").includes("[recall] failed"), "stderr warning expected");
     } finally {
       process.stderr.write = origErrWrite;
       await rm(root, { recursive: true, force: true });
@@ -160,16 +157,20 @@ test('memory reader is ENOENT-tolerant and recall failures never break search', 
   });
 });
 
-test('recordRecall adapter builds deterministic, schema-complete events', async (t) => {
-  await t.test('defaults fill source=search, executor=human, ticketId empty', async () => {
-    const root = await makeRoot('did-lo-defaults-');
+test("recordRecall adapter builds deterministic, schema-complete events", async (t) => {
+  await t.test("defaults fill source=search, executor=human, ticketId empty", async () => {
+    const root = await makeRoot("did-lo-defaults-");
     try {
-      const r1 = recordRecall(root, { lessonId: 'LES-A', query: 'pnpm cache drift', matchMethod: 'string' });
+      const r1 = recordRecall(root, {
+        lessonId: "LES-A",
+        query: "pnpm cache drift",
+        matchMethod: "string",
+      });
       assert.equal(r1.written, true);
-      assert.equal(r1.event.source, 'search');
-      assert.equal(r1.event.executor, 'human');
-      assert.equal(r1.event.ticketId, '');
-      assert.equal(r1.event.queryHash, hashQuery('pnpm cache drift'));
+      assert.equal(r1.event.source, "search");
+      assert.equal(r1.event.executor, "human");
+      assert.equal(r1.event.ticketId, "");
+      assert.equal(r1.event.queryHash, hashQuery("pnpm cache drift"));
       const stored = readRecalls(root);
       assert.equal(stored.length, 1);
       assert.equal(stored[0].id, r1.event.id);
@@ -178,87 +179,92 @@ test('recordRecall adapter builds deterministic, schema-complete events', async 
     }
   });
 
-  await t.test('same inputs yield the same event id across appends', async () => {
-    const root = await makeRoot('did-lo-determinism-');
+  await t.test("same inputs yield the same event id across appends", async () => {
+    const root = await makeRoot("did-lo-determinism-");
     try {
-      const input = { lessonId: 'LES-B', query: 'hook bypass attempt', matchMethod: 'semantic' };
+      const input = { lessonId: "LES-B", query: "hook bypass attempt", matchMethod: "semantic" };
       const a = recordRecall(root, input);
       const b = recordRecall(root, input);
-      assert.equal(a.event.id, b.event.id, 'same inputs -> same id');
-      assert.equal(a.written, true, 'first append persists');
-      assert.equal(b.written, false, 'store dedupes the identical id');
+      assert.equal(a.event.id, b.event.id, "same inputs -> same id");
+      assert.equal(a.written, true, "first append persists");
+      assert.equal(b.written, false, "store dedupes the identical id");
       assert.equal(readRecalls(root).length, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
   });
 
-  await t.test('custom now/source/executor/ticketId are honored', async () => {
-    const root = await makeRoot('did-lo-custom-');
+  await t.test("custom now/source/executor/ticketId are honored", async () => {
+    const root = await makeRoot("did-lo-custom-");
     try {
-      const now = new Date('2026-01-15T08:00:00Z');
-      const r = recordRecall(
-        root,
-        { lessonId: 'LES-C', ticketId: 'TK-9', query: 'q', matchMethod: 'string', source: 'cli-explicit', executor: 'agent', now },
-      );
+      const now = new Date("2026-01-15T08:00:00Z");
+      const r = recordRecall(root, {
+        lessonId: "LES-C",
+        ticketId: "TK-9",
+        query: "q",
+        matchMethod: "string",
+        source: "cli-explicit",
+        executor: "agent",
+        now,
+      });
       assert.equal(r.event.timestamp, now.toISOString());
-      assert.equal(r.event.source, 'cli-explicit');
-      assert.equal(r.event.executor, 'agent');
-      assert.equal(r.event.ticketId, 'TK-9');
+      assert.equal(r.event.source, "cli-explicit");
+      assert.equal(r.event.executor, "agent");
+      assert.equal(r.event.ticketId, "TK-9");
     } finally {
       await rm(root, { recursive: true, force: true });
     }
   });
 });
 
-test('evaluateRecallAgainstCommits pure branches', async (t) => {
-  await t.test('empty pattern yields null verdict', () => {
+test("evaluateRecallAgainstCommits pure branches", async (t) => {
+  await t.test("empty pattern yields null verdict", () => {
     const v = evaluateRecallAgainstCommits({
-      recall: { id: 'r', timestamp: new Date().toISOString() },
+      recall: { id: "r", timestamp: new Date().toISOString() },
       lesson: {},
-      commits: [{ sha: 's', timestampMs: Date.now(), diff: 'TODO fix' }],
+      commits: [{ sha: "s", timestampMs: Date.now(), diff: "TODO fix" }],
     });
     assert.equal(v.helpful, null);
   });
 
-  await t.test('invalid regex falls back to escaped literal matching', () => {
-    const commits = [{ sha: 's', timestampMs: Date.now(), diff: 'attempted (bad[ pattern here' }];
+  await t.test("invalid regex falls back to escaped literal matching", () => {
+    const commits = [{ sha: "s", timestampMs: Date.now(), diff: "attempted (bad[ pattern here" }];
     const v = evaluateRecallAgainstCommits({
-      recall: { id: 'r', timestamp: new Date().toISOString() },
-      lesson: { wrongApproachPattern: '(bad[' },
+      recall: { id: "r", timestamp: new Date().toISOString() },
+      lesson: { wrongApproachPattern: "(bad[" },
       commits,
     });
     assert.equal(v.helpful, false);
-    assert.ok(String(v.matchedPattern).includes('(bad['));
+    assert.ok(String(v.matchedPattern).includes("(bad["));
   });
 
-  await t.test('pattern hit marks harmful recurrence', () => {
+  await t.test("pattern hit marks harmful recurrence", () => {
     const v = evaluateRecallAgainstCommits({
-      recall: { id: 'r', timestamp: new Date().toISOString() },
-      lesson: { wrongApproachPattern: 'npm cache' },
-      commits: [{ sha: 's', timestampMs: Date.now(), diff: '+ still using npm cache here' }],
+      recall: { id: "r", timestamp: new Date().toISOString() },
+      lesson: { wrongApproachPattern: "npm cache" },
+      commits: [{ sha: "s", timestampMs: Date.now(), diff: "+ still using npm cache here" }],
     });
     assert.equal(v.helpful, false);
   });
 
-  await t.test('clean window marks lesson helpful', () => {
+  await t.test("clean window marks lesson helpful", () => {
     const v = evaluateRecallAgainstCommits({
-      recall: { id: 'r', timestamp: new Date().toISOString() },
-      lesson: { wrongApproachPattern: 'npm cache' },
-      commits: [{ sha: 's', timestampMs: Date.now(), diff: '+ pnpm install --frozen-lockfile' }],
+      recall: { id: "r", timestamp: new Date().toISOString() },
+      lesson: { wrongApproachPattern: "npm cache" },
+      commits: [{ sha: "s", timestampMs: Date.now(), diff: "+ pnpm install --frozen-lockfile" }],
     });
     assert.equal(v.helpful, true);
   });
 });
 
-test('readOutcomes filters by recallId and lessonId', async (t) => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'did-lo-filters-'));
+test("readOutcomes filters by recallId and lessonId", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "did-lo-filters-"));
   try {
-    await mkdir(path.join(root, '.agents', 'records'), { recursive: true });
-    appendOutcome(root, outcomeFor('rec-1', 'LES-1'));
-    appendOutcome(root, outcomeFor('rec-2', 'LES-2'));
-    assert.equal(readOutcomes(root, { recallId: 'rec-1' }).length, 1);
-    assert.equal(readOutcomes(root, { lessonId: 'LES-2' }).length, 1);
+    await mkdir(path.join(root, ".agents", "records"), { recursive: true });
+    appendOutcome(root, outcomeFor("rec-1", "LES-1"));
+    appendOutcome(root, outcomeFor("rec-2", "LES-2"));
+    assert.equal(readOutcomes(root, { recallId: "rec-1" }).length, 1);
+    assert.equal(readOutcomes(root, { lessonId: "LES-2" }).length, 1);
     assert.equal(readOutcomes(root).length, 2);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -270,15 +276,15 @@ test('readOutcomes filters by recallId and lessonId', async (t) => {
       recallId,
       lessonId,
       helpful: true,
-      source: 'cli-explicit',
-      timestamp: '2026-08-23T00:00:00.000Z',
-      executor: 'human',
+      source: "cli-explicit",
+      timestamp: "2026-08-23T00:00:00.000Z",
+      executor: "human",
     };
   }
 });
 
-test('feedback F1 starts at zero on empty stores; cursor absent on fresh roots', async (t) => {
-  const root = await makeRoot('did-f1-empty-');
+test("feedback F1 starts at zero on empty stores; cursor absent on fresh roots", async () => {
+  const root = await makeRoot("did-f1-empty-");
   try {
     const metric = computeF1FromFeedback(root);
     assert.equal(Number(metric.f1), 0);
@@ -288,45 +294,42 @@ test('feedback F1 starts at zero on empty stores; cursor absent on fresh roots',
   }
 });
 
-test('dspy-stub unknown mode serves its defensive 500 guard', async (t) => {
-  const stub = await createDspyStub({ mode: 'bogus-mode' });
+test("dspy-stub unknown mode serves its defensive 500 guard", async () => {
+  const stub = await createDspyStub({ mode: "bogus-mode" });
   try {
-    const results = await searchLessons('tier-1', await seedLessonsRoot(), {
+    const results = await searchLessons("tier-1", await seedLessonsRoot(), {
       enabled: true,
       endpoint: stub.endpoint,
       timeoutMs: 5000,
     });
-    assert.ok(stub.requests.length >= 1, 'stub should have received a request');
-    assert.ok(Array.isArray(results), 'client must degrade gracefully, not throw');
+    assert.ok(stub.requests.length >= 1, "stub should have received a request");
+    assert.ok(Array.isArray(results), "client must degrade gracefully, not throw");
   } finally {
     await stub.close();
   }
 
   async function seedLessonsRoot() {
-    const root = await makeRoot('did-stub-guard-');
-    await recordLesson(
-      { ...VALID_LESSON, title: 'tier-1 regression playbook' },
-      root,
-    );
+    const root = await makeRoot("did-stub-guard-");
+    await recordLesson({ ...VALID_LESSON, title: "tier-1 regression playbook" }, root);
     return root;
   }
 });
 
 // F-002 resolution: the raw-body catch is honestly reachable by POSTing
 // malformed JSON straight at the stub — no dead code after all.
-test('dspy-stub records malformed request bodies as raw strings', async () => {
-  const stub = await createDspyStub({ mode: 'score', score: 0.5 });
+test("dspy-stub records malformed request bodies as raw strings", async () => {
+  const stub = await createDspyStub({ mode: "score", score: 0.5 });
   try {
     const res = await fetch(`${stub.endpoint}/evaluate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: '{bad json',
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{bad json",
     });
     assert.equal(res.status, 200);
     const payload = await res.json();
     assert.equal(payload.score, 0.5);
     assert.equal(stub.requests.length, 1);
-    assert.equal(stub.requests[0].body, '{bad json');
+    assert.equal(stub.requests[0].body, "{bad json");
   } finally {
     await stub.close();
   }

@@ -87,7 +87,7 @@ async function ensureFileExists(filepath: string): Promise<void> {
  */
 async function appendJsonl(filepath: string, data: unknown): Promise<void> {
   await ensureFileExists(filepath);
-  const line = JSON.stringify(data) + "\n";
+  const line = `${JSON.stringify(data)}\n`;
   await fs.appendFile(filepath, line, "utf-8");
 }
 
@@ -97,7 +97,7 @@ async function appendJsonl(filepath: string, data: unknown): Promise<void> {
  * @param projectRoot - Directory where the lessons.jsonl file resides
  * @returns Array of Lesson objects read from the file
  */
-async function readAllLessons(projectRoot: string): Promise<Lesson[]> {
+export async function readAllLessons(projectRoot: string): Promise<Lesson[]> {
   const targetPath = path.join(projectRoot, LESSONS_FILE);
   try {
     const content = await fs.readFile(targetPath, "utf-8");

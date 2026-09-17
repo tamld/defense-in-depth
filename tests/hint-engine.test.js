@@ -34,20 +34,10 @@ const REPO_ROOT = path.resolve(__dirname, "..");
 // path.join produces "D:\\...\\hint-engine.js" which Node refuses with
 // ERR_UNSUPPORTED_ESM_URL_SCHEME (protocol 'd:'). pathToFileURL normalises
 // this on every platform.
-const {
-  evaluateHints,
-  listAllHints,
-  DEFAULT_COOLDOWN_DAYS,
-} = await import(
+const { evaluateHints, listAllHints, DEFAULT_COOLDOWN_DAYS } = await import(
   pathToFileURL(path.join(REPO_ROOT, "dist", "core", "hint-engine.js")).href
 );
-const {
-  loadHintState,
-  recordHintShown,
-  dismissHint,
-  resetHintState,
-  hintStatePath,
-} = await import(
+const { loadHintState, recordHintShown, dismissHint, resetHintState, hintStatePath } = await import(
   pathToFileURL(path.join(REPO_ROOT, "dist", "core", "hint-state.js")).href
 );
 
@@ -76,8 +66,16 @@ function commitN(n, { authors } = {}) {
     fs.writeFileSync(file, `content-${i}\n`);
     spawnSync("git", ["add", `f${i}.txt`], { cwd: tmp, env: { ...process.env, ...GIT_ENV } });
     const author = authors ? authors[i % authors.length] : null;
-    const args = ["-c", `user.name=${author?.name ?? "test"}`, "-c", `user.email=${author?.email ?? "test@example.com"}`,
-      "commit", "-q", "-m", `feat: c${i}`];
+    const args = [
+      "-c",
+      `user.name=${author?.name ?? "test"}`,
+      "-c",
+      `user.email=${author?.email ?? "test@example.com"}`,
+      "commit",
+      "-q",
+      "-m",
+      `feat: c${i}`,
+    ];
     spawnSync("git", args, {
       cwd: tmp,
       env: {
@@ -145,7 +143,7 @@ function appendFeedback(label, daysAgo = 0) {
     timestamp: ts,
     executor: "human",
   };
-  fs.appendFileSync(file, JSON.stringify(event) + "\n");
+  fs.appendFileSync(file, `${JSON.stringify(event)}\n`);
 }
 
 describe("hint catalog — listAllHints", () => {
@@ -165,21 +163,30 @@ describe("evaluateHints — H-001-no-dspy", () => {
     writeBareConfig();
     commitN(6);
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.ok(hints.some((h) => h.id === "H-001-no-dspy"), JSON.stringify(hints));
+    assert.ok(
+      hints.some((h) => h.id === "H-001-no-dspy"),
+      JSON.stringify(hints),
+    );
   });
 
   it("does not fire when config explicitly enables DSPy", () => {
     writeDspyConfig();
     commitN(6);
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.equal(hints.find((h) => h.id === "H-001-no-dspy"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-001-no-dspy"),
+      undefined,
+    );
   });
 
   it("does not fire on a fresh repo with <5 commits", () => {
     writeBareConfig();
     commitN(2);
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.equal(hints.find((h) => h.id === "H-001-no-dspy"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-001-no-dspy"),
+      undefined,
+    );
   });
 });
 
@@ -197,19 +204,22 @@ describe("evaluateHints — H-002-no-lessons", () => {
     commitN(6);
     appendFeedback("TP", 60); // older than 30d
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.equal(hints.find((h) => h.id === "H-002-no-lessons"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-002-no-lessons"),
+      undefined,
+    );
   });
 
   it("does not fire when lessons.jsonl already has entries", () => {
     writeBareConfig();
     commitN(6);
     appendFeedback("TP", 1);
-    fs.writeFileSync(
-      path.join(tmp, "lessons.jsonl"),
-      JSON.stringify({ id: "lesson-1" }) + "\n",
-    );
+    fs.writeFileSync(path.join(tmp, "lessons.jsonl"), `${JSON.stringify({ id: "lesson-1" })}\n`);
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.equal(hints.find((h) => h.id === "H-002-no-lessons"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-002-no-lessons"),
+      undefined,
+    );
   });
 });
 
@@ -227,7 +237,10 @@ describe("evaluateHints — H-003-no-feedback", () => {
     commitN(11);
     for (let i = 0; i < 6; i++) appendFeedback("TP", i + 1);
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.equal(hints.find((h) => h.id === "H-003-no-feedback"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-003-no-feedback"),
+      undefined,
+    );
   });
 });
 
@@ -255,7 +268,10 @@ describe("evaluateHints — H-004-no-federation", () => {
     });
     fs.writeFileSync(path.join(tmp, "CHANGELOG.md"), "# changelog\n");
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.equal(hints.find((h) => h.id === "H-004-no-federation"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-004-no-federation"),
+      undefined,
+    );
   });
 
   it("does not fire on a solo repo (1 contributor only)", () => {
@@ -263,7 +279,10 @@ describe("evaluateHints — H-004-no-federation", () => {
     commitN(2);
     fs.writeFileSync(path.join(tmp, "CHANGELOG.md"), "# changelog\n");
     const hints = evaluateHints({ projectRoot: tmp, state: loadHintState(tmp) });
-    assert.equal(hints.find((h) => h.id === "H-004-no-federation"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-004-no-federation"),
+      undefined,
+    );
   });
 });
 
@@ -277,7 +296,10 @@ describe("evaluateHints — cooldown + dismissal", () => {
       state: loadHintState(tmp),
       cooldownDays: DEFAULT_COOLDOWN_DAYS,
     });
-    assert.equal(hints.find((h) => h.id === "H-001-no-dspy"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-001-no-dspy"),
+      undefined,
+    );
   });
 
   it("re-fires after the cooldown elapses", () => {
@@ -304,7 +326,10 @@ describe("evaluateHints — cooldown + dismissal", () => {
       cooldownDays: 1,
       now: farFuture,
     });
-    assert.equal(hints.find((h) => h.id === "H-001-no-dspy"), undefined);
+    assert.equal(
+      hints.find((h) => h.id === "H-001-no-dspy"),
+      undefined,
+    );
   });
 });
 

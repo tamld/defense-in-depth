@@ -116,10 +116,7 @@ describe("public API barrel — built-in guards", () => {
       `allBuiltinGuards must contain ${guardCases.length} guards (one per built-in)`,
     );
     for (const [, guard] of guardCases) {
-      assert.ok(
-        allBuiltinGuards.includes(guard),
-        `allBuiltinGuards must include ${guard.id}`,
-      );
+      assert.ok(allBuiltinGuards.includes(guard), `allBuiltinGuards must include ${guard.id}`);
     }
   });
 });

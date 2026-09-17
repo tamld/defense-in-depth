@@ -30,9 +30,7 @@ function ctxWith(stagedFiles, ssotPollutionConfig) {
 
 describe("ssotPollutionGuard — substring match against defaults", () => {
   it("blocks files inside .agents/ directly", async () => {
-    const result = await ssotPollutionGuard.check(
-      ctxWith([".agents/rules/foo.md"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith([".agents/rules/foo.md"]));
     assert.equal(result.passed, false);
     assert.equal(result.findings.length, 1);
     assert.equal(result.findings[0].severity, Severity.BLOCK);
@@ -41,9 +39,7 @@ describe("ssotPollutionGuard — substring match against defaults", () => {
   });
 
   it("blocks .agents/ path even when nested under another directory", async () => {
-    const result = await ssotPollutionGuard.check(
-      ctxWith(["nested/dir/.agents/x.md"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith(["nested/dir/.agents/x.md"]));
     assert.equal(result.passed, false);
   });
 
@@ -53,18 +49,14 @@ describe("ssotPollutionGuard — substring match against defaults", () => {
   });
 
   it("blocks the literal protected file at any depth", async () => {
-    const result = await ssotPollutionGuard.check(
-      ctxWith(["flow_state.yml"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith(["flow_state.yml"]));
     assert.equal(result.passed, false);
   });
 });
 
 describe("ssotPollutionGuard — basename match for slash-less patterns", () => {
   it("blocks deeply-nested protected basename", async () => {
-    const result = await ssotPollutionGuard.check(
-      ctxWith(["backup/flow_state.yml"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith(["backup/flow_state.yml"]));
     assert.equal(result.passed, false);
   });
 
@@ -74,25 +66,19 @@ describe("ssotPollutionGuard — basename match for slash-less patterns", () => 
     // substring. This is a known false-positive cluster; see the spec at
     // tests/fixtures/ssot-pollution/edge_cases.md for the rationale and a
     // proposed v0.7 follow-up (boundary-aware matcher).
-    const result = await ssotPollutionGuard.check(
-      ctxWith(["flow_state.yml.bak"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith(["flow_state.yml.bak"]));
     assert.equal(result.passed, false);
   });
 
   it("FALSE POSITIVE: 'prefix-flow_state.yml' is currently blocked via substring match (caveat)", async () => {
     // Same caveat as above — substring includes the protected basename even
     // when prefixed. Documented for future hardening.
-    const result = await ssotPollutionGuard.check(
-      ctxWith(["prefix-flow_state.yml"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith(["prefix-flow_state.yml"]));
     assert.equal(result.passed, false);
   });
 
   it("blocks deeply nested 'backlog.yml'", async () => {
-    const result = await ssotPollutionGuard.check(
-      ctxWith(["deep/nested/path/backlog.yml"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith(["deep/nested/path/backlog.yml"]));
     assert.equal(result.passed, false);
   });
 });
@@ -115,9 +101,7 @@ describe("ssotPollutionGuard — ** glob prefix mode", () => {
 
 describe("ssotPollutionGuard — Windows path normalization", () => {
   it("normalizes backslashes in staged paths before matching", async () => {
-    const result = await ssotPollutionGuard.check(
-      ctxWith([".agents\\rules\\x.md"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith([".agents\\rules\\x.md"]));
     assert.equal(result.passed, false);
   });
 
@@ -167,18 +151,14 @@ describe("ssotPollutionGuard — multi-finding semantics", () => {
   it("does NOT double-report a file matching multiple patterns", async () => {
     // ".agents/flow_state.yml" matches both `.agents/` (substring) and
     // `flow_state.yml` (basename). Inner loop breaks on first hit.
-    const result = await ssotPollutionGuard.check(
-      ctxWith([".agents/flow_state.yml"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith([".agents/flow_state.yml"]));
     assert.equal(result.findings.length, 1);
   });
 });
 
 describe("ssotPollutionGuard — finding shape", () => {
   it("includes a 'git reset HEAD' fix suggestion", async () => {
-    const result = await ssotPollutionGuard.check(
-      ctxWith([".agents/rules/x.md"]),
-    );
+    const result = await ssotPollutionGuard.check(ctxWith([".agents/rules/x.md"]));
     assert.ok(result.findings[0].fix?.includes("git reset HEAD"));
   });
 

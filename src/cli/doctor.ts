@@ -18,6 +18,7 @@ import { loadConfig } from "../core/config-loader.js";
 import { listAllHints } from "../core/hint-engine.js";
 import { dismissHint, resetHintState } from "../core/hint-state.js";
 import { emitAllHints, emitOneHint } from "./hints-emit.js";
+import { injectLessons, formatForDoctor } from "../core/injection.js";
 
 export interface DoctorOptions {
   /**
@@ -110,6 +111,26 @@ export async function doctor(projectRoot: string, options: DoctorOptions = {}): 
     emitAllHints(projectRoot, "doctor");
   } else {
     emitOneHint(projectRoot, "doctor");
+  }
+
+  // 6. Lesson Injection — surface relevant cross-project lessons (v1.1)
+  if (options.hintsAction === "all") {
+    try {
+      const injected = await injectLessons({
+        guardId: "hollowArtifact",
+        filePath: "",
+        finding: "health check",
+        projectRoot,
+      });
+      const formatted = formatForDoctor(injected);
+      if (formatted) {
+        console.log(formatted);
+      }
+    } catch (err) {
+      process.stderr.write(
+        `⚠  [injection] failed to fetch lessons: ${err instanceof Error ? err.message : String(err)}\n`,
+      );
+    }
   }
 }
 

@@ -513,7 +513,7 @@ function findRevertedCommit(revert: CommitInfo, commits: CommitInfo[]): CommitIn
 function saveCursor(projectRoot: string, cursor: ScraperCursor): void {
   const filePath = path.resolve(projectRoot, SCRAPER_CURSOR);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify(cursor, null, 2) + "\n", "utf-8");
+  fs.writeFileSync(filePath, `${JSON.stringify(cursor, null, 2)}\n`, "utf-8");
 }
 
 export function readCursor(projectRoot: string): ScraperCursor | null {

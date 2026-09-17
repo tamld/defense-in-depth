@@ -25,7 +25,9 @@ describe("CONTRACT — Security Negative Contract Tests (#48)", () => {
           branchNaming: { enabled: true, pattern: "^(feat|fix)/.*" },
           commitFormat: { enabled: true },
         },
-      }).use(branchNamingGuard).use(commitFormatGuard);
+      })
+        .use(branchNamingGuard)
+        .use(commitFormatGuard);
 
       const verdict = await engine.run({
         files: [],
@@ -85,7 +87,11 @@ describe("CONTRACT — Security Negative Contract Tests (#48)", () => {
       });
 
       // Fail-secure: must NOT pass if guard crashed
-      assert.equal(verdict.passed, false, "Crashing guard must fail-closed (verdict.passed === false)");
+      assert.equal(
+        verdict.passed,
+        false,
+        "Crashing guard must fail-closed (verdict.passed === false)",
+      );
       assert.equal(verdict.failedGuards, 1);
       assert.ok(verdict.results.length > 0);
       assert.equal(verdict.results[0].findings[0].severity, Severity.BLOCK);

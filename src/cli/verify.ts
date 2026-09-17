@@ -17,10 +17,11 @@ import type { DefendConfig } from "../core/types.js";
 import { Severity } from "../core/types.js";
 import { allBuiltinGuards } from "../guards/index.js";
 import { emitOneHint } from "./hints-emit.js";
+import { injectLessons, formatForVerify } from "../core/injection.js";
 
 export async function verify(projectRoot: string, args: string[]): Promise<void> {
   const hookMode = args.includes("--hook");
-  const hook = hookMode ? args[args.indexOf("--hook") + 1] : undefined;
+  const _hook = hookMode ? args[args.indexOf("--hook") + 1] : undefined;
   const dryRunDspy = args.includes("--dry-run-dspy");
 
   // Get files to check
@@ -90,6 +91,27 @@ export async function verify(projectRoot: string, args: string[]): Promise<void>
           console.log(`        💡 Fix: ${f.fix}`);
         }
       }
+      // Inject relevant lessons for failed guards (once per guard)
+      if (!hookMode && result.findings.length > 0) {
+        try {
+          const firstFinding = result.findings[0];
+          const injected = await injectLessons({
+            guardId: result.guardId,
+            filePath: firstFinding.filePath ?? files[0] ?? "",
+            finding: firstFinding.message,
+            projectRoot,
+          });
+          const formatted = formatForVerify(injected);
+          if (formatted) {
+            console.log(formatted);
+          }
+        } catch (err) {
+          // Injection must never break verify — surface to stderr only
+          process.stderr.write(
+            `⚠  [injection] failed to fetch lessons: ${err instanceof Error ? err.message : String(err)}\n`,
+          );
+        }
+      }
     }
   }
 
@@ -143,7 +165,7 @@ function getStagedFiles(root: string): string[] {
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
-  } catch (err) {
+  } catch (_err) {
     // TK-000: fallback when git diff fails or directory is not a git repository
     return [];
   }
@@ -155,7 +177,7 @@ function getBranch(root: string): string | undefined {
       encoding: "utf-8",
       cwd: root,
     }).trim();
-  } catch (err) {
+  } catch (_err) {
     // TK-000: fallback when git branch query fails
     return undefined;
   }
@@ -181,16 +203,16 @@ function getLastCommitMessage(root: string): string | undefined {
         if (prMsg) {
           msg = prMsg;
         }
-      } catch (err) {
+      } catch (_err) {
         // TK-000: fallback if HEAD^2 does not exist
         console.warn(
-          `⚠ Failed to get PR head commit message: ${err instanceof Error ? err.message : String(err)}`,
+          `⚠ Failed to get PR head commit message: ${_err instanceof Error ? _err.message : String(_err)}`,
         );
       }
     }
 
     return msg;
-  } catch (err) {
+  } catch (_err) {
     // TK-000: fallback when git log query fails
     return undefined;
   }

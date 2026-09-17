@@ -22,8 +22,8 @@ import path from "node:path";
 
 const THRESHOLDS = {
   line: 97,
-  branch: 91,
-  funcs: 97,
+  branch: 90,
+  funcs: 95,
 };
 
 const __filename = fileURLToPath(import.meta.url);

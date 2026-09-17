@@ -67,7 +67,10 @@ test("noSwallowedErrorGuard — blocks empty & stub catches", async (t) => {
   await t.test("blocks catch with only noop comment", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "service.ts"), "try {\n  run();\n} catch (_e) {\n  // ignore error\n}\n");
+      await writeFile(
+        path.join(root, "service.ts"),
+        "try {\n  run();\n} catch (_e) {\n  // ignore error\n}\n",
+      );
       const result = await noSwallowedErrorGuard.check({
         stagedFiles: ["service.ts"],
         projectRoot: root,
@@ -83,14 +86,19 @@ test("noSwallowedErrorGuard — blocks empty & stub catches", async (t) => {
   await t.test("blocks catch with stub return null/{}", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "fetcher.ts"), "try { fetch(); } catch (err) { return null; }\n");
+      await writeFile(
+        path.join(root, "fetcher.ts"),
+        "try { fetch(); } catch (err) { return null; }\n",
+      );
       const result = await noSwallowedErrorGuard.check({
         stagedFiles: ["fetcher.ts"],
         projectRoot: root,
         config: { version: "1.0", guards: {} },
       });
       assert.equal(result.passed, false);
-      assert.ok(result.findings.some((f) => f.message.includes("Swallowed error with stub return")));
+      assert.ok(
+        result.findings.some((f) => f.message.includes("Swallowed error with stub return")),
+      );
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -101,7 +109,10 @@ test("noSwallowedErrorGuard — allows valid error handling & ticket comments", 
   await t.test("allows catch with error logging", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "logger.ts"), "try { run(); } catch (e) { console.error(e); }\n");
+      await writeFile(
+        path.join(root, "logger.ts"),
+        "try { run(); } catch (e) { console.error(e); }\n",
+      );
       const result = await noSwallowedErrorGuard.check({
         stagedFiles: ["logger.ts"],
         projectRoot: root,
@@ -117,7 +128,10 @@ test("noSwallowedErrorGuard — allows valid error handling & ticket comments", 
   await t.test("allows catch with rethrow", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "rethrow.ts"), "try { run(); } catch (e) { throw new Error('wrap', { cause: e }); }\n");
+      await writeFile(
+        path.join(root, "rethrow.ts"),
+        "try { run(); } catch (e) { throw new Error('wrap', { cause: e }); }\n",
+      );
       const result = await noSwallowedErrorGuard.check({
         stagedFiles: ["rethrow.ts"],
         projectRoot: root,
@@ -133,7 +147,10 @@ test("noSwallowedErrorGuard — allows valid error handling & ticket comments", 
   await t.test("allows catch with ticket comment in stub return", async () => {
     const root = await makeTmpDir();
     try {
-      await writeFile(path.join(root, "ticket-stub.ts"), "try { fetch(); } catch { /* TODO(TK-555): fallback */ return null; }\n");
+      await writeFile(
+        path.join(root, "ticket-stub.ts"),
+        "try { fetch(); } catch { /* TODO(TK-555): fallback */ return null; }\n",
+      );
       const result = await noSwallowedErrorGuard.check({
         stagedFiles: ["ticket-stub.ts"],
         projectRoot: root,
@@ -172,4 +189,3 @@ test("noSwallowedErrorGuard — allows valid error handling & ticket comments", 
     }
   });
 });
-

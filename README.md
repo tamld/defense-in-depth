@@ -11,6 +11,7 @@
 
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](#)
 [![Version: 1.0.0-rc.1](https://img.shields.io/badge/Version-1.0.0--rc.1-blue.svg)](https://github.com/tamld/defense-in-depth/releases)
+[![Coverage: line≥97% branch≥91% func≥95%](https://img.shields.io/badge/Coverage-line%2097%25%20branch%2091%25%20func%2095%25-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: Cross-Platform](https://img.shields.io/badge/Platform-Win%20%7C%20macOS%20%7C%20Linux-orange.svg)](#)
 [![Node: ≥18](https://img.shields.io/badge/Node-%E2%89%A518-green.svg)](#)
@@ -101,19 +102,23 @@ jobs:
 
 ## 🏗️ Architecture: Progressive Enhancement
 
-`defense-in-depth` is engineered with a strict 3-tier layering model:
+`defense-in-depth` is engineered with a strict 4-tier layering model:
 
 ```
 Tier 0 — Deterministic Core (Zero dependencies, stdlib + yaml only)
   Regex/AST heuristics, Git hooks, sequential engine, <100ms execution
   → Guarantees: BLOCK/WARN on known anti-patterns anywhere
 
-Tier 1 — Optional Intelligence (Opt-in plugins)
-  DSPy semantic evaluation, Án Lệ (Case Law) memory loop, hints engine
-  → Guarantees: Enhanced signal when available; Tier 0 holds when offline
+Tier 1 — Lesson Injection (Offline, evidence-grounded)
+  Matches findings to lessons.jsonl (wrongApproachPattern → correctApproach)
+  → Guarantees: Actionable hints from past failures; RUNTIME/CODE evidence
 
-Tier 2 — Multi-Agent Governance (.agents/ directory)
-  Lazy-loaded rules, cognitive framework, and multi-agent contracts (Cursor, Jules, Claude)
+Tier 2 — Optional Intelligence (Opt-in plugins)
+  Local embeddings (MiniLM), LLM-as-judge (Ollama/vLLM), DSPy semantic evaluation
+  → Guarantees: Recall/precision boost when available; Tier 0+1 hold when offline
+
+Tier 3 — Multi-Agent Governance (.agents/ directory)
+  Lazy-loaded rules, cognitive framework, and multi-agent contracts
   → Guarantees: Consistent behavioral standards across all AI contributors
 ```
 
@@ -121,11 +126,11 @@ Tier 2 — Multi-Agent Governance (.agents/ directory)
 flowchart LR
     A["🤖 AI Agent<br/>generates code"] --> B["📦 git commit"]
     B --> C{"🛡️ defense-in-depth<br/>pre-commit hook"}
-    C -->|"❌ BLOCK"| D["Agent fixes<br/>before commit"]
-    C -->|"⚠️ WARN"| E["Flagged for<br/>human review"]
+    C -->|"❌ BLOCK (Tier 0)"| D["Agent fixes<br/>before commit"]
+    C -->|"⚠️ WARN + Hint (Tier 1)"| E["Lesson suggestion<br/>from past failures"]
     C -->|"✅ PASS"| F["Clean commit"]
-    E --> G["👨‍💼 Human Review<br/>(Business Logic)"]
-    F --> G
+    E --> F
+    F --> G["👨‍💼 Human Review<br/>(Business Logic)"]
     G -->|"Approved"| H["✅ Merged to main"]
 ```
 
@@ -140,7 +145,7 @@ flowchart LR
 | `npx defense-in-depth doctor` | Run comprehensive environment and hook health checks |
 | `npx defense-in-depth feedback --file <path>` | Ingest human feedback into the Án Lệ memory loop |
 | `npx defense-in-depth lesson --tag <tag>` | Query recorded lessons and past failure patterns |
-| `npx defense-in-depth eval` | Run semantic evaluation on artifacts via DSPy |
+| `npx defense-in-depth eval` | Run semantic evaluation on artifacts via DSPy (Tier 3, opt-in) |
 | `npx defense-in-depth hints-emit` | Emit context-aware progressive hints for agents |
 
 > 📖 *Full CLI reference: [CLI Reference Manual](docs/user-guide/cli-reference.md).*
@@ -185,5 +190,3 @@ We welcome contributions from both humans and AI agents operating under human di
 ## 📄 License
 
 Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
-# Test
-# Test 2

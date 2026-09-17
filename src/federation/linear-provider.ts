@@ -78,7 +78,7 @@ export class LinearTicketProvider implements TicketStateProvider {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": this.apiKey,
+          Authorization: this.apiKey,
         },
         body: JSON.stringify({
           query: LINEAR_ISSUE_QUERY,
