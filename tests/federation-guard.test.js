@@ -92,10 +92,12 @@ describe("Federation Guard", () => {
 
     assert.equal(result.passed, false);
     assert.ok(result.findings.length >= 1);
-    const blockFindings = result.findings.filter(f => f.severity === Severity.BLOCK);
+    const blockFindings = result.findings.filter((f) => f.severity === Severity.BLOCK);
     assert.ok(blockFindings.length >= 1, "Should have at least one BLOCK finding");
     // One finding for authorization denial + one for blocked phase
-    assert.ok(result.findings.some(f => f.message.includes("BLOCKED") || f.message.includes("denied")));
+    assert.ok(
+      result.findings.some((f) => f.message.includes("BLOCKED") || f.message.includes("denied")),
+    );
   });
 
   it("BLOCKs when parent phase is CANCELLED", async () => {
@@ -110,7 +112,7 @@ describe("Federation Guard", () => {
     const result = await federationGuard.check(ctx);
 
     assert.equal(result.passed, false);
-    assert.ok(result.findings.some(f => f.message.includes("CANCELLED")));
+    assert.ok(result.findings.some((f) => f.message.includes("CANCELLED")));
   });
 
   it("BLOCKs when parent phase is ARCHIVED", async () => {
@@ -125,7 +127,7 @@ describe("Federation Guard", () => {
     const result = await federationGuard.check(ctx);
 
     assert.equal(result.passed, false);
-    assert.ok(result.findings.some(f => f.message.includes("ARCHIVED")));
+    assert.ok(result.findings.some((f) => f.message.includes("ARCHIVED")));
   });
 
   it("BLOCKs when authorized is explicitly false", async () => {
@@ -140,7 +142,7 @@ describe("Federation Guard", () => {
     const result = await federationGuard.check(ctx);
 
     assert.equal(result.passed, false);
-    assert.ok(result.findings.some(f => f.message.includes("denied authorization")));
+    assert.ok(result.findings.some((f) => f.message.includes("denied authorization")));
   });
 
   it("emits WARN (not BLOCK) when severity is 'warn'", async () => {
@@ -167,7 +169,7 @@ describe("Federation Guard", () => {
     // severity=warn → guard always passes
     assert.equal(result.passed, true);
     assert.ok(result.findings.length >= 1);
-    const warnFinding = result.findings.find(f => f.severity === Severity.WARN);
+    const warnFinding = result.findings.find((f) => f.severity === Severity.WARN);
     assert.ok(warnFinding, "Should have a WARN finding");
   });
 
@@ -218,7 +220,7 @@ describe("Federation Guard", () => {
     const result = await federationGuard.check(ctx);
 
     assert.equal(result.passed, false);
-    assert.ok(result.findings.some(f => f.message.includes("ON_HOLD")));
+    assert.ok(result.findings.some((f) => f.message.includes("ON_HOLD")));
   });
 
   // ─── Edge / Worst Cases ───
@@ -281,8 +283,11 @@ describe("Federation Guard", () => {
 
     assert.equal(result.passed, false);
     assert.equal(result.findings.length, 2, "Should have 2 findings: auth + phase");
-    const severities = result.findings.map(f => f.severity);
-    assert.ok(severities.every(s => s === Severity.BLOCK), "Both should be BLOCK severity");
+    const severities = result.findings.map((f) => f.severity);
+    assert.ok(
+      severities.every((s) => s === Severity.BLOCK),
+      "Both should be BLOCK severity",
+    );
   });
 
   // Worst: federation config is completely missing from guards
@@ -322,4 +327,3 @@ describe("Federation Guard", () => {
     assert.ok(result.durationMs >= 0, "durationMs should be non-negative");
   });
 });
-

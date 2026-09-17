@@ -126,7 +126,7 @@ describe("createJsonlStore — append() id idempotency", () => {
   });
 
   it("creates the parent directory lazily on first append", () => {
-    const nested = path.join(tmpDir, "nested-" + Date.now(), "deep", "store.jsonl");
+    const nested = path.join(tmpDir, `nested-${Date.now()}`, "deep", "store.jsonl");
     assert.equal(fs.existsSync(path.dirname(nested)), false);
     const store = createJsonlStore(nested, recSchema);
     store.append({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" });
@@ -285,7 +285,7 @@ describe("createJsonlStore — read() with filters", () => {
     const store = createJsonlStore(storePath, noTsSchema);
     fs.writeFileSync(
       storePath,
-      JSON.stringify({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }) + "\n",
+      `${JSON.stringify({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" })}\n`,
     );
     assert.throws(() => store.read({ since: "2024-01-01T00:00:00Z" }), /timestampOf/);
   });
@@ -294,14 +294,14 @@ describe("createJsonlStore — read() with filters", () => {
 // ─── Runtime validation ─────────────────────────────────────────────
 
 describe("createJsonlStore — runtime validation rejects malformed records", () => {
-  it("missing required field is dropped silently", () => {
+it("missing required field is dropped silently", () => {
     fs.writeFileSync(
       storePath,
-      [
+      `${[
         JSON.stringify({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }),
         JSON.stringify({ id: "2", group: "g", timestamp: "2025-01-01T00:00:00Z" }), // no value
         JSON.stringify({ id: "3", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }),
-      ].join("\n") + "\n",
+      ].join("\n")}\n`,
     );
     const store = createJsonlStore(storePath, recSchema);
     const out = store.read();
@@ -314,11 +314,11 @@ describe("createJsonlStore — runtime validation rejects malformed records", ()
   it("wrong type for required field is dropped (e.g. value=42 instead of string)", () => {
     fs.writeFileSync(
       storePath,
-      [
+      `${[
         JSON.stringify({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }),
         JSON.stringify({ id: "2", group: "g", value: 42, timestamp: "2025-01-01T00:00:00Z" }),
         JSON.stringify({ id: "3", group: "g", value: "b", timestamp: "2025-01-01T00:00:00Z" }),
-      ].join("\n") + "\n",
+      ].join("\n")}\n`,
     );
     const out = createJsonlStore(storePath, recSchema).read();
     assert.deepStrictEqual(
@@ -330,7 +330,7 @@ describe("createJsonlStore — runtime validation rejects malformed records", ()
   it("string value not in enum is dropped", () => {
     fs.writeFileSync(
       storePath,
-      JSON.stringify({ id: "1", group: "g", value: "z", timestamp: "2025-01-01T00:00:00Z" }) + "\n",
+      `${JSON.stringify({ id: "1", group: "g", value: "z", timestamp: "2025-01-01T00:00:00Z" })}\n`,
     );
     assert.deepStrictEqual(createJsonlStore(storePath, recSchema).read(), []);
   });
@@ -338,11 +338,11 @@ describe("createJsonlStore — runtime validation rejects malformed records", ()
   it("missing or non-string id is dropped", () => {
     fs.writeFileSync(
       storePath,
-      [
+      `${[
         JSON.stringify({ group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }), // no id
         JSON.stringify({ id: 42, group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }), // numeric id
         JSON.stringify({ id: "", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }), // empty id
-      ].join("\n") + "\n",
+      ].join("\n")}\n`,
     );
     assert.deepStrictEqual(createJsonlStore(storePath, recSchema).read(), []);
   });
@@ -350,8 +350,13 @@ describe("createJsonlStore — runtime validation rejects malformed records", ()
   it("array, null, primitive lines are dropped", () => {
     fs.writeFileSync(
       storePath,
-      [JSON.stringify([1, 2, 3]), "null", "42", '"a string"', JSON.stringify({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" })].join("\n") +
-        "\n",
+      `${[
+        JSON.stringify([1, 2, 3]),
+        "null",
+        "42",
+        '"a string"',
+        JSON.stringify({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }),
+      ].join("\n")}\n`,
     );
     const out = createJsonlStore(storePath, recSchema).read();
     assert.equal(out.length, 1);
@@ -364,14 +369,14 @@ describe("createJsonlStore — corrupt-line tolerance", () => {
   it("malformed JSON lines are skipped, valid ones returned", () => {
     fs.writeFileSync(
       storePath,
-      [
+      `${[
         JSON.stringify({ id: "1", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }),
         "{ not valid json",
         JSON.stringify({ id: "2", group: "g", value: "a", timestamp: "2025-01-02T00:00:00Z" }),
         "",
         "    ",
         JSON.stringify({ id: "3", group: "g", value: "a", timestamp: "2025-01-03T00:00:00Z" }),
-      ].join("\n") + "\n",
+      ].join("\n")}\n`,
     );
     const out = createJsonlStore(storePath, recSchema).read();
     assert.deepStrictEqual(
@@ -383,10 +388,15 @@ describe("createJsonlStore — corrupt-line tolerance", () => {
   it("a corrupt line does not block append idempotency check", () => {
     fs.writeFileSync(
       storePath,
-      [
+      `${[
         "garbage line",
-        JSON.stringify({ id: "existing", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }),
-      ].join("\n") + "\n",
+        JSON.stringify({
+          id: "existing",
+          group: "g",
+          value: "a",
+          timestamp: "2025-01-01T00:00:00Z",
+        }),
+      ].join("\n")}\n`,
     );
     const store = createJsonlStore(storePath, recSchema);
     const r = store.append({
@@ -418,10 +428,10 @@ describe("createJsonlStore — exists()", () => {
   it("ignores malformed lines when checking existence", () => {
     fs.writeFileSync(
       storePath,
-      [
+      `${[
         "garbage",
         JSON.stringify({ id: "real", group: "g", value: "a", timestamp: "2025-01-01T00:00:00Z" }),
-      ].join("\n") + "\n",
+      ].join("\n")}\n`,
     );
     const store = createJsonlStore(storePath, recSchema);
     assert.equal(store.exists("real"), true);

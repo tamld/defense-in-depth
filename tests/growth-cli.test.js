@@ -4,9 +4,9 @@
 // without terminating the test runner.
 import test from "node:test";
 import assert from "node:assert";
-import * as fs from "fs/promises";
-import * as path from "path";
-import * as os from "os";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as os from "node:os";
 import { handleGrowthCommand } from "../dist/cli/growth.js";
 
 const EXIT_SENTINEL = "__PROCESS_EXIT__";
@@ -50,7 +50,10 @@ async function readMetricLines(projectRoot) {
   const metricPath = path.join(projectRoot, "growth_metrics.jsonl");
   try {
     const content = await fs.readFile(metricPath, "utf-8");
-    return content.split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    return content
+      .split("\n")
+      .filter(Boolean)
+      .map((l) => JSON.parse(l));
   } catch {
     return [];
   }
@@ -64,9 +67,7 @@ test("Growth CLI: command handling covers all branches", async (t) => {
     await t.test("unknown subcommand exits 1 and prints usage", async () => {
       const r = await runGrowth(tempDir, ["frobnicate"]);
       assert.strictEqual(r.exitCode, 1);
-      assert.ok(
-        r.errors.some((e) => e.includes('Unknown growth command: "frobnicate"')),
-      );
+      assert.ok(r.errors.some((e) => e.includes('Unknown growth command: "frobnicate"')));
       assert.ok(
         r.logs.some((l) => l.includes("Growth Metrics Tracking")),
         "usage banner should be printed",
@@ -82,22 +83,14 @@ test("Growth CLI: command handling covers all branches", async (t) => {
     await t.test("record without required flags exits 1", async () => {
       const r = await runGrowth(tempDir, ["record"]);
       assert.strictEqual(r.exitCode, 1);
-      assert.ok(
-        r.errors.some((e) =>
-          e.includes("requires --name, --value, and --unit"),
-        ),
-      );
+      assert.ok(r.errors.some((e) => e.includes("requires --name, --value, and --unit")));
       assert.strictEqual(await readMetricLines(tempDir).then((l) => l.length), 0);
     });
 
     await t.test("flag at end of args treated as missing", async () => {
       const r = await runGrowth(tempDir, ["record", "--name"]);
       assert.strictEqual(r.exitCode, 1);
-      assert.ok(
-        r.errors.some((e) =>
-          e.includes("requires --name, --value, and --unit"),
-        ),
-      );
+      assert.ok(r.errors.some((e) => e.includes("requires --name, --value, and --unit")));
     });
 
     await t.test("non-numeric --value exits 1", async () => {
@@ -112,9 +105,7 @@ test("Growth CLI: command handling covers all branches", async (t) => {
       ]);
       assert.strictEqual(r.exitCode, 1);
       assert.ok(
-        r.errors.some((e) =>
-          e.includes('Invalid numeric value for --value: "not-a-number"'),
-        ),
+        r.errors.some((e) => e.includes('Invalid numeric value for --value: "not-a-number"')),
       );
     });
 
@@ -129,11 +120,7 @@ test("Growth CLI: command handling covers all branches", async (t) => {
         "count",
       ]);
       assert.strictEqual(r.exitCode, 1);
-      assert.ok(
-        r.errors.some((e) =>
-          e.includes('Invalid numeric value for --value: "Infinity"'),
-        ),
-      );
+      assert.ok(r.errors.some((e) => e.includes('Invalid numeric value for --value: "Infinity"')));
     });
 
     await t.test("unknown trend exits 1", async () => {
@@ -149,11 +136,7 @@ test("Growth CLI: command handling covers all branches", async (t) => {
         "skyrocketing",
       ]);
       assert.strictEqual(r.exitCode, 1);
-      assert.ok(
-        r.errors.some((e) =>
-          e.includes('Unknown trend "skyrocketing"'),
-        ),
-      );
+      assert.ok(r.errors.some((e) => e.includes('Unknown trend "skyrocketing"')));
     });
 
     await t.test("valid minimal record persists and reports success", async () => {
@@ -168,9 +151,7 @@ test("Growth CLI: command handling covers all branches", async (t) => {
       ]);
       assert.strictEqual(r.exitCode, null, "success path must not exit");
       assert.ok(
-        r.logs.some((l) =>
-          l.includes("[guard_false_positive_rate] recorded successfully"),
-        ),
+        r.logs.some((l) => l.includes("[guard_false_positive_rate] recorded successfully")),
       );
 
       const lines = await readMetricLines(tempDir);

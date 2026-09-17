@@ -104,7 +104,7 @@ function writeHook(hookPath: string, content: string, name: string): void {
       return;
     }
     // Existing hook from another tool — append
-    const merged = existing + "\n\n# --- defense-in-depth ---\n" + content;
+    const merged = `${existing}\n\n# --- defense-in-depth ---\n${content}`;
     fs.writeFileSync(hookPath, merged, { mode: 0o755 });
     console.log(`  ✅ Appended ${name} hook (existing hook preserved)`);
     return;

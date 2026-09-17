@@ -1,5 +1,5 @@
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { loadConfig } from "../core/config-loader.js";
 import { callDspy, DEFAULT_DSPY_ENDPOINT, DEFAULT_DSPY_TIMEOUT_MS } from "../core/dspy-client.js";
 import type { GuardContext } from "../core/types.js";

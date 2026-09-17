@@ -90,7 +90,7 @@ export function createJsonlStore<T>(filePath: string, schema: JsonlSchema<T>): J
       return { written: false, event: record, path: filePath };
     }
 
-    fs.appendFileSync(filePath, JSON.stringify(record) + "\n", "utf-8");
+    fs.appendFileSync(filePath, `${JSON.stringify(record)}\n`, "utf-8");
     cache.add(targetId);
     return { written: true, event: record, path: filePath };
   }
@@ -131,7 +131,7 @@ export function createJsonlStore<T>(filePath: string, schema: JsonlSchema<T>): J
         };
       }
     }
-    fs.appendFileSync(filePath, JSON.stringify(record) + "\n", "utf-8");
+    fs.appendFileSync(filePath, `${JSON.stringify(record)}\n`, "utf-8");
     cache.add(targetId);
     return { written: true, event: record, path: filePath };
   }
@@ -144,8 +144,8 @@ export function createJsonlStore<T>(filePath: string, schema: JsonlSchema<T>): J
     const out: T[] = [];
     for (const r of readAll()) {
       if (options.filter && !options.filter(r)) continue;
-      if (sinceMs !== undefined && !Number.isNaN(sinceMs)) {
-        const tsRaw = schema.timestampOf!(r);
+      if (sinceMs !== undefined && !Number.isNaN(sinceMs) && schema.timestampOf) {
+        const tsRaw = schema.timestampOf(r);
         const ts = tsRaw ? Date.parse(tsRaw) : NaN;
         if (Number.isNaN(ts) || ts < sinceMs) continue;
       }

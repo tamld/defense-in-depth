@@ -99,26 +99,14 @@ describe("feedback writer — active CLI mode", () => {
   });
 
   it("missing --finding exits 1 with a helpful stderr message", () => {
-    const r = runCli([
-      "tp",
-      "--guard",
-      "hollowArtifact",
-      "--ticket",
-      "TK-300",
-    ]);
+    const r = runCli(["tp", "--guard", "hollowArtifact", "--ticket", "TK-300"]);
     assert.equal(r.status, 1);
     assert.match(r.stderr, /requires --finding/);
     assert.equal(readJsonl().length, 0);
   });
 
   it("--ticket is optional (Persona A path); ticketId becomes empty string", () => {
-    const r = runCli([
-      "tn",
-      "--guard",
-      "branchNaming",
-      "--finding",
-      "no ticket case",
-    ]);
+    const r = runCli(["tn", "--guard", "branchNaming", "--finding", "no ticket case"]);
     assert.equal(r.status, 0, `stderr=${r.stderr}`);
     const events = readJsonl();
     assert.equal(events.length, 1);
@@ -135,20 +123,8 @@ describe("feedback writer — active CLI mode", () => {
 
 describe("feedback list — read back", () => {
   it("returns appended events with --guard filter", () => {
-    runCli([
-      "tp",
-      "--guard",
-      "hollowArtifact",
-      "--finding",
-      "alpha",
-    ]);
-    runCli([
-      "fp",
-      "--guard",
-      "phaseGate",
-      "--finding",
-      "beta",
-    ]);
+    runCli(["tp", "--guard", "hollowArtifact", "--finding", "alpha"]);
+    runCli(["fp", "--guard", "phaseGate", "--finding", "beta"]);
     const r = runCli(["list", "--guard", "hollowArtifact"]);
     assert.equal(r.status, 0, `stderr=${r.stderr}`);
     assert.match(r.stdout, /TP\s+hollowArtifact/);

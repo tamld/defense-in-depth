@@ -4,6 +4,7 @@ import { runRecalls } from "./recalls.js";
 import { runRecord } from "./record.js";
 import { runScanOutcomes } from "./scan.js";
 import { runSearch } from "./search.js";
+import { runDedup } from "./dedup.js";
 
 /**
  * Parses and executes 'lesson' subcommands.
@@ -26,6 +27,9 @@ export async function handleLessonCommand(projectRoot: string, args: string[]): 
       break;
     case "recalls":
       await runRecalls(projectRoot, args.slice(1));
+      break;
+    case "dedup":
+      await runDedup(projectRoot, args.slice(1));
       break;
     default:
       console.error(`❌ Unknown lesson command: "${subcommand || ""}"`);

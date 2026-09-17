@@ -86,10 +86,7 @@ describe("DSPy fallback — Scenario 1: endpoint unreachable", () => {
     const { endpoint } = await getClosedPort();
     write("hollow.md", "# Title\n\nTODO: write the rest of this doc.\n");
 
-    const engine = new DefendEngine(
-      tmp,
-      makeConfig({ dspyEndpoint: endpoint }),
-    );
+    const engine = new DefendEngine(tmp, makeConfig({ dspyEndpoint: endpoint }));
     engine.use(hollowArtifactGuard);
 
     const verdict = await engine.run({ files: ["hollow.md"] });
@@ -109,10 +106,7 @@ describe("DSPy fallback — Scenario 1: endpoint unreachable", () => {
     write("doc.md", `${SUBSTANTIVE}\n`);
 
     let observed;
-    const engine = new DefendEngine(
-      tmp,
-      makeConfig({ dspyEndpoint: endpoint }),
-    );
+    const engine = new DefendEngine(tmp, makeConfig({ dspyEndpoint: endpoint }));
     engine.use({
       id: "observer",
       name: "observer",
@@ -147,10 +141,7 @@ describe("DSPy fallback — Scenario 2: endpoint returns HTTP 500", () => {
     write("doc.md", `${SUBSTANTIVE}\n`);
 
     let observed;
-    const engine = new DefendEngine(
-      tmp,
-      makeConfig({ dspyEndpoint: stub.endpoint }),
-    );
+    const engine = new DefendEngine(tmp, makeConfig({ dspyEndpoint: stub.endpoint }));
     engine.use({
       id: "observer",
       name: "observer",
@@ -191,10 +182,7 @@ describe("DSPy fallback — Scenario 3: low semantic score", () => {
   it("substantive doc with score 0.0 produces a WARN, never BLOCK", async () => {
     write("doc.md", `${SUBSTANTIVE}\n`);
 
-    const engine = new DefendEngine(
-      tmp,
-      makeConfig({ dspyEndpoint: stub.endpoint }),
-    );
+    const engine = new DefendEngine(tmp, makeConfig({ dspyEndpoint: stub.endpoint }));
     engine.use(hollowArtifactGuard);
 
     const verdict = await engine.run({ files: ["doc.md"] });

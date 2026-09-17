@@ -38,8 +38,7 @@ const BASE_LESSON = {
     "Asserting return-value shapes from inferred behavior without running or reading the code.",
   correctApproach:
     "Open the source, run the test, paste the actual output, and tag the claim [RUNTIME].",
-  insight:
-    "Agents must distinguish [INFER] from [RUNTIME]; users cannot trust untagged claims.",
+  insight: "Agents must distinguish [INFER] from [RUNTIME]; users cannot trust untagged claims.",
   category: "process",
   evidence: EvidenceLevel.RUNTIME,
   confidence: 0.9,

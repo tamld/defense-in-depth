@@ -35,7 +35,10 @@ describe("noTriviallyTrueTestGuard", () => {
       const root = await makeTmpDir();
       try {
         await mkdir(path.join(root, "tests"), { recursive: true });
-        await writeFile(path.join(root, "tests", "dummy.test.js"), "test('trivial', () => { assert.equal(1, 1); });\n");
+        await writeFile(
+          path.join(root, "tests", "dummy.test.js"),
+          "test('trivial', () => { assert.equal(1, 1); });\n",
+        );
         const result = await noTriviallyTrueTestGuard.check({
           stagedFiles: ["tests/dummy.test.js"],
           projectRoot: root,
@@ -78,7 +81,13 @@ describe("noTriviallyTrueTestGuard", () => {
         await mkdir(path.join(root, "tests"), { recursive: true });
         await writeFile(
           path.join(root, "tests", "no-assert.test.js"),
-          ["test('run without" + " check', () => {", "  const x = Math.random();", "  console.log(x);", "});", ""].join("\n"),
+          [
+            "test('run without" + " check', () => {",
+            "  const x = Math.random();",
+            "  console.log(x);",
+            "});",
+            "",
+          ].join("\n"),
         );
         const result = await noTriviallyTrueTestGuard.check({
           stagedFiles: ["tests/no-assert.test.js"],
@@ -148,7 +157,10 @@ describe("noTriviallyTrueTestGuard", () => {
       try {
         await mkdir(path.join(root, "tests", "fixtures"), { recursive: true });
         await mkdir(path.join(root, "src"), { recursive: true });
-        await writeFile(path.join(root, "tests", "fixtures", "dummy.test.js"), "test('stub', () => {});\n");
+        await writeFile(
+          path.join(root, "tests", "fixtures", "dummy.test.js"),
+          "test('stub', () => {});\n",
+        );
         await writeFile(path.join(root, "src", "logic.ts"), "const a = 1 === 1;\n");
 
         const result = await noTriviallyTrueTestGuard.check({

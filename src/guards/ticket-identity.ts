@@ -48,7 +48,7 @@ export const ticketIdentityGuard: Guard = {
     // Non-contradiction check: does the commit mention a DIFFERENT TKID?
     const tkidRegex = new RegExp(tkidPattern, "gi");
     const foreignTkids = (ctx.commitMessage.match(tkidRegex) ?? []).filter(
-      (tk) => tk.toUpperCase() !== ctx.ticket!.id.toUpperCase(),
+      (tk) => ctx.ticket?.id ? tk.toUpperCase() !== ctx.ticket.id.toUpperCase() : false,
     );
 
     if (foreignTkids.length > 0) {

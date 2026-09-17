@@ -306,6 +306,19 @@ export interface MetaGrowthSnapshot {
   communityContributions: number;
   /** Lessons that were specific enough to be actionable (specificity score 0-1) */
   lessonSpecificityScore: number;
+  /** When this snapshot was computed */
+  computedAt: string;
+  /** Velocity: lessons created per week */
+  lessonsPerWeek: number;
+  /** Quality: % of lessons with RUNTIME evidence */
+  runtimeEvidenceRatio: number;
+  /** Trend indicators */
+  trends: {
+    lessonsCreated: "improving" | "stable" | "degrading";
+    lessonsEffective: "improving" | "stable" | "degrading";
+    guardFPRate: "improving" | "stable" | "degrading";
+    timeToGuard: "improving" | "stable" | "degrading";
+  };
 }
 
 // ─── Telemetry Layer: Reverse Design ───

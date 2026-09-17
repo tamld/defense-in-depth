@@ -48,10 +48,7 @@ function runCli(args) {
 function seed(events) {
   const full = path.join(tmp, FEEDBACK_PATH);
   fs.mkdirSync(path.dirname(full), { recursive: true });
-  fs.writeFileSync(
-    full,
-    events.map((e) => JSON.stringify(e)).join("\n") + "\n",
-  );
+  fs.writeFileSync(full, `${events.map((e) => JSON.stringify(e)).join("\n")}\n`);
 }
 
 const ISO_2026_APR_15 = "2026-04-15T12:00:00.000Z";
@@ -93,10 +90,7 @@ describe("feedback f1 — math via CLI", () => {
   });
 
   it("only TPs gives perfect precision/recall", () => {
-    seed([
-      mkEvent("phaseGate", "TP", 1),
-      mkEvent("phaseGate", "TP", 2),
-    ]);
+    seed([mkEvent("phaseGate", "TP", 1), mkEvent("phaseGate", "TP", 2)]);
     const r = runCli([
       "f1",
       "--guard",
@@ -161,11 +155,11 @@ describe("feedback f1 — math via CLI", () => {
     fs.mkdirSync(path.dirname(full), { recursive: true });
     fs.writeFileSync(
       full,
-      [
+      `${[
         JSON.stringify(mkEvent("hollowArtifact", "TP", 1)),
         "{this is not valid json",
         JSON.stringify(mkEvent("hollowArtifact", "FP", 2)),
-      ].join("\n") + "\n",
+      ].join("\n")}\n`,
     );
     const r = runCli([
       "f1",

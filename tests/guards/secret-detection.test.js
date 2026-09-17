@@ -66,7 +66,9 @@ describe("secretDetectionGuard", () => {
       assert.equal(res.passed, false);
       assert.equal(res.findings.length, 1);
       assert.equal(res.findings[0].severity, Severity.BLOCK);
-      assert.ok(res.findings[0].message.includes("Potential credential detected (AWS Access Key ID)"));
+      assert.ok(
+        res.findings[0].message.includes("Potential credential detected (AWS Access Key ID)"),
+      );
       assert.ok(res.findings[0].message.includes("[REDACTED:AKIA...MPLE]"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -74,7 +76,8 @@ describe("secretDetectionGuard", () => {
   });
 
   it("blocks private keys", async () => {
-    const pemHeader = "-----" + "BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----";
+    const pemHeader =
+      "-----" + "BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----";
     const dir = makeTmpRepo({
       "certs/server.pem": pemHeader,
     });
@@ -114,7 +117,7 @@ describe("secretDetectionGuard", () => {
   it("warns on heuristic generic secret assignments", async () => {
     const mockApiKey = "a1b2c3d4e5f6g7h8i9j0";
     const dir = makeTmpRepo({
-      "src/config.ts": `const api_` + `key = "${mockApiKey}";`,
+      "src/config.ts": `const api_key = "${mockApiKey}";`,
     });
     try {
       const res = await secretDetectionGuard.check({
@@ -132,7 +135,8 @@ describe("secretDetectionGuard", () => {
 
   it("supports custom regex patterns and short secret redaction", async () => {
     const dir = makeTmpRepo({
-      "src/custom.ts": 'const token = "MYCORP_TOKEN_123456";\nconst short = "pass" + "word=\'1234567\'";',
+      "src/custom.ts":
+        'const token = "MYCORP_TOKEN_123456";\nconst short = "pass" + "word=\'1234567\'";',
     });
     try {
       const res = await secretDetectionGuard.check({

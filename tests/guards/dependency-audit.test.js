@@ -17,7 +17,12 @@ describe("dependencyAuditGuard", () => {
     return dir;
   }
 
-  function createMockExecutor(stdout, shouldThrow = false, throwError = null, includeStdoutOnError = true) {
+  function createMockExecutor(
+    stdout,
+    shouldThrow = false,
+    throwError = null,
+    includeStdoutOnError = true,
+  ) {
     return () => {
       if (shouldThrow) {
         const err = new Error(throwError ?? "npm audit failed");
@@ -68,7 +73,10 @@ describe("dependencyAuditGuard", () => {
   });
 
   it("skips when non-package files are staged and not whole-project scan", async () => {
-    const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg"}', "src/index.ts": "console.log('hi');" });
+    const dir = makeTmpRepo({
+      "package.json": '{"name": "test-pkg"}',
+      "src/index.ts": "console.log('hi');",
+    });
     const guard = createDependencyAuditGuard();
     try {
       const res = await guard.check({
@@ -101,7 +109,10 @@ describe("dependencyAuditGuard", () => {
   });
 
   it("handles lockfile staged files", async () => {
-    const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg", "version": "1.0.0"}', "pnpm-lock.yaml": "lockfile: 1" });
+    const dir = makeTmpRepo({
+      "package.json": '{"name": "test-pkg", "version": "1.0.0"}',
+      "pnpm-lock.yaml": "lockfile: 1",
+    });
     const guard = createDependencyAuditGuard();
     try {
       const res = await guard.check({
@@ -118,7 +129,9 @@ describe("dependencyAuditGuard", () => {
   it("reports BLOCK finding for critical vulnerabilities (default severity)", async () => {
     const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg", "version": "1.0.0"}' });
     const auditJson = JSON.stringify({
-      metadata: { vulnerabilities: { critical: 2, high: 1, moderate: 0, low: 0, info: 0, total: 3 } },
+      metadata: {
+        vulnerabilities: { critical: 2, high: 1, moderate: 0, low: 0, info: 0, total: 3 },
+      },
     });
     const guard = createDependencyAuditGuard({ executor: createMockExecutor(auditJson) });
     try {
@@ -138,7 +151,9 @@ describe("dependencyAuditGuard", () => {
   it("reports BLOCK finding for high vulnerabilities (default severity)", async () => {
     const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg", "version": "1.0.0"}' });
     const auditJson = JSON.stringify({
-      metadata: { vulnerabilities: { critical: 0, high: 3, moderate: 0, low: 0, info: 0, total: 3 } },
+      metadata: {
+        vulnerabilities: { critical: 0, high: 3, moderate: 0, low: 0, info: 0, total: 3 },
+      },
     });
     const guard = createDependencyAuditGuard({ executor: createMockExecutor(auditJson) });
     try {
@@ -155,9 +170,14 @@ describe("dependencyAuditGuard", () => {
   it("reports WARN finding for critical/high when severity is warn", async () => {
     const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg", "version": "1.0.0"}' });
     const auditJson = JSON.stringify({
-      metadata: { vulnerabilities: { critical: 1, high: 0, moderate: 0, low: 0, info: 0, total: 1 } },
+      metadata: {
+        vulnerabilities: { critical: 1, high: 0, moderate: 0, low: 0, info: 0, total: 1 },
+      },
     });
-    const config = { version: "1.0", guards: { dependencyAudit: { enabled: true, severity: "warn" } } };
+    const config = {
+      version: "1.0",
+      guards: { dependencyAudit: { enabled: true, severity: "warn" } },
+    };
     const guard = createDependencyAuditGuard({ executor: createMockExecutor(auditJson) });
     try {
       const res = await guard.check({ ...baseContext(dir), config });
@@ -173,7 +193,9 @@ describe("dependencyAuditGuard", () => {
   it("reports WARN finding for moderate vulnerabilities only", async () => {
     const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg", "version": "1.0.0"}' });
     const auditJson = JSON.stringify({
-      metadata: { vulnerabilities: { critical: 0, high: 0, moderate: 5, low: 2, info: 0, total: 7 } },
+      metadata: {
+        vulnerabilities: { critical: 0, high: 0, moderate: 5, low: 2, info: 0, total: 7 },
+      },
     });
     const guard = createDependencyAuditGuard({ executor: createMockExecutor(auditJson) });
     try {
@@ -190,7 +212,11 @@ describe("dependencyAuditGuard", () => {
 
   it("returns no findings when no vulnerabilities detected", async () => {
     const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg", "version": "1.0.0"}' });
-    const auditJson = JSON.stringify({ metadata: { vulnerabilities: { critical: 0, high: 0, moderate: 0, low: 0, info: 0, total: 0 } } });
+    const auditJson = JSON.stringify({
+      metadata: {
+        vulnerabilities: { critical: 0, high: 0, moderate: 0, low: 0, info: 0, total: 0 },
+      },
+    });
     const guard = createDependencyAuditGuard({ executor: createMockExecutor(auditJson) });
     try {
       const res = await guard.check(baseContext(dir));
@@ -243,7 +269,9 @@ describe("dependencyAuditGuard", () => {
   it("handles npm audit throwing with valid JSON in stdout (vulnerabilities found)", async () => {
     const dir = makeTmpRepo({ "package.json": '{"name": "test-pkg", "version": "1.0.0"}' });
     const auditJson = JSON.stringify({
-      metadata: { vulnerabilities: { critical: 0, high: 2, moderate: 1, low: 0, info: 0, total: 3 } },
+      metadata: {
+        vulnerabilities: { critical: 0, high: 2, moderate: 1, low: 0, info: 0, total: 3 },
+      },
     });
     const guard = createDependencyAuditGuard({ executor: createMockExecutor(auditJson, true) });
     try {

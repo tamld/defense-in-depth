@@ -77,7 +77,7 @@ function seedLesson(extra = {}) {
     createdAt: new Date().toISOString(),
     ...extra,
   };
-  fs.writeFileSync(path.join(tmp, LESSONS_PATH), JSON.stringify(lesson) + "\n");
+  fs.writeFileSync(path.join(tmp, LESSONS_PATH), `${JSON.stringify(lesson)}\n`);
   return lesson;
 }
 
