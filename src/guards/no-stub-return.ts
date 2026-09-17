@@ -83,7 +83,7 @@ export const noStubReturnGuard: Guard = {
       let content = "";
       try {
         content = fs.readFileSync(absPath, "utf-8");
-      } catch (readErr) {
+      } catch (_readErr) {
         // Ignore file read error on inaccessible files (TK-000)
         continue;
       }

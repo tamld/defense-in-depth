@@ -1,5 +1,5 @@
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { scanOutcomes } from "../../core/lesson-outcome.js";
 import type { Lesson } from "../../core/types.js";
 import { readFlag } from "./helpers.js";

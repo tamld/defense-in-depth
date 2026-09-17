@@ -49,7 +49,11 @@ describe("hitlReviewGuard", () => {
     assert.equal(result.passed, false);
     assert.equal(result.findings.length, 1);
     assert.equal(result.findings[0]?.severity, Severity.BLOCK);
-    assert.ok(result.findings[0]?.message.includes("Direct commits to protected branch 'main' are strictly prohibited"));
+    assert.ok(
+      result.findings[0]?.message.includes(
+        "Direct commits to protected branch 'main' are strictly prohibited",
+      ),
+    );
   });
 
   it("blocks when on default protected branch 'master'", async () => {

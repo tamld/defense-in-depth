@@ -52,7 +52,9 @@ guards:
     try {
       assert.throws(
         () => loadConfig(dir),
-        (err) => err instanceof ConfigError && err.message.includes('Unknown top-level configuration key "invalidTopLevel"'),
+        (err) =>
+          err instanceof ConfigError &&
+          err.message.includes('Unknown top-level configuration key "invalidTopLevel"'),
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -69,7 +71,8 @@ guards:
     try {
       assert.throws(
         () => loadConfig(dir),
-        (err) => err instanceof ConfigError && err.message.includes('Unknown guard "unknownGuardName"'),
+        (err) =>
+          err instanceof ConfigError && err.message.includes('Unknown guard "unknownGuardName"'),
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -86,7 +89,9 @@ guards:
     try {
       assert.throws(
         () => loadConfig(dir),
-        (err) => err instanceof ConfigError && err.message.includes("guards.hollowArtifact.enabled must be a boolean"),
+        (err) =>
+          err instanceof ConfigError &&
+          err.message.includes("guards.hollowArtifact.enabled must be a boolean"),
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -104,7 +109,9 @@ guards:
     try {
       assert.throws(
         () => loadConfig(dir),
-        (err) => err instanceof ConfigError && err.message.includes('guards.ticketIdentity.severity must be "warn" or "block"'),
+        (err) =>
+          err instanceof ConfigError &&
+          err.message.includes('guards.ticketIdentity.severity must be "warn" or "block"'),
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -122,7 +129,8 @@ guards:
     try {
       assert.throws(
         () => loadConfig(dir),
-        (err) => err instanceof ConfigError && err.message.includes("must be a non-negative number"),
+        (err) =>
+          err instanceof ConfigError && err.message.includes("must be a non-negative number"),
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -154,11 +162,14 @@ guards:
     );
     assert.throws(
       () => validateConfigSchema({ hints: { enabled: "true" } }, "test.yml"),
-      (err) => err instanceof ConfigError && err.message.includes("hints.enabled must be a boolean"),
+      (err) =>
+        err instanceof ConfigError && err.message.includes("hints.enabled must be a boolean"),
     );
     assert.throws(
       () => validateConfigSchema({ hints: { cooldownDays: -5 } }, "test.yml"),
-      (err) => err instanceof ConfigError && err.message.includes("hints.cooldownDays must be a non-negative number"),
+      (err) =>
+        err instanceof ConfigError &&
+        err.message.includes("hints.cooldownDays must be a non-negative number"),
     );
     assert.throws(
       () => validateConfigSchema({ hints: { channels: ["invalid-channel"] } }, "test.yml"),
@@ -169,7 +180,9 @@ guards:
   it("validates version, guards container, and guard values structure", () => {
     assert.throws(
       () => validateConfigSchema({ version: {} }, "test.yml"),
-      (err) => err instanceof ConfigError && err.message.includes('Configuration "version" must be a string or number'),
+      (err) =>
+        err instanceof ConfigError &&
+        err.message.includes('Configuration "version" must be a string or number'),
     );
     assert.throws(
       () => validateConfigSchema({ guards: "not-an-object" }, "test.yml"),
@@ -177,10 +190,13 @@ guards:
     );
     assert.throws(
       () => validateConfigSchema({ guards: { hollowArtifact: "on" } }, "test.yml"),
-      (err) => err instanceof ConfigError && err.message.includes('Configuration for guard "hollowArtifact" must be an object'),
+      (err) =>
+        err instanceof ConfigError &&
+        err.message.includes('Configuration for guard "hollowArtifact" must be an object'),
     );
     assert.throws(
-      () => validateConfigSchema({ guards: { hollowArtifact: { dspyTimeoutMs: -100 } } }, "test.yml"),
+      () =>
+        validateConfigSchema({ guards: { hollowArtifact: { dspyTimeoutMs: -100 } } }, "test.yml"),
       (err) => err instanceof ConfigError && err.message.includes("must be a non-negative number"),
     );
     assert.throws(
@@ -188,7 +204,11 @@ guards:
       (err) => err instanceof ConfigError && err.message.includes("must be a non-negative number"),
     );
     assert.throws(
-      () => validateConfigSchema({ guards: { noTypeSafetyBypass: { allowlistPaths: [123] } } }, "test.yml"),
+      () =>
+        validateConfigSchema(
+          { guards: { noTypeSafetyBypass: { allowlistPaths: [123] } } },
+          "test.yml",
+        ),
       (err) => err instanceof ConfigError && err.message.includes("must be an array of strings"),
     );
   });

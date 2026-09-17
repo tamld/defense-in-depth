@@ -1,8 +1,8 @@
 // Executor: Sisyphus (OhMyOpenCode)
 // JiraTicketProvider tests
-import assert from 'node:assert/strict';
-import { test } from 'node:test';
-import { JiraTicketProvider } from '../dist/federation/jira-provider.js';
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { JiraTicketProvider } from "../dist/federation/jira-provider.js";
 
 async function withFetch(stub, fn) {
   const orig = globalThis.fetch;
@@ -20,232 +20,248 @@ async function withFetch(stub, fn) {
   }
 }
 
-test('JiraTicketProvider requires baseUrl and auth', async (t) => {
-  await t.test('missing baseUrl returns undefined', async () => {
-    const p = new JiraTicketProvider({ email: 'test@test.com', apiToken: 'token' });
-    assert.equal(await p.resolve('TK-1'), undefined);
+test("JiraTicketProvider requires baseUrl and auth", async (t) => {
+  await t.test("missing baseUrl returns undefined", async () => {
+    const p = new JiraTicketProvider({ email: "test@test.com", apiToken: "token" });
+    assert.equal(await p.resolve("TK-1"), undefined);
   });
 
-  await t.test('missing auth returns undefined', async () => {
-    const p = new JiraTicketProvider({ baseUrl: 'https://test.atlassian.net' });
-    assert.equal(await p.resolve('TK-1'), undefined);
+  await t.test("missing auth returns undefined", async () => {
+    const p = new JiraTicketProvider({ baseUrl: "https://test.atlassian.net" });
+    assert.equal(await p.resolve("TK-1"), undefined);
   });
 
-  await t.test('bearerToken auth works without email/apiToken', async () => {
-    const p = new JiraTicketProvider({ baseUrl: 'https://test.atlassian.net', bearerToken: 'bearer-token' });
+  await t.test("bearerToken auth works without email/apiToken", async () => {
+    const p = new JiraTicketProvider({
+      baseUrl: "https://test.atlassian.net",
+      bearerToken: "bearer-token",
+    });
     // Just check it doesn't immediately return undefined
-    const ref = await p.resolve('TK-1');
+    const ref = await p.resolve("TK-1");
     assert.equal(ref, undefined); // will be undefined due to 404 from stub
   });
 });
 
-test('JiraTicketProvider maps HTTP failures to graceful undefined', async (t) => {
-  const p = new JiraTicketProvider({ baseUrl: 'https://test.atlassian.net', email: 'test@test.com', apiToken: 'token' });
+test("JiraTicketProvider maps HTTP failures to graceful undefined", async (t) => {
+  const p = new JiraTicketProvider({
+    baseUrl: "https://test.atlassian.net",
+    email: "test@test.com",
+    apiToken: "token",
+  });
 
-  await t.test('404 resolves undefined silently', async () => {
+  await t.test("404 resolves undefined silently", async () => {
     await withFetch(
       async () => ({ ok: false, status: 404 }),
-      async () => assert.equal(await p.resolve('TK-GONE'), undefined),
+      async () => assert.equal(await p.resolve("TK-GONE"), undefined),
     );
   });
 
-  await t.test('500 warns and resolves undefined', async () => {
+  await t.test("500 warns and resolves undefined", async () => {
     const warnings = [];
     const origWarn = console.warn;
-    console.warn = (...a) => warnings.push(a.join(' '));
+    console.warn = (...a) => warnings.push(a.join(" "));
     try {
       await withFetch(
         async () => ({ ok: false, status: 500 }),
-        async () => assert.equal(await p.resolve('TK-BOOM'), undefined),
+        async () => assert.equal(await p.resolve("TK-BOOM"), undefined),
       );
     } finally {
       console.warn = origWarn;
     }
-    assert.ok(warnings.join('\n').includes('returned 500'));
+    assert.ok(warnings.join("\n").includes("returned 500"));
   });
 
-  await t.test('non-object JSON body warns and resolves undefined', async () => {
+  await t.test("non-object JSON body warns and resolves undefined", async () => {
     const warnings = [];
     const origWarn = console.warn;
-    console.warn = (...a) => warnings.push(a.join(' '));
+    console.warn = (...a) => warnings.push(a.join(" "));
     try {
       await withFetch(
         async () => ({ ok: true, status: 200, json: async () => null }),
-        async () => assert.equal(await p.resolve('TK-JUNK'), undefined),
+        async () => assert.equal(await p.resolve("TK-JUNK"), undefined),
       );
     } finally {
       console.warn = origWarn;
     }
-    assert.ok(warnings.join('\n').includes('Invalid JSON response'));
+    assert.ok(warnings.join("\n").includes("Invalid JSON response"));
   });
 });
 
-test('JiraTicketProvider happy path maps Jira issue onto TicketRef', async (t) => {
-  const p = new JiraTicketProvider({ baseUrl: 'https://test.atlassian.net', email: 'test@test.com', apiToken: 'token' });
+test("JiraTicketProvider happy path maps Jira issue onto TicketRef", async (t) => {
+  const p = new JiraTicketProvider({
+    baseUrl: "https://test.atlassian.net",
+    email: "test@test.com",
+    apiToken: "token",
+  });
 
-  await t.test('maps status category to phase', async () => {
+  await t.test("maps status category to phase", async () => {
     await withFetch(
       async () => ({
         ok: true,
         status: 200,
         json: async () => ({
-          key: 'PROJ-123',
+          key: "PROJ-123",
           fields: {
             status: {
-              statusCategory: { name: 'In Progress' },
+              statusCategory: { name: "In Progress" },
             },
           },
         }),
       }),
       async () => {
-        const ref = await p.resolve('PROJ-123');
-        assert.equal(ref.id, 'PROJ-123');
-        assert.equal(ref.phase, 'EXECUTING');
+        const ref = await p.resolve("PROJ-123");
+        assert.equal(ref.id, "PROJ-123");
+        assert.equal(ref.phase, "EXECUTING");
       },
     );
   });
 
-  await t.test('maps Done status to COMPLETED phase', async () => {
+  await t.test("maps Done status to COMPLETED phase", async () => {
     await withFetch(
       async () => ({
         ok: true,
         status: 200,
         json: async () => ({
-          key: 'PROJ-124',
+          key: "PROJ-124",
           fields: {
             status: {
-              statusCategory: { name: 'Done' },
+              statusCategory: { name: "Done" },
             },
           },
         }),
       }),
       async () => {
-        const ref = await p.resolve('PROJ-124');
-        assert.equal(ref.phase, 'COMPLETED');
+        const ref = await p.resolve("PROJ-124");
+        assert.equal(ref.phase, "COMPLETED");
       },
     );
   });
 
-  await t.test('maps Canceled status to CANCELLED phase', async () => {
+  await t.test("maps Canceled status to CANCELLED phase", async () => {
     await withFetch(
       async () => ({
         ok: true,
         status: 200,
         json: async () => ({
-          key: 'PROJ-125',
+          key: "PROJ-125",
           fields: {
             status: {
-              statusCategory: { name: 'Cancelled' },
+              statusCategory: { name: "Cancelled" },
             },
           },
         }),
       }),
       async () => {
-        const ref = await p.resolve('PROJ-125');
-        assert.equal(ref.phase, 'CANCELLED');
+        const ref = await p.resolve("PROJ-125");
+        assert.equal(ref.phase, "CANCELLED");
       },
     );
   });
 
-  await t.test('maps Blocked status to BLOCKED phase', async () => {
+  await t.test("maps Blocked status to BLOCKED phase", async () => {
     await withFetch(
       async () => ({
         ok: true,
         status: 200,
         json: async () => ({
-          key: 'PROJ-126',
+          key: "PROJ-126",
           fields: {
             status: {
-              statusCategory: { name: 'Blocked' },
+              statusCategory: { name: "Blocked" },
             },
           },
         }),
       }),
       async () => {
-        const ref = await p.resolve('PROJ-126');
-        assert.equal(ref.phase, 'BLOCKED');
+        const ref = await p.resolve("PROJ-126");
+        assert.equal(ref.phase, "BLOCKED");
       },
     );
   });
 
-  await t.test('maps parent key to parentId', async () => {
+  await t.test("maps parent key to parentId", async () => {
     await withFetch(
       async () => ({
         ok: true,
         status: 200,
         json: async () => ({
-          key: 'PROJ-127',
+          key: "PROJ-127",
           fields: {
-            status: { statusCategory: { name: 'In Progress' } },
-            parent: { key: 'PROJ-100', id: '10000' },
+            status: { statusCategory: { name: "In Progress" } },
+            parent: { key: "PROJ-100", id: "10000" },
           },
         }),
       }),
       async () => {
-        const ref = await p.resolve('PROJ-127');
-        assert.equal(ref.parentId, 'PROJ-100');
+        const ref = await p.resolve("PROJ-127");
+        assert.equal(ref.parentId, "PROJ-100");
       },
     );
   });
 
-  await t.test('maps Jira issue type to our type', async () => {
+  await t.test("maps Jira issue type to our type", async () => {
     await withFetch(
       async () => ({
         ok: true,
         status: 200,
         json: async () => ({
-          key: 'PROJ-128',
+          key: "PROJ-128",
           fields: {
-            status: { statusCategory: { name: 'To Do' } },
-            issuetype: { name: 'Bug' },
+            status: { statusCategory: { name: "To Do" } },
+            issuetype: { name: "Bug" },
           },
         }),
       }),
       async () => {
-        const ref = await p.resolve('PROJ-128');
-        assert.equal(ref.type, 'fix');
+        const ref = await p.resolve("PROJ-128");
+        assert.equal(ref.type, "fix");
       },
     );
   });
 
-  await t.test('maps Story/Epic to feat type', async () => {
+  await t.test("maps Story/Epic to feat type", async () => {
     await withFetch(
       async () => ({
         ok: true,
         status: 200,
         json: async () => ({
-          key: 'PROJ-129',
+          key: "PROJ-129",
           fields: {
-            status: { statusCategory: { name: 'Backlog' } },
-            issuetype: { name: 'Story' },
+            status: { statusCategory: { name: "Backlog" } },
+            issuetype: { name: "Story" },
           },
         }),
       }),
       async () => {
-        const ref = await p.resolve('PROJ-129');
-        assert.equal(ref.type, 'feat');
+        const ref = await p.resolve("PROJ-129");
+        assert.equal(ref.type, "feat");
       },
     );
   });
 
-  await t.test('timeout (AbortError) resolves undefined', async () => {
-    const p = new JiraTicketProvider({ baseUrl: 'https://test.atlassian.net', email: 'test@test.com', apiToken: 'token', timeout: 1 });
+  await t.test("timeout (AbortError) resolves undefined", async () => {
+    const p = new JiraTicketProvider({
+      baseUrl: "https://test.atlassian.net",
+      email: "test@test.com",
+      apiToken: "token",
+      timeout: 1,
+    });
     const warnings = [];
     const origWarn = console.warn;
-    console.warn = (...a) => warnings.push(a.join(' '));
+    console.warn = (...a) => warnings.push(a.join(" "));
     try {
       await withFetch(
         async () => {
           // Simulate abort by throwing AbortError directly
-          const err = new Error('Aborted');
-          err.name = 'AbortError';
+          const err = new Error("Aborted");
+          err.name = "AbortError";
           throw err;
         },
-        async () => assert.equal(await p.resolve('PROJ-1'), undefined),
+        async () => assert.equal(await p.resolve("PROJ-1"), undefined),
       );
     } finally {
       console.warn = origWarn;
     }
-    assert.ok(warnings.join('\n').includes('timed out'));
+    assert.ok(warnings.join("\n").includes("timed out"));
   });
 });

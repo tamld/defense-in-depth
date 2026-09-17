@@ -32,12 +32,7 @@ import http from "node:http";
  * @returns {Promise<{ port: number, endpoint: string, requests: Array<object>, close: () => Promise<void> }>}
  */
 export function createDspyStub(options = {}) {
-  const {
-    mode = "score",
-    score = 0.8,
-    feedback = "ok",
-    status = 200,
-  } = options;
+  const { mode = "score", score = 0.8, feedback = "ok", status = 200 } = options;
   const requests = [];
   // Track sockets so timeout-mode tests can force-close pending connections
   // during afterEach. server.close() alone hangs on never-responded requests.

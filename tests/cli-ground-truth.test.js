@@ -145,12 +145,7 @@ describe("CLI ground truth — verify catches each guard category", () => {
     write("defense.config.yml", SAFE_PATTERNS_CONFIG);
     write("docs/hollow.md", `${SUBSTANTIVE}\n\nTODO: write this`);
     write(".agents/rule-x.md", SUBSTANTIVE);
-    const r = runCli([
-      "verify",
-      "--files",
-      "docs/hollow.md",
-      ".agents/rule-x.md",
-    ]);
+    const r = runCli(["verify", "--files", "docs/hollow.md", ".agents/rule-x.md"]);
     assert.equal(r.status, 1);
     assert.match(r.stdout, /Hollow/);
     assert.match(r.stdout, /SSOT|ssotPollution|protected/i);
@@ -165,18 +160,11 @@ describe("CLI ground truth — custom defense.config.yml", () => {
     );
     write("docs/short.md", "# Title\n\nMm.uu"); // post-strip: 5 chars
     const r = runCli(["verify", "--files", "docs/short.md"]);
-    assert.equal(
-      r.status,
-      0,
-      `stdout=${r.stdout}\nstderr=${r.stderr}`,
-    );
+    assert.equal(r.status, 0, `stdout=${r.stdout}\nstderr=${r.stderr}`);
   });
 
   it("disabling hollowArtifact lets a TODO-only file through", () => {
-    write(
-      "defense.config.yml",
-      "version: '1.0'\nguards:\n  hollowArtifact:\n    enabled: false\n",
-    );
+    write("defense.config.yml", "version: '1.0'\nguards:\n  hollowArtifact:\n    enabled: false\n");
     write("docs/hollow.md", `${SUBSTANTIVE}\n\nTODO: tomorrow`);
     const r = runCli(["verify", "--files", "docs/hollow.md"]);
     assert.equal(r.status, 0);
@@ -205,11 +193,7 @@ describe("CLI ground truth — argv-edge handling", () => {
   it("verify --files <missing-file in docs/> → guards silently skip → exit 0", () => {
     write("defense.config.yml", SAFE_PATTERNS_CONFIG);
     const r = runCli(["verify", "--files", "docs/ghost.md"]);
-    assert.equal(
-      r.status,
-      0,
-      `stdout=${r.stdout}\nstderr=${r.stderr}`,
-    );
+    assert.equal(r.status, 0, `stdout=${r.stdout}\nstderr=${r.stderr}`);
   });
 });
 

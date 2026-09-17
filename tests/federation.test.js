@@ -345,11 +345,13 @@ describe("HttpTicketProvider (SRS FH.01-05)", () => {
 
       // Default: return valid ticket
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({
-        id: ticketId,
-        phase: "EXECUTING",
-        type: "feat",
-      }));
+      res.end(
+        JSON.stringify({
+          id: ticketId,
+          phase: "EXECUTING",
+          type: "feat",
+        }),
+      );
     });
 
     await new Promise((resolve) => {
@@ -450,7 +452,11 @@ describe("HttpTicketProvider (SRS FH.01-05)", () => {
 
     // Should still return a TicketRef with fallback id
     assert.ok(result);
-    assert.equal(result.id, "TK-EMPTY-BODY", "Should use ticketId as fallback when response has no id");
+    assert.equal(
+      result.id,
+      "TK-EMPTY-BODY",
+      "Should use ticketId as fallback when response has no id",
+    );
 
     await new Promise((resolve) => emptyServer.close(resolve));
   });
@@ -485,5 +491,3 @@ describe("HttpTicketProvider (SRS FH.01-05)", () => {
     assert.ok(result === undefined || typeof result.id === "string");
   });
 });
-
-

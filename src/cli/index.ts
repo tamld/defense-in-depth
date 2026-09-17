@@ -9,9 +9,9 @@
  *   doctor  — Health check: verify config, hooks, and guards
  */
 
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { type DoctorOptions, doctor } from "./doctor.js";
 import { handleFeedbackCommand } from "./feedback.js";
 import { handleGrowthCommand } from "./growth.js";
@@ -19,6 +19,7 @@ import { init } from "./init.js";
 import { handleLessonCommand } from "./lesson/index.js";
 import { auditCommand } from "./audit.js";
 import { verify } from "./verify.js";
+import { handleMetricsCommand } from "./metrics.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -76,6 +77,10 @@ async function main(): Promise<void> {
       await auditCommand(process.cwd(), args.slice(1));
       break;
 
+    case "metrics":
+      await handleMetricsCommand(process.cwd(), args.slice(1));
+      break;
+
     case "--help":
     case "-h":
     case undefined:
@@ -107,6 +112,7 @@ Commands:
   verify:server  Verify server-side branch protection on GitHub matches baseline (v0.8)
   doctor         Health check — verify config, hooks, and guard status
   audit          Read-only pattern extraction from a target project (v1.0)
+  metrics        Guard effectiveness analytics — F1 scores from feedback (v1.1)
   lesson    Manage lessons (án lệ) in the local memory (v0.4)
   growth    Manage growth metrics checking the system's learning velocity (v0.4)
   feedback  Record TP/FP/FN/TN labels for guards (v0.7, F1 input pipeline)
@@ -138,6 +144,9 @@ Examples:
   npx defense-in-depth doctor
   npx defense-in-depth audit ../my-project
   npx defense-in-depth audit ../my-project --export-lessons .agents/records/audit-lessons.jsonl
+  npx defense-in-depth metrics f1
+  npx defense-in-depth metrics f1 --period 90d --format json
+  npx defense-in-depth metrics f1 --guard hollowArtifact
 
 Learn more: https://github.com/tamld/defense-in-depth
 `);

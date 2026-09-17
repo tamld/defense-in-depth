@@ -1,5 +1,5 @@
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import type { RecordLessonResult } from "../../core/memory.js";
 import { recordLesson } from "../../core/memory.js";
 import { EvidenceLevel, type Lesson } from "../../core/types.js";

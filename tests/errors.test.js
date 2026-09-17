@@ -84,10 +84,11 @@ describe("typed errors — .code property is stable & matches ErrorCodes", () =>
   });
 
   it("ErrorCodes table has the documented members and no extras", () => {
-    assert.deepStrictEqual(
-      Object.keys(ErrorCodes).sort(),
-      ["CONFIG_INVALID", "GUARD_CRASH", "PROVIDER_FAIL"],
-    );
+    assert.deepStrictEqual(Object.keys(ErrorCodes).sort(), [
+      "CONFIG_INVALID",
+      "GUARD_CRASH",
+      "PROVIDER_FAIL",
+    ]);
   });
 });
 
@@ -135,11 +136,7 @@ describe("loadConfig — ConfigError on invalid config (BREAKING vs v0.x)", () =
 
   it("throws ConfigError when the YAML root is not a mapping", () => {
     const root = mkProjectRoot();
-    fs.writeFileSync(
-      path.join(root, "defense.config.yml"),
-      "- 1\n- 2\n- 3\n",
-      "utf-8",
-    );
+    fs.writeFileSync(path.join(root, "defense.config.yml"), "- 1\n- 2\n- 3\n", "utf-8");
     assert.throws(
       () => loadConfig(root),
       (err) => err instanceof ConfigError && err.code === "DID_CONFIG_INVALID",

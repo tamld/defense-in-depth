@@ -102,17 +102,16 @@ describe("verify --dry-run-dspy — banner output", () => {
       /--dry-run-dspy: DSPy semantic evaluation skipped/,
       `expected banner on stderr; got stderr=${JSON.stringify(r.stderr)}`,
     );
-    assert.doesNotMatch(
-      r.stdout,
-      /--dry-run-dspy/,
-      "banner must NOT appear on stdout",
-    );
+    assert.doesNotMatch(r.stdout, /--dry-run-dspy/, "banner must NOT appear on stdout");
   });
 
   it("no banner is emitted without the flag", () => {
     // Use defaults (useDspy disabled) so no network call happens; we only
     // care that the banner string is absent from both streams.
-    write("defense.config.yml", "version: '1.0'\nguards:\n  hollowArtifact:\n    enabled: true\n    patterns: ['TODO']\n");
+    write(
+      "defense.config.yml",
+      "version: '1.0'\nguards:\n  hollowArtifact:\n    enabled: true\n    patterns: ['TODO']\n",
+    );
     write("docs/clean.md", SUBSTANTIVE);
 
     const r = runCli(["verify", "--files", "docs/clean.md"]);
@@ -179,18 +178,9 @@ describe("verify --dry-run-dspy — exit code parity", () => {
     write("defense.config.yml", DSPY_ENABLED_CLOSED_PORT_CONFIG);
     write("docs/hollow.md", `${SUBSTANTIVE}\n\nTODO: write the rest`);
 
-    const r = runCli([
-      "verify",
-      "--dry-run-dspy",
-      "--files",
-      "docs/hollow.md",
-    ]);
+    const r = runCli(["verify", "--dry-run-dspy", "--files", "docs/hollow.md"]);
 
-    assert.equal(
-      r.status,
-      1,
-      "L1 BLOCK must still fire when DSPy is dry-run-disabled",
-    );
+    assert.equal(r.status, 1, "L1 BLOCK must still fire when DSPy is dry-run-disabled");
     assert.match(
       r.stdout,
       /Hollow Artifact/,
@@ -204,12 +194,7 @@ describe("verify --dry-run-dspy — flag combinations", () => {
     write("defense.config.yml", DSPY_ENABLED_CLOSED_PORT_CONFIG);
     write("docs/clean.md", SUBSTANTIVE);
 
-    const r = runCli([
-      "verify",
-      "--files",
-      "docs/clean.md",
-      "--dry-run-dspy",
-    ]);
+    const r = runCli(["verify", "--files", "docs/clean.md", "--dry-run-dspy"]);
 
     assert.equal(r.status, 0);
     assert.match(r.stderr, /--dry-run-dspy/);
@@ -219,12 +204,7 @@ describe("verify --dry-run-dspy — flag combinations", () => {
     write("defense.config.yml", DSPY_ENABLED_CLOSED_PORT_CONFIG);
     write("docs/clean.md", SUBSTANTIVE);
 
-    const r = runCli([
-      "verify",
-      "--dry-run-dspy",
-      "--files",
-      "docs/clean.md",
-    ]);
+    const r = runCli(["verify", "--dry-run-dspy", "--files", "docs/clean.md"]);
 
     assert.equal(r.status, 0);
     assert.match(r.stderr, /--dry-run-dspy/);
@@ -236,15 +216,7 @@ describe("--help mentions --dry-run-dspy", () => {
     const r = runCli(["--help"]);
 
     assert.equal(r.status, 0);
-    assert.match(
-      r.stdout,
-      /--dry-run-dspy/,
-      "--help must document the new flag",
-    );
-    assert.match(
-      r.stdout,
-      /DSPy/,
-      "--help should explain what the flag does",
-    );
+    assert.match(r.stdout, /--dry-run-dspy/, "--help must document the new flag");
+    assert.match(r.stdout, /DSPy/, "--help should explain what the flag does");
   });
 });
