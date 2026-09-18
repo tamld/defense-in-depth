@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@types/glob':
-        specifier: ^8.1.0
-        version: 8.1.0
       glob:
         specifier: ^13.0.6
         version: 13.0.6
@@ -86,12 +83,6 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
-
-  '@types/glob@8.1.0':
-    resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
-
-  '@types/minimatch@5.1.2':
-    resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
 
   '@types/node@26.4.0':
     resolution: {integrity: sha512-faiGnoIrLH/V8cibOMEAZ8pMw6oXqSukl29ra4mN8GdaB2ZewzeaLj+INpV5N+Z1eKWzY+IzaIZH2EIR6YZRNQ==}
@@ -293,13 +284,6 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.5.11':
     optional: true
-
-  '@types/glob@8.1.0':
-    dependencies:
-      '@types/minimatch': 5.1.2
-      '@types/node': 26.4.0
-
-  '@types/minimatch@5.1.2': {}
 
   '@types/node@26.4.0':
     dependencies:
