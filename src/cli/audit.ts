@@ -10,7 +10,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Severity } from "../core/types.js";
 
@@ -311,7 +311,7 @@ export async function extractCodePatterns(
   for (const file of files) {
     try {
       const content = readFileSync(file, "utf-8");
-      const relFile = file.replace(`${targetPath}/`, "");
+      const relFile = relative(targetPath, file);
 
       for (const { regex, category } of patternCategories) {
         const matches = content.match(regex);
