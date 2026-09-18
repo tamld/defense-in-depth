@@ -447,7 +447,7 @@ export async function scanFileSizes(targetPath: string): Promise<FileSizeInfo[]>
       const sizeKB = stats.size / 1024;
       if (sizeKB > 100) {
         largeFiles.push({
-          file: file.replace(`${targetPath}/`, ""),
+          file: relative(targetPath, file),
           sizeBytes: stats.size,
           sizeKB: Math.round(sizeKB),
           category: sizeKB > 1000 ? "huge" : "large",
