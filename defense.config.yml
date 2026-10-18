@@ -1,0 +1,17 @@
+# Repository-local dogfood configuration: defense-in-depth verifying itself.
+# Committed on purpose (operator decision 2026-10-18). Every allowlisted path below
+# carries the reason it legitimately trips hollowArtifact.
+version: "1.0"
+guards:
+  hollowArtifact:
+    enabled: true
+    allowlistPaths:
+      # Documents that describe this guard and must quote its marker words.
+      - "AGENTS.md"
+      - "docs/quickstart.md"
+      - "docs/user-guide/configuration.md"
+      - "docs/goals/complete-track-b-v1.1/notes/"
+      # Adversarial fixture specs that must quote the patterns they test.
+      - "tests/fixtures/"
+      # Machine-read g8s registries that are short by design.
+      - ".g8s/"
