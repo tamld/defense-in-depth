@@ -37,7 +37,7 @@ These are non-negotiable. No PR, no contributor, no agent may violate:
 2. **Git-Only Enforcement** — All validation happens through Git hooks. No runtime deps beyond Node
 3. **Guards Must Be Pure** — No side effects beyond reading files. No network calls. No state mutation
 4. **Evidence Over Plausibility** — Every claim must be verifiable. Tag: `[CODE]`, `[RUNTIME]`, `[INFER]`, `[HYPO]`
-5. **Zero Hollow Artifacts** — No To-Do/To-Be-Determined/Place-Holder in committed artifacts
+5. **Zero Hollow Artifacts** — No TODO/TBD/PLACEHOLDER in committed artifacts
 6. **Conventional Commits** — All commits follow `type(scope): description`
 
 ---

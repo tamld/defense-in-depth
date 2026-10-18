@@ -23,6 +23,8 @@ export interface HollowArtifactConfig {
   patterns?: string[];
   /** Minimum content length (chars after stripping headers) */
   minContentLength?: number;
+  /** File paths or regex patterns exempt from hollow checks */
+  allowlistPaths?: string[];
   /** v0.5: Enable DSPy semantic evaluation for deeper quality analysis (opt-in, default: false) */
   useDspy?: boolean;
   /** v0.5: HTTP endpoint for the DSPy evaluation service */

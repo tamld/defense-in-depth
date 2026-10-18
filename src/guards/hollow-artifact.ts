@@ -95,6 +95,7 @@ export const hollowArtifactGuard: Guard = {
     const config = ctx.config.guards.hollowArtifact;
     const extensions = config?.extensions ?? DEFAULT_EXTENSIONS;
     const minLength = config?.minContentLength ?? DEFAULT_MIN_CONTENT_LENGTH;
+    const customAllowlist = config?.allowlistPaths ?? [];
 
     // Build regex patterns from config or defaults.
     // User-supplied strings are escaped so they match as literal substrings
@@ -111,6 +112,16 @@ export const hollowArtifactGuard: Guard = {
     const filesToCheck = ctx.stagedFiles.filter((f) => extensions.some((ext) => f.endsWith(ext)));
 
     for (const relPath of filesToCheck) {
+      const normalizedPath = relPath.replace(/\\/g, "/");
+
+      if (
+        customAllowlist.some(
+          (pat) => normalizedPath.includes(pat) || new RegExp(pat).test(normalizedPath),
+        )
+      ) {
+        continue;
+      }
+
       const absPath = path.join(ctx.projectRoot, relPath);
 
       if (!fs.existsSync(absPath)) continue;

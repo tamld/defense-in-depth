@@ -39,6 +39,7 @@ guards:
     enabled: true
     extensions: [".md", ".json", ".yml", ".yaml"]
     minContentLength: 50
+    # allowlistPaths: ["AGENTS.md", "docs/quickstart.md", "tests/fixtures/"] # For files that legitimately mention marker words, e.g. docs that describe this guard, or adversarial fixtures.
     # v0.5 DSPy Semantic Evaluation (opt-in)
     useDspy: false
     dspyEndpoint: "http://localhost:8080/evaluate"

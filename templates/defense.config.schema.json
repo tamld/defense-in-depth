@@ -25,6 +25,7 @@
             "extensions": { "type": "array", "items": { "type": "string" } },
             "patterns": { "type": "array", "items": { "type": "string" } },
             "minContentLength": { "type": "integer", "minimum": 0 },
+            "allowlistPaths": { "type": "array", "items": { "type": "string" } },
             "useDspy": { "type": "boolean" },
             "dspyEndpoint": { "type": "string", "format": "uri" },
             "dspyTimeoutMs": { "type": "integer", "minimum": 100 }
