@@ -41,7 +41,7 @@ describe("branchNamingGuard — default pattern", () => {
 
   for (const branch of ["refactor/x", "test/x", "perf/x", "ci/x", "style/x"]) {
     it(`blocks types not in the default 4: ${branch}`, async () => {
-      const result = await branchNamingGuard.check(ctxWith(branch));
+      const result = await branchNamingGuard.check(ctxWith(branch, { severity: "block" }));
       assert.equal(result.passed, false);
       assert.equal(result.findings.length, 1);
       assert.equal(result.findings[0].severity, Severity.BLOCK);
@@ -51,7 +51,7 @@ describe("branchNamingGuard — default pattern", () => {
   }
 
   it("blocks empty suffix (e.g. 'feat/')", async () => {
-    const result = await branchNamingGuard.check(ctxWith("feat/"));
+    const result = await branchNamingGuard.check(ctxWith("feat/", { severity: "block" }));
     assert.equal(result.passed, false);
   });
 
@@ -61,17 +61,17 @@ describe("branchNamingGuard — default pattern", () => {
   });
 
   it("default pattern is case-sensitive (FEAT/x blocked)", async () => {
-    const result = await branchNamingGuard.check(ctxWith("FEAT/x"));
+    const result = await branchNamingGuard.check(ctxWith("FEAT/x", { severity: "block" }));
     assert.equal(result.passed, false);
   });
 
   it("blocks branches without a slash separator", async () => {
-    const result = await branchNamingGuard.check(ctxWith("feat-no-slash"));
+    const result = await branchNamingGuard.check(ctxWith("feat-no-slash", { severity: "block" }));
     assert.equal(result.passed, false);
   });
 
   it("regex is anchored at start (prefix/feat/x blocked)", async () => {
-    const result = await branchNamingGuard.check(ctxWith("prefix/feat/x"));
+    const result = await branchNamingGuard.check(ctxWith("prefix/feat/x", { severity: "block" }));
     assert.equal(result.passed, false);
   });
 
@@ -83,6 +83,15 @@ describe("branchNamingGuard — default pattern", () => {
   it("permits unicode in suffix", async () => {
     const result = await branchNamingGuard.check(ctxWith("feat/旧-bug"));
     assert.equal(result.passed, true);
+  });
+});
+
+describe("branchNamingGuard — default severity warns", () => {
+  it("warns on invalid branch with default severity", async () => {
+    const result = await branchNamingGuard.check(ctxWith("refactor/x"));
+    assert.equal(result.passed, false);
+    assert.equal(result.findings.length, 1);
+    assert.equal(result.findings[0].severity, Severity.WARN);
   });
 });
 

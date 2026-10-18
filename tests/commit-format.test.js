@@ -52,7 +52,7 @@ describe("commitFormatGuard — default pattern accepts", () => {
   }
 });
 
-describe("commitFormatGuard — default pattern rejects", () => {
+describe("commitFormatGuard — default pattern rejects (severity=block)", () => {
   for (const msg of [
     "wip: hack",
     "feat add login",
@@ -63,12 +63,21 @@ describe("commitFormatGuard — default pattern rejects", () => {
     "Feat: case mismatch",
   ]) {
     it(`blocks: ${JSON.stringify(msg)}`, async () => {
-      const result = await commitFormatGuard.check(ctxWith(msg));
+      const result = await commitFormatGuard.check(ctxWith(msg, { severity: "block" }));
       assert.equal(result.passed, false, `expected block for "${msg}"`);
       assert.equal(result.findings.length, 1);
       assert.equal(result.findings[0].severity, Severity.BLOCK);
     });
   }
+});
+
+describe("commitFormatGuard — default pattern warns (severity=warn)", () => {
+  it("warns on invalid format with default severity", async () => {
+    const result = await commitFormatGuard.check(ctxWith("wip: hack"));
+    assert.equal(result.passed, false, "expected warn for invalid format");
+    assert.equal(result.findings.length, 1);
+    assert.equal(result.findings[0].severity, Severity.WARN);
+  });
 });
 
 describe("commitFormatGuard — multi-line handling", () => {

@@ -52,7 +52,7 @@ docs/
 
 ### Pillar 2: User Guide (`docs/user-guide/`)
 - [`user-guide/configuration.md`](user-guide/configuration.md) — Full `defense.config.yml` schema, default values, and deep-merge rules.
-- [`user-guide/cli-reference.md`](user-guide/cli-reference.md) — Complete manual for `init`, `verify`, `doctor`, `feedback`, `eval`, `growth`, `hints-emit`, and `lesson`.
+- [`user-guide/cli-reference.md`](user-guide/cli-reference.md) — Complete manual for `init`, `verify`, `doctor`, `feedback`, `eval`, `growth`, and `lesson`.
 - [`user-guide/providers.md`](user-guide/providers.md) — Configuring File and HTTP ticket providers for cross-repository federation.
 - [`user-guide/hints.md`](user-guide/hints.md) — Progressive discovery hints engine and developer context feedback.
 

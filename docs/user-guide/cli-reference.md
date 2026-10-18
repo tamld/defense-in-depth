@@ -35,7 +35,7 @@ npx defense-in-depth verify --files src/auth.ts docs/plan.md
 npx defense-in-depth doctor --hints all
 
 # Extract patterns from another project (read-only)
-npx defense-in-depth audit ../my-project --export-lessons .agents/records/audit-lessons.jsonl
+npx defense-in-depth audit ../my-project --format json
 
 # View F1 scores for all guards (last 30 days)
 npx defense-in-depth metrics f1
@@ -50,7 +50,7 @@ npx defense-in-depth metrics meta-growth --period 90d --format json
 npx defense-in-depth lesson dedup --threshold 0.8 --format table
 
 # Record guard feedback (TP/FP/FN/TN)
-npx defense-in-depth feedback tp --guard hollowArtifact --finding "TODO in src/auth.ts"
+npx defense-in-depth feedback tp --guard hollowArtifact --finding "To-Do in src/auth.ts"
 
 # Record growth metric
 npx defense-in-depth growth record --name "lessons_per_week" --value 2 --unit count

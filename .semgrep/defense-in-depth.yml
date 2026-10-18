@@ -1,0 +1,22 @@
+rules:
+  - id: did-no-eval-or-function
+    message: "Dynamic code execution via eval() or new Function() is forbidden."
+    severity: ERROR
+    languages:
+      - typescript
+      - javascript
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: did-no-exec-string-concat
+    message: "Avoid child_process execSync/exec with template literal interpolation."
+    severity: WARNING
+    languages:
+      - typescript
+      - javascript
+    pattern-either:
+      - pattern: execSync(`...${$X}...`, ...)
+      - pattern: exec(`...${$X}...`, ...)
+      - pattern: $CP.execSync(`...${$X}...`, ...)
+      - pattern: $CP.exec(`...${$X}...`, ...)

@@ -7,7 +7,7 @@
 
 | Guard | Status | What it catches |
 |:---|:---:|:---|
-| Hollow Artifact | ✅ ON | Files with TODO, TBD, PLACEHOLDER |
+| Hollow Artifact | ✅ ON | Files with To-Do, To-Be-Determined, Place-Holder |
 | SSoT Pollution | ✅ ON | Config/governance files in feature branches |
 | Commit Format | ✅ ON | Non-conventional commit messages |
 | Branch Naming | ❌ OFF | Enable in config to enforce patterns |
@@ -51,10 +51,12 @@
 ```
 
 **Missing links to v1.1 features:**
+```text
 - [Lessons System](./user-guide/lessons.md) — Record, search, deduplicate lessons
 - [Progressive Discovery Hints](./user-guide/hints.md) — Earned hints + lesson injection
 - [Federation Providers](./dev-guide/federation.md) — Linear/Jira/HTTP/File ticket sync
 - [Meta Growth Metrics](./user-guide/metrics.md) — F1 + MetaGrowthSnapshot
+```
 
 ## hints.md — Missing Injection Section
 **Current sections:** Quick reference, The hint catalog, Output shape, Configuration, Why three layers of restraint
@@ -68,11 +70,11 @@ When a guard fails, relevant lessons from cross-project memory are automatically
 ### In `verify` (inline, compact)
 ```
 ❌ Hollow Artifact Detector
-   🚫 TODO found in src/auth.ts
+   🚫 To-Do found in src/auth.ts
 
 💡 Relevant lessons from past failures:
-  📚 L-abc123 Recurring TODO pattern (74 occurrences) [defense-in-depth]
-     → Replace TODO with proper implementation or ticket reference
+  📚 L-abc123 Recurring To-Do pattern (74 occurrences) [defense-in-depth]
+     → Replace To-Do with proper implementation or ticket reference
 ```
 
 ### In `doctor --hints all` (rich, with scores)

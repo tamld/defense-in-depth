@@ -37,7 +37,7 @@ These are non-negotiable. No PR, no contributor, no agent may violate:
 2. **Git-Only Enforcement** — All validation happens through Git hooks. No runtime deps beyond Node
 3. **Guards Must Be Pure** — No side effects beyond reading files. No network calls. No state mutation
 4. **Evidence Over Plausibility** — Every claim must be verifiable. Tag: `[CODE]`, `[RUNTIME]`, `[INFER]`, `[HYPO]`
-5. **Zero Hollow Artifacts** — No TODO/TBD/PLACEHOLDER in committed artifacts
+5. **Zero Hollow Artifacts** — No To-Do/To-Be-Determined/Place-Holder in committed artifacts
 6. **Conventional Commits** — All commits follow `type(scope): description`
 
 ---
@@ -217,3 +217,11 @@ flowchart LR
 
 **Contribution = Growth**: Every merged PR makes this project (and the core system) smarter.
 Community-discovered patterns are harvested back into the parent system.
+
+## g8s Offer Gates (Wave-2 onboarded 2026-10-06)
+
+This repository is onboarded to the g8s offer bundle (security profile):
+
+- **Registries**: `.g8s/lane-bundles.yml` (lane gates) + `.g8s/trust-boundaries.yml` (P0 paths) + `.g8s/effort-classes.yml` (effort defaults resolved by `g8s submit` for dispatches scoped under this root — security-review→high, test→medium, docs→low).
+- **Principle**: gates are evidence, not ceremony — a FAIL is a catch (M2 metric), a pass is a claim with proof.
+- **Effort defaults are hypotheses** until pass-rate telemetry earns them (g8s #550 rails); adjustments are operator-ratified diffs.

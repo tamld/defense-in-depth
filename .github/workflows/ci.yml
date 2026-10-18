@@ -86,6 +86,12 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Run g8s offer governance gates
+        run: |
+          bash tools/ci_spec_code_sync.sh
+          bash tools/ci_structure_sync.sh
+          bash tools/ci_link_integrity.sh
+
   coverage:
     name: Coverage Gate
     runs-on: ubuntu-latest

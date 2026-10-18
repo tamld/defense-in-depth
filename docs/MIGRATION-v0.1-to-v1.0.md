@@ -10,10 +10,10 @@ v1.0 freezes the public surface that has been incrementally landing since v0.2:
 
 | Surface | Frozen by v1.0 | Where to read it |
 |:---|:---|:---|
-| Library entry point | Every value- and type-level export from [`src/index.ts`](src/index.ts) | [SEMVER.md](SEMVER.md) |
-| Guard / Provider contract | `Guard`, `GuardContext`, `GuardResult`, `Finding`, `Severity`, `EvidenceLevel`, `EngineVerdict`, `TicketStateProvider` | [src/core/types.ts](src/core/types.ts) · [.agents/contracts/guard-interface.md](.agents/contracts/guard-interface.md) |
-| Configuration schema | `DefendConfig` (the `defense.config.yml` shape), required `version: "1"` field | [Configuration Guide](docs/user-guide/configuration.md) |
-| CLI surface | `init`, `verify`, `doctor`, `eval`, `feedback`, `lesson`, `growth` subcommands · exit codes `0/1/2` · WARN ≠ exit non-zero | [CLI Reference](docs/user-guide/cli-reference.md) |
+| Library entry point | Every value- and type-level export from [src/index.ts](../src/index.ts) | [SEMVER.md](SEMVER.md) |
+| Guard / Provider contract | `Guard`, `GuardContext`, `GuardResult`, `Finding`, `Severity`, `EvidenceLevel`, `EngineVerdict`, `TicketStateProvider` | [src/core/types.ts](../src/core/types.ts) · `.agents/contracts/guard-interface.md` |
+| Configuration schema | `DefendConfig` (the `defense.config.yml` shape), required `version: "1"` field | [Configuration Guide](user-guide/configuration.md) |
+| CLI surface | `init`, `verify`, `doctor`, `eval`, `feedback`, `lesson`, `growth` subcommands · exit codes `0/1/2` · WARN ≠ exit non-zero | [CLI Reference](user-guide/cli-reference.md) |
 
 ---
 

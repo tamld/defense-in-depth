@@ -51,12 +51,16 @@ export interface CommitFormatConfig {
   pattern?: string;
   /** Allowed conventional commit types */
   types?: string[];
+  /** Severity: 'warn' (advisory, default) or 'block' (enforcement) */
+  severity?: "warn" | "block";
 }
 
 export interface BranchNamingConfig {
   enabled: boolean;
   /** Regex pattern for valid branch names */
   pattern?: string;
+  /** Severity: 'warn' (advisory, default) or 'block' (enforcement) */
+  severity?: "warn" | "block";
 }
 
 export interface PhaseGateConfig {
