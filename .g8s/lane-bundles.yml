@@ -1,0 +1,4 @@
+# security profile — Lane S default, redaction scan mandatory per PR
+default_lane: S
+audit_cadence: per-pr
+dominant_dimensions: [security-redaction, tests, lifecycle]

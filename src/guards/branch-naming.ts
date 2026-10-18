@@ -46,13 +46,16 @@ export const branchNamingGuard: Guard = {
     const pattern = config?.pattern ? new RegExp(config.pattern) : DEFAULT_PATTERN;
 
     if (!pattern.test(ctx.branch)) {
+      const severityLevel = config?.severity ?? "warn";
+      const severity = severityLevel === "block" ? Severity.BLOCK : Severity.WARN;
+
       return {
         guardId: "branchNaming",
         passed: false,
         findings: [
           {
             guardId: "branchNaming",
-            severity: Severity.BLOCK,
+            severity,
             message: `Branch name "${ctx.branch}" does not match required pattern: ${pattern.source}`,
             fix: `git branch -m "${ctx.branch}" "feat/${ctx.branch}"`,
           },

@@ -1,0 +1,6 @@
+# security profile — deny-all, allow-some (everything is P0-adjacent)
+schema_version: "trust-boundaries.v1"
+profile: "security-deny-all-default"
+trust_boundaries:
+  - "**"
+

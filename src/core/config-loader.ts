@@ -60,10 +60,12 @@ const DEFAULT_CONFIG: DefendConfig = {
       enabled: true,
       pattern: "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\\([^)]*\\))?(!)?:\\s.+",
       types: ["feat", "fix", "chore", "docs", "refactor", "test", "style", "perf", "ci"],
+      severity: "warn",
     },
     branchNaming: {
       enabled: false,
       pattern: "^(feat|fix|chore|docs)/.*",
+      severity: "warn",
     },
     phaseGate: {
       enabled: false,

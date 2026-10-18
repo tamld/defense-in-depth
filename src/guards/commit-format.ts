@@ -63,13 +63,16 @@ export const commitFormatGuard: Guard = {
         "ci",
       ];
 
+      const severityLevel = config?.severity ?? "warn";
+      const severity = severityLevel === "block" ? Severity.BLOCK : Severity.WARN;
+
       return {
         guardId: "commitFormat",
         passed: false,
         findings: [
           {
             guardId: "commitFormat",
-            severity: Severity.BLOCK,
+            severity,
             message: `Commit message does not match conventional format.\n  Got: "${subject}"\n  Expected: <type>(<scope>): <description>\n  Allowed types: ${allowedTypes.join(", ")}`,
             fix: `git commit --amend -m "type(scope): your description"`,
           },

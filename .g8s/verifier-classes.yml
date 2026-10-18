@@ -1,0 +1,26 @@
+classes:
+  - name: docs
+    status: advisory
+    priority: 10
+    paths:
+      - '*.md'
+      - 'docs/**'
+    checks:
+      - type: script
+        run: tools/ci_link_integrity.sh
+      - type: script
+        run: tools/ci_structure_sync.sh
+      - type: script
+        run: tools/ci_spec_code_sync.sh
+  - name: gates
+    status: advisory
+    priority: 20
+    paths:
+      - '**/*'
+    checks:
+      - type: script
+        run: tools/ci_link_integrity.sh
+      - type: script
+        run: tools/ci_structure_sync.sh
+      - type: script
+        run: tools/ci_spec_code_sync.sh

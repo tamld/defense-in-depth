@@ -1,0 +1,36 @@
+# Effort Classes — defense-in-depth (g8s offer, security profile; issue #550 loop-C)
+# Resolved by `g8s submit` for dispatches scoped under this root — the sibling
+# registry wins over the g8s repo's own (C2 semantics, PR #562).
+# Class defaults are HYPOTHESES for this sibling (no pilot evidence yet):
+# guards code review/audit -> high (security surface), tests -> medium,
+# docs -> low (earned on the wiki sibling, same audit class). Adjustments
+# are operator-ratified diffs per the earned-defaults rails.
+
+schema_version: "effort-classes.v1"
+
+classes:
+  # the guards/security surface: review and audit work earns high until
+  # pass-rate telemetry proves otherwise (defaults are hypotheses)
+  - name: security-review
+    default_effort: high
+    priority: 10
+    paths:
+      - "src/guards/**"
+      - "src/core/**"
+      - "SECURITY.md"
+
+  - name: test
+    default_effort: medium
+    priority: 20
+    paths:
+      - "tests/**"
+
+  - name: docs
+    default_effort: low
+    priority: 30
+    paths:
+      - "*.md"
+      - "docs/**"
+      - "wiki/**"
+      - "templates/**"
+      - "examples/**"

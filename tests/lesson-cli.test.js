@@ -103,7 +103,7 @@ async function seedRecall(root, lessonId, recallId = "rec-1") {
     matchMethod: "string",
     source: "search",
     executor: "human",
-    timestamp: "2026-08-23T00:00:00.000Z",
+    timestamp: new Date().toISOString(),
   };
   await writeFile(path.join(root, RECALLS_REL), `${JSON.stringify(recall)}\n`, "utf8");
 }
@@ -125,6 +125,7 @@ test("lesson CLI handler branches", async (t) => {
     try {
       const res = await runLesson(root, ["record"]);
       assertExitOne(res, "missing payload source");
+      assert.equal(res.exitCode, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -135,6 +136,7 @@ test("lesson CLI handler branches", async (t) => {
     try {
       const res = await runLesson(root, ["record", "--data", "{not json"]);
       assertExitOne(res, "invalid JSON");
+      assert.equal(res.exitCode, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -161,6 +163,7 @@ test("lesson CLI handler branches", async (t) => {
       const bad = { ...VALID_PAYLOAD, confidence: 1.5 };
       const res = await runLesson(root, ["record", "--data", JSON.stringify(bad)]);
       assertExitOne(res, "confidence range");
+      assert.equal(res.exitCode, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -172,6 +175,7 @@ test("lesson CLI handler branches", async (t) => {
       const bad = { ...VALID_PAYLOAD, evidence: "GOSSIP" };
       const res = await runLesson(root, ["record", "--data", JSON.stringify(bad)]);
       assertExitOne(res, "evidence level");
+      assert.equal(res.exitCode, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -197,6 +201,7 @@ test("lesson CLI handler branches", async (t) => {
     try {
       const res = await runLesson(root, ["search"]);
       assertExitOne(res, "empty query");
+      assert.equal(res.exitCode, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -233,6 +238,7 @@ test("lesson CLI handler branches", async (t) => {
     try {
       const neither = await runLesson(root, ["outcome", "LES-1"]);
       assertExitOne(neither, "no verdict flag");
+      assert.equal(neither.exitCode, 1);
       const both = await runLesson(root, ["outcome", "LES-1", "--helpful", "--not-helpful"]);
       assertExitOne(both, "conflicting verdict flags");
     } finally {
@@ -245,6 +251,7 @@ test("lesson CLI handler branches", async (t) => {
     try {
       const res = await runLesson(root, ["outcome", "LES-MISSING", "--helpful"]);
       assertExitOne(res, "no recall chain");
+      assert.equal(res.exitCode, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -342,6 +349,7 @@ test("lesson tails: ticket attribution, ghost recall, list filters", async (t) =
         "rec-ghost",
       ]);
       assertExitOne(res, "ghost recall id must exit 1");
+      assert.equal(res.exitCode, 1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
