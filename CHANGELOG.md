@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.1] - 2026-10-24
+
+### Added
+- **g8s Offer Bundle (Security Profile)**: Integrated `.g8s/config.yml`, `manifest.json`, and 3 deterministic repo-agnostic CI governance gates (`tools/ci_spec_code_sync.sh`, `tools/ci_structure_sync.sh`, `tools/ci_link_integrity.sh`).
+- **Pre-push Verification & Link Integrity**: Fixed broken anchor references in `spec/constitution.md` and enforced pre-push verification gates.
+
+---
+
 ## [1.0.0-rc.1] - 2026-09-12
 
 > **API Freeze Release** — Public surface frozen for 90 days minimum. Migrates npm `latest` from v0.1.0 to v1.0.0-rc.1.
