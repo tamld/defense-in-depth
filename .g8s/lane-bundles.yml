@@ -1,3 +1,4 @@
+schema_version: "lane-bundles.v1"
 # security profile — Lane S default, redaction scan mandatory per PR
 default_lane: S
 audit_cadence: per-pr

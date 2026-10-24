@@ -45,7 +45,7 @@ static_entry() {
         offer) echo "├── offer/                  # Pull-bundle for sibling projects (profiles, onboarding, seeds)" ;;
         plans) echo "├── plans/                  # Campaign ledgers (dated, session-type marked)" ;;
         reference) echo "├── reference/              # JIT-only Python baseline (read, never import)" ;;
-        spec) echo "├── spec/openspec/          # OpenSpec deltas (DELTA-01..24)" ;;
+        spec) echo "├── spec/openspec/          # OpenSpec deltas (DELTA-01..25)" ;;
         schemas) echo "├── schemas/                # JSON schemas (task, receipt, result)" ;;
         scripts) echo "├── scripts/                # Public installer (scripts/install.sh curl entrypoint)" ;;
         tools) echo "├── tools/                  # CI helper scripts (pre-push gates, SAST, release)" ;;
@@ -65,17 +65,32 @@ static_entry() {
 doc_summary() {
     local dir="$1" pkg="$2"
     local line
-    line=$(grep -hE "^// Package ${pkg}([^[:alnum:]]|$)" "$dir"/*.go 2>/dev/null | head -1 || true)
-    [ -n "$line" ] || { echo "(no package doc — add one)"; return; }
-    line=${line#*Package ${pkg}}
-    while true; do
-        case "$line" in
-            [[:space:]]*) line=${line#?} ;;
-            [-—:]*) line=${line#?} ;;
-            *) break ;;
-        esac
-    done
-    line=${line%%.*}
+    line=$(awk -v pkg="$pkg" '
+        $0 ~ "^// Package " pkg "([^[:alnum:]]|$)" {
+            in_doc = 1
+            sub("^// Package " pkg "[[:space:]:—-]*", "", $0)
+            buf = $0
+            next
+        }
+        in_doc {
+            if ($0 ~ "^//[[:space:]]*$") { exit }
+            if ($0 ~ "^//") {
+                sub("^//[[:space:]]*", "", $0)
+                buf = buf " " $0
+            } else {
+                exit
+            }
+        }
+        END {
+            gsub(/[[:space:]]+/, " ", buf)
+            if (match(buf, /\.[[:space:]]/)) {
+                buf = substr(buf, 1, RSTART - 1)
+            } else {
+                sub(/\.[[:space:]]*$/, "", buf)
+            }
+            print buf
+        }
+    ' "$dir"/*.go 2>/dev/null || true)
     [ -n "$(printf '%s' "$line" | tr -d '[:space:]')" ] && printf '%s\n' "$line" || echo "(no package doc — add one)"
 }
 

@@ -1,3 +1,4 @@
+schema_version: "verifier-classes.v1"
 classes:
   - name: docs
     status: advisory
