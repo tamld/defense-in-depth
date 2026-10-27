@@ -2,7 +2,7 @@
 domain: governance
 name: skill-impact-predictor
 description: Trace import graph + test coverage of files about to be modified and produce an impact report before any code changes are made.
-version: 1.0.1
+version: 1.0.2
 type: specialist
 role: The Blast Radius Calculator
 ---

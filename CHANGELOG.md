@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.2] - 2026-10-28
+
+### Added & Fixed
+- Restore 12 adversarial guard `edge_cases.md` fixtures (`#144`) and onboard Spec-Kit v2 `.g8s/feature-map.yml`.
+- Enforce `--test-concurrency=1` to prevent `node:test` IPC deserialization race (`#156`).
+- Upgrade `@biomejs/biome` to `2.6.3`, `yaml` to `2.9.1`, and `@types/node` to `26.6.5`.
+
 ## [1.0.1] - 2026-10-24
 
 ### Added
