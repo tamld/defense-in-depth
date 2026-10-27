@@ -1,0 +1,31 @@
+schema_version: "2.0"
+inherits_spec_kit: "g8s/offer/profiles/security@v0.21"
+hotspots:
+  - id: "HOT-DOCS-01"
+    paths:
+      - "README.md"
+      - ".g8s/**"
+    policy: "serialize"
+    rationale: "Shared repository governance and top-level documentation"
+features:
+  - id: "FEAT-DID-GUARDS-01"
+    title: "Defense-in-Depth Deterministic Guard Engine & Adversarial Fixtures"
+    persona_story: "As a security governor, I need deterministic guards and adversarial fixtures so that unsafe mutations and bypass attempts are blocked mechanically."
+    collision_domain: "CD-GUARDS"
+    srs_reqs:
+      - "FR-DID-GUARDS-01"
+    owned_paths:
+      - "src/**"
+      - "tests/**"
+    code_paths:
+      - "src/index.ts"
+      - "src/guards/index.ts"
+    invariants:
+      - "All 17 guards in src/guards/ have corresponding adversarial edge_cases.md fixtures in tests/fixtures/"
+    visible_tests:
+      - "tests/fixtures/secret-detection/edge_cases.md"
+      - "tests/fixtures/federation/edge_cases.md"
+    verifier_class: "test"
+    blast_radius:
+      depends_on: []
+      direct_consumers: []
