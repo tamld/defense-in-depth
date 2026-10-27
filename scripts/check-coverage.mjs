@@ -35,6 +35,7 @@ const result = spawnSync(
   [
     "--experimental-test-coverage",
     "--test",
+    "--test-concurrency=1",
   ],
   {
     cwd: REPO_ROOT,
